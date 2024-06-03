@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "Dope V3",
+    "slug": "dope",
+    "scheme": "dope",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.getdope.dope",
+      "infoPlist": {
+        "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
+        "LSApplicationQueriesSchemes": ["mailto"],
+        "ITSAppUsesNonExemptEncryption": "NO"
+      },
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "ai.getdope.dope",
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "react-native-auth0",
+        {
+          "domain": "{AUTH0_DOMAIN}"
+        }
+      ]
+    ]   
+  }
+}
