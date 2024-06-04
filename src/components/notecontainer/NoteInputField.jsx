@@ -1,12 +1,24 @@
+import {
+  BUTTON_NAME,
+  EVENTS,
+  INPUT_NAME,
+  useTrackWithPageInfo,
+} from "../../utils/analytics";
+import {
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+
+import AudioPlayer from "../audio/AudioPlayerV2";
+import Document from "./Document";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { Image, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import { BUTTON_NAME, EVENTS, INPUT_NAME, useTrackWithPageInfo } from "../../utils/analytics";
-import AudioPlayer from "../audio/AudioPlayerV2";
 import Recording from "../audio/Recording";
 import SendButtonIcon from "../icons/SendButtonIcon";
-import Document from "./Document";
 
 const NoteInputField = forwardRef(
   (

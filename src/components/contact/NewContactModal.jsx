@@ -1,7 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as Contacts from "expo-contacts";
-import { useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import {
   BUTTON_NAME,
   EVENTS,
@@ -9,19 +7,44 @@ import {
   MODAL_NAME,
   useTrackWithPageInfo,
 } from "../../utils/analytics";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { useObject, useRealm } from "@realm/react";
+
+import Contact from "../../realm/models/Contact";
 import ExactTextBox from "../notecontainer/ExactTextBox";
+import { Ionicons } from "@expo/vector-icons";
+
 async function requestContactPermission() {
   const { status } = await Contacts.requestPermissionsAsync();
   return status;
 }
 
-const NewContactModal = ({ visible, onClose, onSubmit }) => {
+const NewContactModal = ({
+  visible,
+  onClose,
+  onSubmit,
+  existingId = null,
+  title = "Create New",
+}) => {
   const track = useTrackWithPageInfo();
   const [name, setName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
+
+  const realm = useRealm();
+  const existingContact = useObject(Contact, existingId);
+
+  useEffect(() => {
+    if (existingContact) {
+      setName(existingContact?.name || "");
+      setPhoneNumber(existingContact?.phoneNumbers?.[0] || "");
+      setEmail(existingContact?.emails?.[0] || "");
+      setLinkedin(existingContact?.linkedinProfileUrl || "");
+    }
+  }, [existingContact]);
 
   const onCreate = async () => {
     let contact = {};
@@ -66,6 +89,20 @@ const NewContactModal = ({ visible, onClose, onSubmit }) => {
 
     if (contact == {}) {
       onClose();
+      return;
+    }
+
+    if (existingId) {
+      realm.write(() => {
+        existingContact.name = name;
+        existingContact.linkedinProfileUrl = linkedin;
+        existingContact.emails = [email, ...existingContact.emails];
+        existingContact.phoneNumbers = [
+          phoneNumber,
+          ...existingContact.phoneNumbers,
+        ];
+      });
+      onSubmit();
       return;
     }
 
@@ -118,7 +155,7 @@ const NewContactModal = ({ visible, onClose, onSubmit }) => {
               color="black"
             />
           </TouchableOpacity>
-          <Text style={styles.createtext}>Create New</Text>
+          <Text style={styles.createtext}>{title}</Text>
           <TouchableOpacity
             onPress={() => {
               track(EVENTS.BUTTON_TAPPED.NAME, {

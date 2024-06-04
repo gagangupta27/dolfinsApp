@@ -1,30 +1,28 @@
 import * as Clipboard from "expo-clipboard";
+
+import { Alert, KeyboardAvoidingView, Linking } from "react-native";
 import React, { useCallback } from "react";
-import {
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View
-} from "react-native";
-import Toast from "react-native-toast-message";
-
-import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Linking } from "react-native";
-import LinkedinDataConnectModal from "../../components/contact/LinkedinDataConnectModal";
-import NavigationBarForContact from "../../components/contact/NavigationBarForContact";
-import NewNoteContainer from "../../components/notecontainer/NoteContainer";
-import NotesList from "../../components/notecontainer/NotesList";
-import { useTrackWithPageInfo } from "../../utils/analytics";
-import { getWorkHistoryList } from "../../utils/linkedin";
-
-import { useRealm } from "@realm/react";
-import { BSON } from "realm";
-import { useContact } from "../../realm/queries/contactOperations";
+import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import {
   createNoteAndAddToContact,
   deleteNote,
   updateNote,
   useContactNotes,
 } from "../../realm/queries/noteOperations";
+import { useEffect, useRef, useState } from "react";
+
+import { BSON } from "realm";
+import LinkedinDataConnectModal from "../../components/contact/LinkedinDataConnectModal";
+import NavigationBarForContact from "../../components/contact/NavigationBarForContact";
+import NewContactModal from "../../components/contact/NewContactModal";
+import NewNoteContainer from "../../components/notecontainer/NoteContainer";
+import NotesList from "../../components/notecontainer/NotesList";
+import Toast from "react-native-toast-message";
+import { getWorkHistoryList } from "../../utils/linkedin";
+import { useContact } from "../../realm/queries/contactOperations";
+import { useRealm } from "@realm/react";
+import { useTrackWithPageInfo } from "../../utils/analytics";
+
 // import
 const ContactScreen = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -45,6 +43,7 @@ const ContactScreen = ({ route }) => {
         };
   const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
+  const [contactEditVisible, setContactEditVisible] = useState(false);
 
   const [notes, setNotes] = useState([]);
   const [update, forceUpdate] = useState(0);
@@ -64,6 +63,19 @@ const ContactScreen = ({ route }) => {
       }
       if (ct.emails && ct.emails.length > 0 && ct.emails[0]) {
         data = data + "Email: <" + ct.emails[0] + ">\n";
+      }
+      if (
+        ct?.addresses &&
+        Array.isArray(JSON.parse(JSON.stringify(ct?.addresses))) &&
+        ct?.addresses?.length > 0
+      ) {
+        const address = JSON.parse(JSON.stringify(ct?.addresses))?.[0];
+        data =
+          data +
+          `Address: ${address?.street} ${address?.city} ${address?.region} ${address?.country} ${address?.postalCode}  \n`;
+      }
+      if (ct?.note) {
+        data = data + "note: " + ct?.note + "\n";
       }
     }
     if (data) {
@@ -284,8 +296,10 @@ const ContactScreen = ({ route }) => {
         <View style={{ flex: 1 }}>
           <NavigationBarForContact
             contact={contact}
+            showEdit={true}
             onLinkedinDataConnectModalOpen={onLinkedinDataConnectModalOpen}
             onShare={onShare}
+            onEdit={() => setContactEditVisible(true)}
           />
           <NotesList
             ref={notesListRef}
@@ -313,6 +327,13 @@ const ContactScreen = ({ route }) => {
       style={{ flex: 1 }}
     >
       <CommonComponent />
+      <NewContactModal
+        visible={contactEditVisible}
+        onClose={() => setContactEditVisible(false)}
+        onSubmit={() => setContactEditVisible(false)}
+        title={"Edit Conatct"}
+        existingId={contact?._id}
+      />
     </KeyboardAvoidingView>
   );
 };

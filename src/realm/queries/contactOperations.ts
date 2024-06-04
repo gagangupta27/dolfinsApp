@@ -1,4 +1,5 @@
 import Realm, { BSON } from "realm";
+
 import Contact from "../models/Contact";
 
 function addContact(
@@ -8,6 +9,19 @@ function addContact(
     name: string;
     emails: { email: string }[];
     phoneNumbers: { number: string }[];
+    imageAvailable: boolean;
+    image: string;
+    note: string;
+    addresses: {
+      city: string;
+      country: string;
+      id: string;
+      isoCountryCode: string;
+      label: string;
+      postalCode: string;
+      region: string;
+      street: string;
+    }[];
   }
 ) {
   realm.write(() => {
@@ -21,6 +35,12 @@ function addContact(
       phoneNumbers: contactData.phoneNumbers
         ? contactData.phoneNumbers.map((number) => number.number)
         : [],
+      imageAvailable: contactData?.imageAvailable || false,
+      image: contactData?.image || "",
+      note: contactData?.note || "",
+      addresses: contactData?.addresses || [],
+      isFavourite: false,
+      isPinned: false,
       linkedinProfileUrl: "",
       linkedinProfileData: "",
       linkedinSummary: "",
@@ -131,7 +151,10 @@ function useContact(realm, contactId: string) {
 export {
   addContact,
   updateContact,
-  updateContactById, updateLinkedinProfile,
-  updateLinkedinSummary, updateLinkedinUrl, useContact, useContacts
+  updateContactById,
+  updateLinkedinProfile,
+  updateLinkedinSummary,
+  updateLinkedinUrl,
+  useContact,
+  useContacts,
 };
-

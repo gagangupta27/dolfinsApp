@@ -1,9 +1,24 @@
 import { FlatList, StyleSheet, View } from "react-native";
+
 import ContactItem from "./ContactItem";
 
-const ContactList = ({ contacts, onLongPress }) => {
+const ContactList = ({
+  contacts,
+  onLongPress,
+  onFavPress = () => {},
+  onPinPress = () => {},
+}) => {
   const renderItem = ({ item }) => {
-    return <ContactItem item={item} onLongPress={onLongPress} />;
+    return (
+      <ContactItem
+        showPin={true}
+        showFav={true}
+        item={item}
+        onLongPress={onLongPress}
+        onFavPress={() => onFavPress(item)}
+        onPinPress={() => onPinPress(item)}
+      />
+    );
   };
 
   return (

@@ -1,4 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import {
+  BUTTON_NAME,
+  EVENTS,
+  useTrackWithPageInfo,
+} from "../../utils/analytics";
 import {
   FlatList,
   Image,
@@ -9,37 +13,33 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import ContactList from "../../components/contact/ContactList";
-import ContactSelectionModal from "../../components/contact/ContactSelectionModal";
-import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
-
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { useNavigation } from "@react-navigation/native";
-import { useRealm } from "@realm/react";
+import React, { useEffect, useRef, useState } from "react";
 import { TouchableWithoutFeedback, View } from "react-native";
-import Modal from "react-native-modal";
-import { BSON } from "realm";
-import CalendarTab from "../../components/calendar/CalendarTab";
-import ContactItem from "../../components/contact/ContactItem";
-import QuickNotes from "../../components/home/QuickNotes";
-import NewNoteContainer from "../../components/notecontainer/NoteContainer";
-import NoteDone from "../../components/home/NoteDone";
-import SearchResultItem from "../../components/search/SearchResultItem";
 import { addContact, useContacts } from "../../realm/queries/contactOperations";
 import {
   createNoteAndAddToContact,
   useAllCalendarNotes,
   useAllContactNotes,
 } from "../../realm/queries/noteOperations";
-import {
-  BUTTON_NAME,
-  EVENTS,
-  useTrackWithPageInfo,
-} from "../../utils/analytics";
+import { useQuery, useRealm } from "@realm/react";
 
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { BSON } from "realm";
 import CalendarItem from "../../components/calendar/CalendarItem";
-import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperations";
+import CalendarTab from "../../components/calendar/CalendarTab";
+import Contact from "../../realm/models/Contact";
+import ContactItem from "../../components/contact/ContactItem";
+import ContactList from "../../components/contact/ContactList";
+import ContactSelectionModal from "../../components/contact/ContactSelectionModal";
+import Modal from "react-native-modal";
+import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
+import NewNoteContainer from "../../components/notecontainer/NoteContainer";
+import NoteDone from "../../components/home/NoteDone";
+import QuickNotes from "../../components/home/QuickNotes";
+import SearchResultItem from "../../components/search/SearchResultItem";
 import { getWorkHistoryList } from "../../utils/linkedin";
+import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperations";
+import { useNavigation } from "@react-navigation/native";
 
 const SearchBar = ({ search, text, setText }) => {
   useEffect(() => {
@@ -94,7 +94,18 @@ const CommonComponent = () => {
   const [currentNoteAdded, setCurrentNoteAdded] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const contacts = useContacts(realm);
+  const contacts = useQuery(
+    Contact,
+    (tasks) => {
+      return tasks.sorted([
+        ["isPinned", true],
+        ["isFavourite", true],
+        ["name", false],
+      ]);
+    },
+    []
+  );
+  // const contacts = useContacts(realm);
   const allNotes = useAllContactNotes(realm);
   const contactMap = contacts.reduce((acc, contact) => {
     acc[contact._id] = contact;
@@ -356,6 +367,32 @@ const CommonComponent = () => {
     // Now Search
   };
 
+  const onFavPress = (item) => {
+    realm.write(() => {
+      // If an object exists, setting the third parameter (`updateMode`) to
+      // "modified" only updates properties that have changed, resulting in
+      // faster operations.
+      realm.create(
+        "Contact",
+        { ...item, isFavourite: !item?.isFavourite },
+        "modified"
+      );
+    });
+  };
+
+  const onPinPress = (item) => {
+    realm.write(() => {
+      // If an object exists, setting the third parameter (`updateMode`) to
+      // "modified" only updates properties that have changed, resulting in
+      // faster operations.
+      realm.create(
+        "Contact",
+        { ...item, isPinned: !item?.isPinned },
+        "modified"
+      );
+    });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <TouchableWithoutFeedback
@@ -535,6 +572,8 @@ const CommonComponent = () => {
                   <ContactList
                     contacts={contacts}
                     onLongPress={handleLongPress}
+                    onFavPress={onFavPress}
+                    onPinPress={onPinPress}
                   />
                 </View>
               )}

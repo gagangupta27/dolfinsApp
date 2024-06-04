@@ -1,7 +1,5 @@
-import { Entypo } from "@expo/vector-icons";
-import { useRealm } from "@realm/react";
 import * as Contacts from "expo-contacts";
-import React, { useEffect, useState } from "react";
+
 import {
   ActivityIndicator,
   Modal,
@@ -12,8 +10,6 @@ import {
   View,
   VirtualizedList,
 } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { updateContactById } from "../../realm/queries/contactOperations";
 import {
   BUTTON_NAME,
   CARD_NAME,
@@ -22,8 +18,14 @@ import {
   MODAL_NAME,
   useTrackWithPageInfo,
 } from "../../utils/analytics";
+import React, { useEffect, useState } from "react";
+import Svg, { Path } from "react-native-svg";
+
+import { Entypo } from "@expo/vector-icons";
 import ExactTextBox from "../notecontainer/ExactTextBox";
 import NewContactModal from "./NewContactModal";
+import { updateContactById } from "../../realm/queries/contactOperations";
+import { useRealm } from "@realm/react";
 
 const Checked = () => {
   return (

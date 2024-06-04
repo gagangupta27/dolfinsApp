@@ -20,7 +20,9 @@
       "bundleIdentifier": "ai.getdope.dope",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
-        "LSApplicationQueriesSchemes": ["mailto"],
+        "LSApplicationQueriesSchemes": [
+          "mailto"
+        ],
         "ITSAppUsesNonExemptEncryption": "NO"
       },
       "buildNumber": "1"
@@ -59,6 +61,11 @@
           "domain": "{AUTH0_DOMAIN}"
         }
       ]
-    ]   
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "847161c4-0ecb-49bb-a05d-f7fca2ea1176"
+      }
+    }
   }
 }
