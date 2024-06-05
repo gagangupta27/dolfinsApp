@@ -1,9 +1,20 @@
-import { forwardRef } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
+
 import NoteItem from "./NoteItem";
+import { forwardRef } from "react";
 
 const NotesList = forwardRef(
-  ({ notes, setEditMode, contact, onDelete }, ref) => {
+  (
+    {
+      notes,
+      setEditMode,
+      contact,
+      onDelete,
+      onPinPress = () => {},
+      showPin = false,
+    },
+    ref
+  ) => {
     const renderItem = ({ item }) => {
       return (
         <NoteItem
@@ -11,6 +22,10 @@ const NotesList = forwardRef(
           setEditMode={setEditMode}
           contact={contact}
           onDelete={onDelete}
+          showPin={showPin}
+          onPinPress={() => {
+            onPinPress(item);
+          }}
         />
       );
     };

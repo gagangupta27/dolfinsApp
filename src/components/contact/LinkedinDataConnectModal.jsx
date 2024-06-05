@@ -1,7 +1,3 @@
-import { Entypo } from "@expo/vector-icons";
-import { useRealm } from "@realm/react";
-import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Button,
@@ -13,11 +9,6 @@ import {
   View,
 } from "react-native";
 import {
-  updateLinkedinProfile,
-  updateLinkedinSummary,
-  updateLinkedinUrl,
-} from "../../realm/queries/contactOperations";
-import {
   BUTTON_NAME,
   EVENTS,
   GLOBAL_KEYS,
@@ -25,9 +16,19 @@ import {
   MODAL_NAME,
   useTrackWithPageInfo,
 } from "../../utils/analytics";
-import Api from "../../utils/Api";
 import { getQuickSummary, getWorkHistoryList } from "../../utils/linkedin";
+import {
+  updateLinkedinProfile,
+  updateLinkedinSummary,
+  updateLinkedinUrl,
+} from "../../realm/queries/contactOperations";
+import { useEffect, useState } from "react";
+
+import Api from "../../utils/Api";
+import { Entypo } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import NotesList from "../notecontainer/NotesList";
+import { useRealm } from "@realm/react";
 
 const LinkedinDataConnectModal = ({
   visible,
@@ -39,7 +40,7 @@ const LinkedinDataConnectModal = ({
   const realm = useRealm();
 
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
-    contact.linkedinProfileUrl
+    contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
   );
   const [linkedinProfileData, setLinkedProfileData] = useState(
     contact.linkedinProfileData ? JSON.parse(contact.linkedinProfileData) : null

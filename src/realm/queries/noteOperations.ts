@@ -1,8 +1,9 @@
-import { useQuery } from "@realm/react";
 import Realm, { BSON } from "realm";
+
 import CalendarEventNoteMap from "../models/CalendarEventNoteMap";
 import ContactNoteMap from "../models/ContactNoteMap";
 import Note from "../models/Note";
+import { useQuery } from "@realm/react";
 
 function useCalendarNotes(realm: Realm, calendarEventId: BSON.ObjectId) {
   const noteMaps = useQuery(CalendarEventNoteMap).filtered(
@@ -95,6 +96,7 @@ function addNoteToCalendar(
       documentName: noteDetails.documentName,
       createdAt: new Date(),
       updatedAt: new Date(),
+      isPinned: false,
     });
 
     const calendarNoteMap = realm.create("CalendarEventNoteMap", {
@@ -136,6 +138,7 @@ function createNoteAndAddToContact(
       documentName: noteDetails.documentName,
       createdAt: new Date(),
       updatedAt: new Date(),
+      isPinned: false,
     });
 
     const contactNoteMap = realm.create("ContactNoteMap", {
@@ -241,6 +244,14 @@ function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
 }
 
 export {
-  addNoteToCalendar, addNoteToContact, createNoteAndAddToContact, deleteNote, removeNoteFromContact, updateNote, useAllCalendarNotes, useAllContactNotes, useCalendarNotes, useContactNotes
+  addNoteToCalendar,
+  addNoteToContact,
+  createNoteAndAddToContact,
+  deleteNote,
+  removeNoteFromContact,
+  updateNote,
+  useAllCalendarNotes,
+  useAllContactNotes,
+  useCalendarNotes,
+  useContactNotes,
 };
-

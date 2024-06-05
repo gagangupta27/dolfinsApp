@@ -1,5 +1,6 @@
-import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import { useNavigation } from "@react-navigation/native";
 
 const QuickNotes = () => {
   const navigation = useNavigation();

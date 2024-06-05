@@ -12,7 +12,7 @@ const ContactList = ({
     return (
       <ContactItem
         showPin={true}
-        showFav={true}
+        showFav={false}
         item={item}
         onLongPress={onLongPress}
         onFavPress={() => onFavPress(item)}

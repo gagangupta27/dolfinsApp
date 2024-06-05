@@ -35,7 +35,7 @@ const NewContactModal = ({
   const [linkedin, setLinkedin] = useState("");
 
   const realm = useRealm();
-  const existingContact = useObject(Contact, existingId);
+  const existingContact = existingId ? useObject(Contact, existingId) : null;
 
   useEffect(() => {
     if (existingContact) {

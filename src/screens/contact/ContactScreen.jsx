@@ -10,17 +10,19 @@ import {
   useContactNotes,
 } from "../../realm/queries/noteOperations";
 import { useEffect, useRef, useState } from "react";
+import { useQuery, useRealm } from "@realm/react";
 
 import { BSON } from "realm";
+import ContactNoteMap from "../../realm/models/ContactNoteMap";
 import LinkedinDataConnectModal from "../../components/contact/LinkedinDataConnectModal";
 import NavigationBarForContact from "../../components/contact/NavigationBarForContact";
 import NewContactModal from "../../components/contact/NewContactModal";
 import NewNoteContainer from "../../components/notecontainer/NoteContainer";
+import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
 import { getWorkHistoryList } from "../../utils/linkedin";
 import { useContact } from "../../realm/queries/contactOperations";
-import { useRealm } from "@realm/react";
 import { useTrackWithPageInfo } from "../../utils/analytics";
 
 // import
@@ -45,11 +47,17 @@ const ContactScreen = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
 
+  const noteIdS = useQuery(ContactNoteMap)
+    .filtered("contactId == $0", contact._id)
+    .map((o) => o?.noteId);
+  const storedNotes = useQuery(Note)
+    .filtered("_id IN $0", noteIdS || [])
+    .sorted([["isPinned", true]]);
+
   const [notes, setNotes] = useState([]);
   const [update, forceUpdate] = useState(0);
 
   const db = useRef(null);
-  const storedNotes = useContactNotes(realm, contact._id);
 
   const contactNote = useRef(null);
   const linkedinSummaryNote = useRef(null);
@@ -238,6 +246,20 @@ const ContactScreen = ({ route }) => {
     }, 500);
   };
 
+  const onPinPress = async (note) => {
+    realm.write(() => {
+      realm.create(
+        "Note",
+        {
+          ...note,
+          isPinned: !note?.isPinned,
+          mentions: JSON.stringify(note?.mentions || []),
+        },
+        "modified"
+      );
+    });
+  };
+
   const onLinkedinDataConnectModalOpen = () => {
     setLinkedinModalVisible(true);
   };
@@ -307,6 +329,8 @@ const ContactScreen = ({ route }) => {
             setEditMode={setEditMode}
             contact={contact}
             onDelete={onDelete}
+            showPin={true}
+            onPinPress={onPinPress}
           />
         </View>
       </TouchableWithoutFeedback>

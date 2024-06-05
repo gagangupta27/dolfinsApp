@@ -1,17 +1,28 @@
-import axios from "axios";
-import auth0 from "./auth";
-import { Storage } from "./storage"; // Adjust the import path as necessary
 import { BASE_URL } from "./../../config";
+import { Storage } from "./storage"; // Adjust the import path as necessary
+import auth0 from "./auth";
+import axios from "axios";
 
 const instance = axios.create({
   baseURL: BASE_URL,
 });
 
+instance.interceptors.request.use(
+  async (config) => {
+    console.log(JSON.stringify(config));
+    return config;
+  },
+  (error) => {
+    console.error("Error while setting up axios request interceptor,", error);
+  }
+);
+
 instance.interceptors.response.use(
   (response) => response, // Return the response directly on success
   async (error) => {
+    console.log("err", error?.message);
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error?.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true; // Mark this request as already tried
       const authDataString = await Storage.getItem("authData");
       const authData = JSON.parse(authDataString || "{}");

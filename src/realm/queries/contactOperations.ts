@@ -25,28 +25,39 @@ function addContact(
   }
 ) {
   realm.write(() => {
-    realm.create("Contact", {
-      _id: new BSON.ObjectId(),
-      id: contactData.id,
-      name: contactData.name,
-      emails: contactData.emails
-        ? contactData.emails.map((email) => email.email)
-        : [],
-      phoneNumbers: contactData.phoneNumbers
-        ? contactData.phoneNumbers.map((number) => number.number)
-        : [],
-      imageAvailable: contactData?.imageAvailable || false,
-      image: contactData?.image || "",
-      note: contactData?.note || "",
-      addresses: contactData?.addresses || [],
-      isFavourite: false,
-      isPinned: false,
-      linkedinProfileUrl: "",
-      linkedinProfileData: "",
-      linkedinSummary: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    const contacts = realm
+      .objects("Contact")
+      .filtered("id == $0", contactData.id);
+    if (contacts.length > 0) {
+      let contact = contacts[0];
+      contact.name = contactData.name;
+      contact.emails = contactData.emails;
+      contact.phoneNumbers = contactData.phoneNumbers;
+      contact.updatedA = new Date();
+    } else {
+      realm.create("Contact", {
+        _id: new BSON.ObjectId(),
+        id: contactData.id,
+        name: contactData.name,
+        emails: contactData.emails
+          ? contactData.emails.map((email) => email.email)
+          : [],
+        phoneNumbers: contactData.phoneNumbers
+          ? contactData.phoneNumbers.map((number) => number.number)
+          : [],
+        imageAvailable: contactData?.imageAvailable || false,
+        image: contactData?.image || "",
+        note: contactData?.note || "",
+        addresses: contactData?.addresses || [],
+        isFavourite: false,
+        isPinned: false,
+        linkedinProfileUrl: "",
+        linkedinProfileData: "",
+        linkedinSummary: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
   });
 }
 

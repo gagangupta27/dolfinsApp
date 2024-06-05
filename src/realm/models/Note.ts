@@ -8,6 +8,7 @@ export default class Note extends Realm.Object {
   imageUri!: string | null;
   audioUri!: string | null;
   volumeLevels!: number[];
+  isPinned: boolean;
   documentUri!: string | null;
   documentName!: string | null;
   createdAt!: Date;
@@ -23,6 +24,7 @@ export default class Note extends Realm.Object {
       imageUri: "string?",
       audioUri: "string?",
       volumeLevels: "double[]",
+      isPinned: "bool",
       documentUri: "string?",
       documentName: "string?",
       createdAt: "date",
