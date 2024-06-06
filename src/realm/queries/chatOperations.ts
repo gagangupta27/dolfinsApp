@@ -1,6 +1,7 @@
-import { useQuery } from "@realm/react";
 import Realm, { BSON } from "realm";
+
 import Chat from "../models/Chat";
+import { useQuery } from "@realm/react";
 
 function addChat(
   realm: Realm,
@@ -40,6 +41,17 @@ function updateChat(
   });
 }
 
+function removeChat(realm: Realm, chatId: BSON.ObjectId) {
+  realm.write(() => {
+    const chat = realm.objectForPrimaryKey("Chat", chatId);
+
+    // If the chat object is found, delete it
+    if (chat) {
+      realm.delete(chat);
+    }
+  });
+}
+
 function useChats(realm: Realm): Realm.Results<Chat> {
   const chats = useQuery(Chat);
   return chats;
@@ -50,5 +62,4 @@ function useChat(realm: Realm, chatId: BSON.ObjectId) {
   return chat;
 }
 
-export { addChat, updateChat, useChat, useChats };
-
+export { addChat, updateChat, useChat, useChats, removeChat };

@@ -1,3 +1,4 @@
+import { Keyboard, StyleSheet, View } from "react-native";
 import React, {
   forwardRef,
   useEffect,
@@ -5,21 +6,21 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Keyboard, StyleSheet, View } from "react-native";
-import useAudioRecording from "../../hooks/AudioRecording";
-import useContactPermission from "../../hooks/ContactPermission";
-import useDocumentHandler from "../../hooks/DocumentHandler";
-import useImageHandler from "../../hooks/ImageHandler";
-import useSearchFilter from "../../hooks/SearchFilter";
+
 import ExactTextBox from "./ExactTextBox";
 import MultiModalOptions from "./MultiModalOptions";
 import NoteInputField from "./NoteInputField";
 import TextFormattingToolbar from "./TextFormattingToolbar";
 import UserMentionDropdown from "./UserMentionDropdown";
 import UserMentionOptionsDropdown from "./UserMentionOptionsDropdown";
+import useAudioRecording from "../../hooks/AudioRecording";
+import useContactPermission from "../../hooks/ContactPermission";
+import useDocumentHandler from "../../hooks/DocumentHandler";
+import useImageHandler from "../../hooks/ImageHandler";
+import useSearchFilter from "../../hooks/SearchFilter";
 
 const NewNoteContainer = forwardRef(
-  ({ addNote, contact, note, updateNote }, ref) => {
+  ({ addNote, contact, note, updateNote, mentionHasInput = true }, ref) => {
     const noteInputFieldRef = useRef();
     const [shouldIncreaseHeight, setShouldIncreaseHeight] = useState(
       note ? true : false
@@ -27,6 +28,7 @@ const NewNoteContainer = forwardRef(
     const [isFocused, setIsFocused] = useState(note ? true : false);
     const [isMentionFocused, setIsMentionFocused] = useState(false);
     const [content, setContent] = useState(note ? note.content : "");
+    const [isTagging, setIsTagging] = useState(false);
     const [mentionData, setMentionData] = useState(
       note && note.mentions
         ? note.mentions
@@ -70,8 +72,9 @@ const NewNoteContainer = forwardRef(
     );
 
     const handleMentionSelect = (user) => {
+      console.log(user);
       const remaining = mentionData.filter(
-        (mention) => mention.contactId != user.id
+        (mention) => mention.contactId != (user.id || user?.contactId)
       );
       setMentionData(remaining);
     };
@@ -197,6 +200,7 @@ const NewNoteContainer = forwardRef(
                 searchText={searchText}
                 setSearchText={searchFilter}
                 setIsMentionFocused={setIsMentionFocused}
+                hasTextInput={mentionHasInput}
               />
             }
 
@@ -211,7 +215,15 @@ const NewNoteContainer = forwardRef(
               volumeLevels={volumeLevels}
               document={document}
               content={content}
-              setContent={setContent}
+              setContent={(txt) => {
+                setContent(txt);
+                if (txt?.includes("@")) {
+                  setIsTagging(true);
+                  console.log("true");
+                } else {
+                  setIsTagging(false);
+                }
+              }}
               setIsFocused={setIsFocused}
               autoFocus={isFocused}
               clear={clear}

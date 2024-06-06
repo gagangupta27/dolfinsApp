@@ -74,6 +74,7 @@ const NoteItem = ({
     setModalVisible(false);
   };
   const TagSection = () => {
+    const mentions = JSON.parse(JSON.stringify(note?.mentions));
     if (
       note?.mentions?.length > 0 &&
       Array.isArray(note?.mentions) &&
@@ -162,7 +163,7 @@ const NoteItem = ({
   const navigation = useNavigation();
 
   return (
-    <View style={{ flexDirection: "column" }}>
+    <View style={{ flexDirection: "column", marginBottom: 10 }}>
       <TouchableOpacity style={styles.row} onLongPress={handleLongPress}>
         <View ref={noteContainerRef} style={styles.notecontainer}>
           <TagSection />

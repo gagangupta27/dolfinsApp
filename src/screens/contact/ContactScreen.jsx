@@ -174,8 +174,19 @@ const ContactScreen = ({ route }) => {
     if (!mentions.some((mention) => mention.contactId === contact.id)) {
       mentions.push({ contactId: contact.id, name: contact.name });
     }
+    console.log(content);
+    let newLineIndex = content.indexOf("\n");
+    let newConent = "";
+    if (newLineIndex) {
+      newConent += `*${content.substring(
+        0,
+        newLineIndex
+      )}*\n${content.substring(newLineIndex + 1)}`;
+    } else {
+      newConent = content;
+    }
     const newNote = {
-      content: content,
+      content: newConent,
       mentions: mentions, // Assuming mentions is an array of ids
       type: imageUri
         ? "image"
@@ -340,6 +351,7 @@ const ContactScreen = ({ route }) => {
         contact={contact}
         note={editMode.editMode && firstNote}
         updateNote={updateNoteV2}
+        mentionHasInput={true}
       />
     </View>
   );

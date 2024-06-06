@@ -1,9 +1,9 @@
-import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import { MarkdownView } from "../../utils/markdown";
+import { useNavigation } from "@react-navigation/native";
 
 const SearchResultItem = ({ searchterm, name, note, onPress }) => {
-
   const getFormattedDate = (updatedAt) => {
     const date = new Date(updatedAt);
     const month = date.toLocaleString("default", { month: "short" });

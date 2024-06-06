@@ -1,15 +1,8 @@
-import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItem,
-} from "@react-navigation/drawer";
-import { useNavigation } from "@react-navigation/native";
-import { useRealm } from "@realm/react";
 import * as Clipboard from "expo-clipboard";
-import React, { useRef, useState } from "react";
+
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   StyleSheet,
@@ -18,32 +11,43 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import Toast from "react-native-toast-message";
-import { BSON } from "realm";
-import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
-import {
-  addChat,
-  updateChat,
-  useChat,
-  useChats,
-} from "../../realm/queries/chatOperations";
-import { useContacts } from "../../realm/queries/contactOperations";
-import {
-  useAllCalendarNotes,
-  useAllContactNotes,
-} from "../../realm/queries/noteOperations";
+import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import {
   BUTTON_NAME,
   CARD_NAME,
   EVENTS,
   INPUT_NAME,
   LOADING_TEXT_NAME,
-  useTrackWithPageInfo
+  useTrackWithPageInfo,
 } from "../../utils/analytics";
+import {
+  DrawerContentScrollView,
+  DrawerItem,
+  createDrawerNavigator,
+} from "@react-navigation/drawer";
+import React, { useRef, useState } from "react";
+import Svg, { G, Path } from "react-native-svg";
+import {
+  addChat,
+  removeChat,
+  updateChat,
+  useChat,
+  useChats,
+} from "../../realm/queries/chatOperations";
+import {
+  useAllCalendarNotes,
+  useAllContactNotes,
+} from "../../realm/queries/noteOperations";
+
+import { ASK_MODULE_TOP_LEVEL_PROMPT } from "../../../prompts";
+import { BSON } from "realm";
+import Toast from "react-native-toast-message";
 import { chatGptStream } from "../../utils/gpt";
 import { getWorkHistoryList } from "../../utils/linkedin";
-import { ASK_MODULE_TOP_LEVEL_PROMPT } from "../../../prompts";
+import { useContacts } from "../../realm/queries/contactOperations";
+import { useNavigation } from "@react-navigation/native";
+import { useRealm } from "@realm/react";
+import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -84,7 +88,7 @@ const ChatComponent = ({ route }) => {
     try {
       track(EVENTS.LOADING_START.NAME, {
         [EVENTS.LOADING_START.KEYS.TEXT_NAME]:
-          LOADING_TEXT_NAME.RESPONSE_TO_QUERY
+          LOADING_TEXT_NAME.RESPONSE_TO_QUERY,
       });
       const start = Date.now();
 
@@ -359,21 +363,67 @@ const CustomDrawerContent = (props) => {
         const focused = index === state.index;
         const label = route.name;
 
+        const chatId = route?.params?.id;
+
         return (
-          <React.Fragment key={route.key}>
-            <DrawerItem
-              label={label}
-              focused={focused}
-              onPress={() => {
-                track(EVENTS.CARD_TAPPED.NAME, {
-                  [EVENTS.CARD_TAPPED.KEYS.CARD_NAME]: CARD_NAME.PREVIOUS_ASK,
-                  [EVENTS.CARD_TAPPED.KEYS.CARD_IDENTIFIER]: label,
-                });
-                props.navigation.navigate(route.name);
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              width: "100%",
+              backgroundColor: "transparent",
+              paddingRight: 10,
+            }}
+            key={route.key}
+          >
+            <View
+              style={{
+                flex: 1,
               }}
-              labelStyle={{ color: "white" }}
-            />
-          </React.Fragment>
+            >
+              <DrawerItem
+                label={label}
+                focused={focused}
+                onPress={() => {
+                  track(EVENTS.CARD_TAPPED.NAME, {
+                    [EVENTS.CARD_TAPPED.KEYS.CARD_NAME]: CARD_NAME.PREVIOUS_ASK,
+                    [EVENTS.CARD_TAPPED.KEYS.CARD_IDENTIFIER]: label,
+                  });
+                  props.navigation.navigate(route.name);
+                }}
+                style={{
+                  backgroundColor: "transparent",
+                }}
+                labelStyle={{ color: "white" }}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                if (chatId) {
+                  props?.deleteChat(chatId);
+                }
+              }}
+            >
+              <Svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <G id="icon/action/delete_24px">
+                  <Path
+                    id="icon/action/delete_24px_2"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M14.5 3H9.5L8.5 4H5V6H19V4H15.5L14.5 3ZM16 9V19H8V9H16ZM6 7H18V19C18 20.1 17.1 21 16 21H8C6.9 21 6 20.1 6 19V7Z"
+                    fill="white"
+                    fill-opacity="0.54"
+                  />
+                </G>
+              </Svg>
+            </TouchableOpacity>
+          </View>
         );
       })}
     </DrawerContentScrollView>
@@ -406,6 +456,24 @@ const CommonComponent = ({ systemPrompt }) => {
     }, 500);
   };
 
+  const deleteChat = async (chatId) => {
+    const objectId = new BSON.ObjectId(chatId);
+    Alert.alert("Delete Chat", "Are you sure you want to delete this chat?", [
+      {
+        text: "Cancel",
+        onPress: () => {},
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => {
+          removeChat(realm, objectId);
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
   return (
     <View
       style={{
@@ -427,7 +495,11 @@ const CommonComponent = ({ systemPrompt }) => {
             },
           }}
           drawerContent={(props) => (
-            <CustomDrawerContent {...props} createNewChat={createNewChat} />
+            <CustomDrawerContent
+              deleteChat={deleteChat}
+              {...props}
+              createNewChat={createNewChat}
+            />
           )}
         >
           {[...chats].reverse().map((chat, index) => (
@@ -603,7 +675,11 @@ const AskScreen = () => {
       })
       .join("\n\n------------------------\n\n");
     return (
-      ASK_MODULE_TOP_LEVEL_PROMPT + "\n\n\n" + systemPrompt + "\n\n\n" + calendarNotesPrompt
+      ASK_MODULE_TOP_LEVEL_PROMPT +
+      "\n\n\n" +
+      systemPrompt +
+      "\n\n\n" +
+      calendarNotesPrompt
     );
   }
 
