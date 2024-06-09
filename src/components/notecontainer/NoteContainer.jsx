@@ -74,6 +74,10 @@ const NewNoteContainer = forwardRef(
       const remaining = mentionData.filter(
         (mention) => mention.contactId != (user.id || user?.contactId)
       );
+      setContent((prev) => {
+        return prev?.replace(`*${user?.name}*`, "");
+      });
+      setSearchText("");
       setMentionData(remaining);
     };
 
@@ -88,17 +92,15 @@ const NewNoteContainer = forwardRef(
         ]);
       }
       const str = await getLastSubstringAfterAt(content);
-      setContent((prev) => {
-        if (str !== null) {
-          const boldSubstring = `*${option?.name}*`;
-          return prev.replace(`@${str}`, boldSubstring);
-        } else {
-          return prev;
-        }
-      });
+      let newConent = content;
+      if (str !== null) {
+        const boldSubstring = `*${option?.name}* `;
+        newConent = newConent.replace(`@${str}`, boldSubstring);
+      }
+      setContent(newConent);
       setSearchText("");
       setTimeout(() => {
-        noteInputFieldRef?.current?.moveCurorToLast();
+        noteInputFieldRef?.current?.moveCurorToLast(newConent);
       }, 300);
     };
 

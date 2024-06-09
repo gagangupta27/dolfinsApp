@@ -71,59 +71,65 @@ const NoteInputField = forwardRef(
       clear();
     };
 
-    useImperativeHandle(ref, () => ({
-      onBoldPress: () => {
-        const { start, end } = selection;
-        const beforeMatch = content.substring(0, start);
-        const match = content.substring(start, end);
-        const afterMatch = content.substring(end);
-        setContent(beforeMatch + "*" + match + "*" + afterMatch);
-        textInputRef.current.focus();
-        setTimeout(() => {
-          if (start != end) {
-            setSelection({ start: start, end: end + 2 });
-          } else {
-            setSelection({ start: start + 1, end: start + 1 });
-          }
-        }, 50);
-      },
-      onItalicPress: () => {
-        const { start, end } = selection;
-        const beforeMatch = content.substring(0, start);
-        const match = content.substring(start, end);
-        const afterMatch = content.substring(end);
-        setContent(beforeMatch + "_" + match + "_" + afterMatch);
-        textInputRef.current.focus();
-        setTimeout(() => {
-          if (start != end) {
-            setSelection({ start: start, end: end + 2 });
-          } else {
-            setSelection({ start: start + 1, end: start + 1 });
-          }
-        }, 50);
-      },
-      onStrikethroughPress: () => {
-        const { start, end } = selection;
-        const beforeMatch = content.substring(0, start);
-        const match = content.substring(start, end);
-        const afterMatch = content.substring(end);
-        setContent(beforeMatch + "~" + match + "~" + afterMatch);
-        textInputRef.current.focus();
-        setTimeout(() => {
-          if (start != end) {
-            setSelection({ start: start, end: end + 2 });
-          } else {
-            setSelection({ start: start + 1, end: start + 1 });
-          }
-        }, 50);
-      },
-      focus: () => {
-        textInputRef.current.focus();
-      },
-      moveCurorToLast: () => {
-        setSelection({ start: content?.last || 0, end: content?.last || 0 });
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        onBoldPress: () => {
+          const { start, end } = selection;
+          const beforeMatch = content.substring(0, start);
+          const match = content.substring(start, end);
+          const afterMatch = content.substring(end);
+          setContent(beforeMatch + "*" + match + "*" + afterMatch);
+          textInputRef.current.focus();
+          setTimeout(() => {
+            if (start != end) {
+              setSelection({ start: start, end: end + 2 });
+            } else {
+              setSelection({ start: start + 1, end: start + 1 });
+            }
+          }, 50);
+        },
+        onItalicPress: () => {
+          const { start, end } = selection;
+          const beforeMatch = content.substring(0, start);
+          const match = content.substring(start, end);
+          const afterMatch = content.substring(end);
+          setContent(beforeMatch + "_" + match + "_" + afterMatch);
+          textInputRef.current.focus();
+          setTimeout(() => {
+            if (start != end) {
+              setSelection({ start: start, end: end + 2 });
+            } else {
+              setSelection({ start: start + 1, end: start + 1 });
+            }
+          }, 50);
+        },
+        onStrikethroughPress: () => {
+          const { start, end } = selection;
+          const beforeMatch = content.substring(0, start);
+          const match = content.substring(start, end);
+          const afterMatch = content.substring(end);
+          setContent(beforeMatch + "~" + match + "~" + afterMatch);
+          textInputRef.current.focus();
+          setTimeout(() => {
+            if (start != end) {
+              setSelection({ start: start, end: end + 2 });
+            } else {
+              setSelection({ start: start + 1, end: start + 1 });
+            }
+          }, 50);
+        },
+        focus: () => {
+          textInputRef.current.focus();
+        },
+        moveCurorToLast: (text) => {
+          textInputRef.current.setNativeProps({
+            selection: { start: text.length, end: text.length },
+          });
+        },
+      }),
+      [textInputRef]
+    );
 
     const onSelectionChange = (event) => {
       setSelection(event.nativeEvent.selection);
