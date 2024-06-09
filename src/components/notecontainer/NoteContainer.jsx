@@ -28,7 +28,6 @@ const NewNoteContainer = forwardRef(
     const [isFocused, setIsFocused] = useState(note ? true : false);
     const [isMentionFocused, setIsMentionFocused] = useState(false);
     const [content, setContent] = useState(note ? note.content : "");
-    const [isTagging, setIsTagging] = useState(false);
     const [mentionData, setMentionData] = useState(
       note && note.mentions
         ? note.mentions
@@ -72,14 +71,13 @@ const NewNoteContainer = forwardRef(
     );
 
     const handleMentionSelect = (user) => {
-      console.log(user);
       const remaining = mentionData.filter(
         (mention) => mention.contactId != (user.id || user?.contactId)
       );
       setMentionData(remaining);
     };
 
-    const handleOptionSelect = (option) => {
+    const handleOptionSelect = async (option) => {
       const exisiting = mentionData.filter(
         (mention) => mention.contactId == option.id
       );
@@ -89,7 +87,19 @@ const NewNoteContainer = forwardRef(
           { contactId: option.id, name: option.name },
         ]);
       }
+      const str = await getLastSubstringAfterAt(content);
+      setContent((prev) => {
+        if (str !== null) {
+          const boldSubstring = `*${option?.name}*`;
+          return prev.replace(`@${str}`, boldSubstring);
+        } else {
+          return prev;
+        }
+      });
       setSearchText("");
+      setTimeout(() => {
+        noteInputFieldRef?.current?.moveCurorToLast();
+      }, 300);
     };
 
     const handleBoldPress = () => {
@@ -167,6 +177,20 @@ const NewNoteContainer = forwardRef(
       }
     }, [imageUri, audioUri, document, isFocused, isMentionFocused, recording]);
 
+    async function getLastSubstringAfterAt(text) {
+      return new Promise((resolve, reject) => {
+        const pattern = /@([^\s@]+)(?!\S)/g;
+        let lastMatch = null;
+        let match;
+
+        while ((match = pattern.exec(text)) !== null) {
+          lastMatch = match[1];
+        }
+
+        resolve(lastMatch);
+      });
+    }
+
     return (
       <View>
         {!shouldIncreaseHeight && (
@@ -193,16 +217,15 @@ const NewNoteContainer = forwardRef(
                 onSelectOption={handleOptionSelect}
               />
             )}
-            {
-              <UserMentionDropdown
-                data={mentionData}
-                onMentionSelect={handleMentionSelect}
-                searchText={searchText}
-                setSearchText={searchFilter}
-                setIsMentionFocused={setIsMentionFocused}
-                hasTextInput={mentionHasInput}
-              />
-            }
+
+            <UserMentionDropdown
+              data={mentionData}
+              onMentionSelect={handleMentionSelect}
+              searchText={searchText}
+              setSearchText={searchFilter}
+              setIsMentionFocused={setIsMentionFocused}
+              hasTextInput={mentionHasInput}
+            />
 
             <NoteInputField
               ref={noteInputFieldRef}
@@ -215,13 +238,15 @@ const NewNoteContainer = forwardRef(
               volumeLevels={volumeLevels}
               document={document}
               content={content}
-              setContent={(txt) => {
+              setContent={async (txt) => {
                 setContent(txt);
-                if (txt?.includes("@")) {
-                  setIsTagging(true);
-                  console.log("true");
+                const matches = await getLastSubstringAfterAt(txt);
+                if (matches && matches?.length > 0) {
+                  searchFilter(matches);
+                  setSearchText(matches);
                 } else {
-                  setIsTagging(false);
+                  searchFilter("");
+                  setSearchText("");
                 }
               }}
               setIsFocused={setIsFocused}

@@ -174,10 +174,9 @@ const ContactScreen = ({ route }) => {
     if (!mentions.some((mention) => mention.contactId === contact.id)) {
       mentions.push({ contactId: contact.id, name: contact.name });
     }
-    console.log(content);
     let newLineIndex = content.indexOf("\n");
     let newConent = "";
-    if (newLineIndex) {
+    if (newLineIndex != -1) {
       newConent += `*${content.substring(
         0,
         newLineIndex
@@ -351,7 +350,7 @@ const ContactScreen = ({ route }) => {
         contact={contact}
         note={editMode.editMode && firstNote}
         updateNote={updateNoteV2}
-        mentionHasInput={true}
+        mentionHasInput={false}
       />
     </View>
   );

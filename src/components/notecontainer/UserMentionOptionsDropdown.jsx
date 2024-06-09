@@ -1,4 +1,3 @@
-import React from "react";
 import {
   FlatList,
   StyleSheet,
@@ -6,6 +5,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+import React from "react";
 
 const UserMentionOptionsDropdown = ({ filteredContacts, onSelectOption }) => {
   const handleItemClick = (item) => {

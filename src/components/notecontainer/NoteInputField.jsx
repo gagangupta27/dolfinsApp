@@ -11,7 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import AudioPlayer from "../audio/AudioPlayerV2";
 import Document from "./Document";
@@ -113,6 +119,9 @@ const NoteInputField = forwardRef(
       },
       focus: () => {
         textInputRef.current.focus();
+      },
+      moveCurorToLast: () => {
+        setSelection({ start: content?.last || 0, end: content?.last || 0 });
       },
     }));
 
