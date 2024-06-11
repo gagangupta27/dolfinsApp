@@ -42,12 +42,17 @@ import {
 import { ASK_MODULE_TOP_LEVEL_PROMPT } from "../../../prompts";
 import { BSON } from "realm";
 import Toast from "react-native-toast-message";
+import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
+import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
+import { getLastSubstringAfterAt } from "../../utils/common";
 import { getWorkHistoryList } from "../../utils/linkedin";
+import useContactPermission from "../../hooks/ContactPermission";
 import { useContacts } from "../../realm/queries/contactOperations";
 import { useNavigation } from "@react-navigation/native";
 import { useRealm } from "@realm/react";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
+import useSearchFilter from "../../hooks/SearchFilter";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -55,7 +60,6 @@ const ChatComponent = ({ route }) => {
   const { id, systemPrompt } = route.params;
 
   const textInputRef = useRef(null);
-  const inputRef = useRef("");
   const flatListRef = useRef();
 
   const chat = useChat(realm, new BSON.ObjectId(id));
@@ -69,16 +73,22 @@ const ChatComponent = ({ route }) => {
 
   const [fetchingAnswer, setFetchingAnswer] = useState(false);
   const [error, setError] = useState(null);
+  const [mentionData, setMentionData] = useState([]);
+  const [input, setInput] = useState("");
+
+  const contacts = useContactPermission();
+  const { searchText, setSearchText, searchFilter, filteredContacts } =
+    useSearchFilter(contacts, mentionData);
 
   const submit = () => {
     track(EVENTS.INPUT_DONE.NAME, {
       [EVENTS.INPUT_DONE.KEYS.INPUT_NAME]: INPUT_NAME.ASK_QUERY,
     });
 
-    const question = inputRef.current;
+    const question = input;
     if (question.trim().length != 0) {
       handleNewQuestion(question);
-      inputRef.current = "";
+      setInput("");
       textInputRef.current.clear();
     }
   };
@@ -139,7 +149,6 @@ const ChatComponent = ({ route }) => {
       });
       setAllMessages(updatedMessages);
     } catch (e) {
-      console.log(e);
       setFetchingAnswer(false);
       setError("Having trouble at the moment. Please try again later.");
     }
@@ -153,6 +162,42 @@ const ChatComponent = ({ route }) => {
     });
     // toast message
     // copied to clipboard
+  };
+
+  const handleOptionSelect = async (option) => {
+    const exisiting = mentionData.filter(
+      (mention) => mention.contactId == option.id
+    );
+    if (exisiting.length == 0) {
+      setMentionData([
+        ...mentionData,
+        { contactId: option.id, name: option.name },
+      ]);
+    }
+    const str = await getLastSubstringAfterAt(input);
+    let newConent = input;
+    if (str !== null) {
+      const boldSubstring = `*${option?.name}* `;
+      newConent = newConent.replace(`@${str}`, boldSubstring);
+    }
+    setInput(newConent);
+    setSearchText("");
+    setTimeout(() => {
+      textInputRef.current.setNativeProps({
+        selection: { start: newConent?.length, end: newConent?.length },
+      });
+    }, 300);
+  };
+
+  const handleMentionSelect = (user) => {
+    const remaining = mentionData.filter(
+      (mention) => mention.contactId != (user.id || user?.contactId)
+    );
+    setInput((prev) => {
+      return prev?.replace(`*${user?.name}*`, "");
+    });
+    setSearchText("");
+    setMentionData(remaining);
   };
 
   const renderItem = ({ item }) => {
@@ -287,6 +332,24 @@ const ChatComponent = ({ route }) => {
           </View>
         )}
       </View>
+      {searchText && filteredContacts.length > 0 && (
+        <UserMentionOptionsDropdown
+          filteredContacts={filteredContacts}
+          onSelectOption={handleOptionSelect}
+          containerStyle={{
+            backgroundColor: "#5D5EB8",
+            paddingVertical: 10,
+          }}
+        />
+      )}
+      <UserMentionDropdown
+        data={mentionData}
+        onMentionSelect={handleMentionSelect}
+        searchText={searchText}
+        setSearchText={searchFilter}
+        setIsMentionFocused={() => {}}
+        hasTextInput={false}
+      />
       <View
         style={{
           flexDirection: "row",
@@ -301,14 +364,23 @@ const ChatComponent = ({ route }) => {
       >
         <TextInput
           ref={textInputRef}
+          value={input}
           style={{
             flex: 1,
             color: "white",
             fontFamily: "Inter-Regular",
             fontSize: 16,
           }}
-          onChangeText={(text) => {
-            inputRef.current = text;
+          onChangeText={async (text) => {
+            setInput(text);
+            const matches = await getLastSubstringAfterAt(text);
+            if (matches && matches?.length > 0) {
+              searchFilter(matches);
+              setSearchText(matches);
+            } else {
+              searchFilter("");
+              setSearchText("");
+            }
           }}
           multiline
           maxHeight={100}

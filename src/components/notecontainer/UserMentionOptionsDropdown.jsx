@@ -8,7 +8,11 @@ import {
 
 import React from "react";
 
-const UserMentionOptionsDropdown = ({ filteredContacts, onSelectOption }) => {
+const UserMentionOptionsDropdown = ({
+  filteredContacts,
+  onSelectOption,
+  containerStyle = {},
+}) => {
   const handleItemClick = (item) => {
     onSelectOption(item);
   };
@@ -22,7 +26,7 @@ const UserMentionOptionsDropdown = ({ filteredContacts, onSelectOption }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <FlatList
         data={filteredContacts}
         renderItem={renderItem}

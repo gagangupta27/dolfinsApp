@@ -13,6 +13,7 @@ import NoteInputField from "./NoteInputField";
 import TextFormattingToolbar from "./TextFormattingToolbar";
 import UserMentionDropdown from "./UserMentionDropdown";
 import UserMentionOptionsDropdown from "./UserMentionOptionsDropdown";
+import { getLastSubstringAfterAt } from "../../utils/common";
 import useAudioRecording from "../../hooks/AudioRecording";
 import useContactPermission from "../../hooks/ContactPermission";
 import useDocumentHandler from "../../hooks/DocumentHandler";
@@ -178,20 +179,6 @@ const NewNoteContainer = forwardRef(
         setShouldIncreaseHeight(false);
       }
     }, [imageUri, audioUri, document, isFocused, isMentionFocused, recording]);
-
-    async function getLastSubstringAfterAt(text) {
-      return new Promise((resolve, reject) => {
-        const pattern = /@([^\s@]+)(?!\S)/g;
-        let lastMatch = null;
-        let match;
-
-        while ((match = pattern.exec(text)) !== null) {
-          lastMatch = match[1];
-        }
-
-        resolve(lastMatch);
-      });
-    }
 
     return (
       <View>
