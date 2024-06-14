@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Dope V3",
-    "slug": "dope",
+    "slug": "dope-test",
     "scheme": "dope",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -64,8 +64,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "847161c4-0ecb-49bb-a05d-f7fca2ea1176"
+        "projectId": "20c8b718-ece1-4162-bdbb-1f6321e43caf"
       }
-    }
+    },
+    "owner": "siddharthbulia"
   }
 }

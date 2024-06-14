@@ -2,9 +2,7 @@ import "react-native-get-random-values";
 
 import {
   AUTH0CLIENTID,
-  AUTH0DOMAIN,
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_WEB_CLIENT_ID,
+  AUTH0DOMAIN
 } from "./config";
 
 import Address from "./src/realm/models/ContactAddress";
