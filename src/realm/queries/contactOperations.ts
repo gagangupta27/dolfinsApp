@@ -61,6 +61,23 @@ function addContact(
   });
 }
 
+function deleteContact(
+  realm: Realm,
+  contactId: string // Note the change to string type
+) {
+  const contactId2 = new BSON.ObjectId(contactId); // Convert string to ObjectId
+
+  realm.write(() => {
+    // Find the chat object by its id
+    const contact = realm.objectForPrimaryKey("Contact", contactId2);
+
+    // If the chat object is found, delete it
+    if (contact) {
+      realm.delete(contact);
+    }
+  });
+}
+
 function updateContact(
   realm: Realm,
   contactId: BSON.ObjectId,
@@ -168,4 +185,5 @@ export {
   updateLinkedinUrl,
   useContact,
   useContacts,
+  deleteContact,
 };

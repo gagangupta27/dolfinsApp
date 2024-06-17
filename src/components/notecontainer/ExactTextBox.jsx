@@ -1,11 +1,12 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, TextInput, View } from "react-native";
+
+import { LinearGradient } from "expo-linear-gradient";
 
 const ExactTextBox = ({
   content,
   setContent,
   setIsFocused = (x) => {},
-  placeholder = "Add dope",
+  placeholder = "Add Note",
 }) => {
   return (
     <View style={styles.textinputview1}>

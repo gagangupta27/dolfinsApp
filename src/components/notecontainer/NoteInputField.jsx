@@ -5,6 +5,7 @@ import {
   useTrackWithPageInfo,
 } from "../../utils/analytics";
 import {
+  Dimensions,
   Image,
   StyleSheet,
   TextInput,
@@ -186,7 +187,7 @@ const NoteInputField = forwardRef(
                   onChangeText={setContent}
                   selection={selection}
                   onSelectionChange={onSelectionChange}
-                  placeholder="Add dope about this contact..."
+                  placeholder="Add note about this contact..."
                   placeholderTextColor="#858585" // This is to give the placeholder the subtle color
                   keyboardType="default"
                   returnKeyType="done"
@@ -242,7 +243,7 @@ const NoteInputField = forwardRef(
 const styles = StyleSheet.create({
   textinputview: {
     backgroundColor: "#FFFFFF",
-    height: 120,
+    height: Dimensions.get("screen").height * 0.3,
     // flex:1,
     borderRadius: 15,
     backgroundColor: "rgba(165, 166, 246, 0.17)",

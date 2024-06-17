@@ -19,7 +19,7 @@ const ContactItem = ({
 
   const onPress = () => {
     track(EVENTS.CARD_TAPPED.NAME, {
-      [EVENTS.CARD_TAPPED.KEYS.CARD_NAME]: CARD_NAME.DOPE_PAGE,
+      [EVENTS.CARD_TAPPED.KEYS.CARD_NAME]: CARD_NAME.NOTE_PAGE,
       [EVENTS.CARD_TAPPED.KEYS.CARD_IDENTIFIER]: item.name,
     });
 

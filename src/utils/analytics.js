@@ -1,6 +1,6 @@
-import { useRoute } from "@react-navigation/native";
-import { Mixpanel } from "mixpanel-react-native";
 import { MIXPANEL_CLIENT_ID } from "../../config";
+import { Mixpanel } from "mixpanel-react-native";
+import { useRoute } from "@react-navigation/native";
 
 export const GLOBAL_KEYS = {
   PAGE_NAME: "Page name",
@@ -102,7 +102,7 @@ export const PAGE_NAME = {
   IMAGE_PREVIEW: "Image Preview",
   PDF_PREVIEW: "PDF Preview",
   ONBOARDING: "Onboarding",
-  DOPE: "Dope",
+  DOLFINS: "Dolfins",
 };
 
 export const MODAL_NAME = {
@@ -143,7 +143,7 @@ export const BUTTON_NAME = {
 };
 
 export const CARD_NAME = {
-  DOPE_PAGE: "Dope Page",
+  NOTE_PAGE: "Note Page",
   QUESTION_SUGGESTION: "Question suggestion",
   PREVIOUS_ASK: "Previous Ask",
   SELECT_CONTACT: "Select contact",
@@ -164,10 +164,7 @@ export const LOADING_TEXT_NAME = {
 };
 
 const trackAutomaticEvents = false;
-const mixpanel = new Mixpanel(
-  MIXPANEL_CLIENT_ID,
-  trackAutomaticEvents
-);
+const mixpanel = new Mixpanel(MIXPANEL_CLIENT_ID, trackAutomaticEvents);
 mixpanel.init();
 
 export const useTrackWithPageInfo = () => {

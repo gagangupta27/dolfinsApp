@@ -94,7 +94,6 @@ const ChatComponent = ({ route }) => {
   };
 
   const getSystemPrompt = async (mentions = []) => {
-    console.log("mentions", mentions);
     const contactIds = mentions?.map((o) => o?.contactId);
     const quickNotesContact = {
       _id: "000000000000000000000000",
@@ -109,19 +108,21 @@ const ChatComponent = ({ route }) => {
       }, {});
 
     contactMap[quickNotesContact._id] = quickNotesContact;
-    console.log("1");
-    console.log("allNotes", JSON.stringify(allNotes));
     const notesMap = allNotes
       ?.filter((o) => {
-        const mentionIDs = JSON.parse(o?.mentions)?.map((o) => o?.contactId);
-        if (
-          contactIds.includes(o?.contactId) ||
-          mentionIDs.includes(o?.contactId)
-        ) {
+        if (Array.isArray(o?.mentions)) {
+          const mentionIDs = o?.mentions?.map((o) => o?.contactId);
+          if (
+            contactIds?.includes(o?.contactId) ||
+            mentionIDs?.includes(o?.contactId)
+          ) {
+            return true;
+          }
+
+          return false;
+        } else {
           return true;
         }
-
-        return false;
       })
       .reduce((acc, note) => {
         if (!acc[note.contactId]) {
@@ -130,12 +131,10 @@ const ChatComponent = ({ route }) => {
         acc[note.contactId].push(note);
         return acc;
       }, {});
-    console.log("2");
     const calendarEventMap = calendarEvents.reduce((acc, calendarEvent) => {
       acc[calendarEvent._id] = calendarEvent;
       return acc;
     }, {});
-    console.log("3");
     const notesCalendarMap = allCalendarNotes
       .filter((o) => {
         const mentionIDs = JSON.parse(o?.mentions)?.map((o) => o?.contactId);
@@ -679,7 +678,7 @@ const CommonComponent = ({}) => {
   if (chats.length == 0) {
     const newChat = {
       title: `Chat 1`,
-      messages: [{ role: "assistant", content: "hi" }],
+      messages: [{ role: "assistant", content: "Hi, How can I help you?" }],
     };
     addChat(realm, newChat);
   }
@@ -689,7 +688,7 @@ const CommonComponent = ({}) => {
   const createNewChat = (navigation) => {
     const newChat = {
       title: `Chat ${chats.length + 1}`,
-      messages: [{ role: "assistant", content: "hi" }],
+      messages: [{ role: "assistant", content: "Hi, How can I help you?" }],
     };
     const id = addChat(realm, newChat);
     setTimeout(() => {

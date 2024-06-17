@@ -15,7 +15,11 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { TouchableWithoutFeedback, View } from "react-native";
-import { addContact, useContacts } from "../../realm/queries/contactOperations";
+import {
+  addContact,
+  deleteContact,
+  useContacts,
+} from "../../realm/queries/contactOperations";
 import {
   createNoteAndAddToContact,
   useAllCalendarNotes,
@@ -124,6 +128,10 @@ const CommonComponent = () => {
     useState(null);
   const isContactSettingModalVisible = contactSettingModalContact != null;
 
+  const delContact = async () => {
+    deleteContact(realm, contactSettingModalContact?._id);
+  };
+
   const handleLongPress = (item) => {
     setContactSettingModalContact(item);
   };
@@ -138,7 +146,8 @@ const CommonComponent = () => {
     );
     if (newContacts.length != 0) {
       for (let contact of newContacts) {
-        addContact(realm, contact);
+        console.log(contact);
+        addContact(realm, { ...contact, image: contact?.image?.uri });
       }
     }
     setModalVisible(false);
@@ -592,7 +601,7 @@ const CommonComponent = () => {
                 >
                   <TouchableOpacity
                     onPress={() => {
-                      deleteContact();
+                      delContact();
                       handleCloseModal();
                     }}
                   >

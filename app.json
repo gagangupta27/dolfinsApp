@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Dope V3",
-    "slug": "dope-test",
-    "scheme": "dope",
+    "name": "Dolfins",
+    "slug": "dolfins",
+    "scheme": "dolfins",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -12,17 +12,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.getdope.dope",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
-        "LSApplicationQueriesSchemes": [
-          "mailto"
-        ],
+        "LSApplicationQueriesSchemes": ["mailto"],
         "ITSAppUsesNonExemptEncryption": "NO"
       },
       "buildNumber": "1"

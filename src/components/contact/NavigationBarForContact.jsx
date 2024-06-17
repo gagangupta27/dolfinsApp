@@ -13,6 +13,7 @@ const NavigationBarForContact = ({
   showEdit = false,
   onEdit = () => {},
 }) => {
+  console.log("contact", contact);
   const navigation = useNavigation();
   return (
     <View style={styles.navBar}>
@@ -31,14 +32,14 @@ const NavigationBarForContact = ({
               paddingRight: 10,
             }}
           >
-            {contact?.imageAvailable && contact?.Image && (
+            {contact?.imageAvailable && contact?.image && (
               <Image
                 source={{ uri: contact?.image }}
                 style={{ height: 24, width: 24, borderRadius: 100 }}
               />
             )}
 
-            {(!contact?.imageAvailable || !contact?.Image) && (
+            {(!contact?.imageAvailable || !contact?.image) && (
               <Svg
                 width="26"
                 height="26"

@@ -279,7 +279,7 @@ const ContactSelectionModal = ({
             />
           </TouchableOpacity>
           <Text style={{ fontSize: 20, fontFamily: "WorkSans-Bold" }}>
-            Add new dope to
+            Add new note to
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -345,7 +345,7 @@ const ContactSelectionModal = ({
                 Create new contact or section
               </Text>
               <Text style={{ fontSize: 16, fontFamily: "WorkSans-Regular" }}>
-                Add dope to any entity
+                Add notes to any entity
               </Text>
             </View>
           </TouchableOpacity>

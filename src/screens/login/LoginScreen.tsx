@@ -1,27 +1,25 @@
-import React, { useRef } from "react";
+import * as AuthSession from "expo-auth-session";
+
 import {
   Dimensions,
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
-
+import React, { useRef } from "react";
 import Svg, { Rect } from "react-native-svg";
-
-import * as AuthSession from "expo-auth-session";
-import Swiper from "react-native-swiper";
-import { useTrackWithPageInfo } from "../../utils/analytics";
-
-import { useAuth0 } from "react-native-auth0";
 import { useDispatch, useSelector } from "react-redux";
 
-import { setAuthData } from "../../redux/reducer/app";
 import { RootState } from "../../redux/store";
-import { identify } from "../../utils/analytics";
-import auth0 from "../../utils/auth";
 import { Storage } from "../../utils/storage";
+import Swiper from "react-native-swiper";
+import auth0 from "../../utils/auth";
+import { identify } from "../../utils/analytics";
+import { setAuthData } from "../../redux/reducer/app";
+import { useAuth0 } from "react-native-auth0";
+import { useTrackWithPageInfo } from "../../utils/analytics";
 
 const LoginScreen = ({ navigation }) => {
   const track = useTrackWithPageInfo();
@@ -104,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
           fontFamily: "WorkSans-Medium",
         }}
       >
-        This is your Dope corner
+        This is your Note corner
       </Text>
       <Text
         style={{
@@ -165,7 +163,7 @@ const LoginScreen = ({ navigation }) => {
           fontFamily: "WorkSans-Medium",
         }}
       >
-        Sync and add dope on the go
+        Sync and add notes on the go
       </Text>
       <Text
         style={{
@@ -177,7 +175,7 @@ const LoginScreen = ({ navigation }) => {
           fontSize: 18,
         }}
       >
-        Instantly add dope during travels, events, or meetings. Sync contacts
+        Instantly add notes during travels, events, or meetings. Sync contacts
         effortlessly with LinkedIn and your calendar.
       </Text>
       <View
@@ -239,7 +237,7 @@ const LoginScreen = ({ navigation }) => {
           fontSize: 18,
         }}
       >
-        With Dope’s AI assistant, remember little details that make big
+        With Dolfin's AI assistant, remember little details that make big
         differences.
       </Text>
       <View
@@ -272,7 +270,7 @@ const LoginScreen = ({ navigation }) => {
   const LoginPage = () => (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Image
-        source={require("../../assets/dopelogofull.png")}
+        source={require("../../assets/Dolfins.png")}
         style={{
           marginVertical: 10,
           width: screenWidth * 0.8,

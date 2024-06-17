@@ -1,6 +1,7 @@
+import { StyleSheet, TextInput, View } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
 
 const BottomBar = ({ addNote }) => {
   const [currentNote, setCurrentNote] = useState("");
@@ -20,7 +21,7 @@ const BottomBar = ({ addNote }) => {
           multiline
           value={currentNote}
           onChangeText={setCurrentNote}
-          placeholder="Add dope about this contact..."
+          placeholder="Add notes about this contact..."
           placeholderTextColor="#858585" // This is to give the placeholder the subtle color
           keyboardType="default"
           returnKeyType="done"

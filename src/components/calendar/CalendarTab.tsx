@@ -1,25 +1,23 @@
-import { useRealm } from "@realm/react";
-import React, { useEffect, useState } from "react";
+import { AppDispatch, RootState } from "../../redux/store";
 import { Button, FlatList, Text, View } from "react-native";
-import InAppBrowser from "react-native-inappbrowser-reborn";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+// import TabView
+import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import {
   addCalendarEvent,
   useAllCalendarEvents,
 } from "../../realm/queries/calendarEventOperations";
-import Styles from "./CalendarTabStyle";
-
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { Linking } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../redux/store";
-
 import { fetchCalendarEvents, fetchCalendars } from "../../redux/reducer/app";
-// import TabView
-import { SceneMap, TabBar, TabView } from "react-native-tab-view";
+import { useDispatch, useSelector } from "react-redux";
 
-import { Dimensions } from "react-native";
 import Api from "../../utils/Api";
 import CalendarItem from "./CalendarItem";
+import { Dimensions } from "react-native";
+import InAppBrowser from "react-native-inappbrowser-reborn";
+import { Linking } from "react-native";
+import Styles from "./CalendarTabStyle";
+import { useRealm } from "@realm/react";
 
 const url = Api.defaults.baseURL;
 
@@ -29,7 +27,7 @@ const LoginScreen = ({ calendar_type }: { calendar_type: string }) => {
   const dispatch: AppDispatch = useDispatch();
 
   const handleLogin = async () => {
-    const redirectUrl = "dope://home"; // Your app's URL scheme to handle the redirect
+    const redirectUrl = "dolfins://home"; // Your app's URL scheme to handle the redirect
     const authUrl = `${url}/api/1.0/user/auth/${calendar_type}/?redirect_uri=${encodeURIComponent(
       redirectUrl
     )}&token=Bearer ${authData.idToken}`;

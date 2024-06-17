@@ -16,7 +16,7 @@ const QuickNotes = () => {
     >
       <View style={styles.quicknotes}>
         <Text style={styles.title}>Quick Notes</Text>
-        <Text style={styles.details}>Add any dope here quickly</Text>
+        <Text style={styles.details}>Add any notes here quickly</Text>
       </View>
     </TouchableOpacity>
   );

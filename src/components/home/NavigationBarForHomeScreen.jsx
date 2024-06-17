@@ -1,9 +1,10 @@
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { setAuthData } from "../../redux/reducer/app";
 import { useAuth0 } from "react-native-auth0";
 import { useDispatch } from "react-redux";
-import { setAuthData } from "../../redux/reducer/app";
 
 const NavigationBarForHomeScreen = ({ onNewContactClick }) => {
   const { clearCredentials } = useAuth0();
@@ -18,7 +19,7 @@ const NavigationBarForHomeScreen = ({ onNewContactClick }) => {
     <View style={styles.navBar}>
       <TouchableOpacity onPress={clear}>
         <Image
-          source={require("../../assets/dopelogocropped.png")}
+          source={require("../../assets/DolfinsCropped.png")}
           style={{ width: 80, height: 25 }}
           resizeMode="contain"
         />
