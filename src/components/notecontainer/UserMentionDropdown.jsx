@@ -21,14 +21,18 @@ const UserMentionDropdown = ({
   return (
     <View style={styles.container}>
       <View style={styles.list}>
-        {data.map((item, index) => (
-          <View style={styles.item} key={index}>
-            <Text style={styles.itemText}>{item.name}</Text>
-            <TouchableOpacity key={index} onPress={() => onMentionSelect(item)}>
-              <Entypo name="cross" size={16} color="black" />
-            </TouchableOpacity>
-          </View>
-        ))}
+        {Array.isArray(data) &&
+          data?.map((item, index) => (
+            <View style={styles.item} key={index}>
+              <Text style={styles.itemText}>{item.name}</Text>
+              <TouchableOpacity
+                key={index}
+                onPress={() => onMentionSelect(item)}
+              >
+                <Entypo name="cross" size={16} color="black" />
+              </TouchableOpacity>
+            </View>
+          ))}
         {hasTextInput && (
           <View style={styles.addmentiondbox}>
             <View style={styles.searchicon}>

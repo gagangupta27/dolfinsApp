@@ -171,7 +171,10 @@ const ContactScreen = ({ route }) => {
     volumeLevels,
     document
   ) => {
-    if (!mentions.some((mention) => mention.contactId === contact.id)) {
+    if (
+      Array.isArray(mentions) &&
+      !mentions.some((mention) => mention.contactId === contact.id)
+    ) {
       mentions.push({ contactId: contact.id, name: contact.name });
     }
     let newLineIndex = content.indexOf("\n");
@@ -221,7 +224,10 @@ const ContactScreen = ({ route }) => {
     volumeLevels,
     document
   ) => {
-    if (!mentions.some((mention) => mention.contactId === contact.id)) {
+    if (
+      Array.isArray(mentions) &&
+      !mentions.some((mention) => mention.contactId === contact.id)
+    ) {
       mentions.push({ contactId: contact.id, name: contact.name });
     }
     const updatedNote = {

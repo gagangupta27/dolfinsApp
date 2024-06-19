@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const useSearchFilter = (contacts, mentionData) => {
+const useSearchFilter = (contacts, mentionData = []) => {
   const [searchText, setSearchText] = useState("");
   const [filteredContacts, setFilteredContacts] = useState([]);
 
@@ -22,7 +22,10 @@ const useSearchFilter = (contacts, mentionData) => {
       })
       .filter((item) => item.matchIndex > -1)
       .filter((item) => {
-        return mentionData.filter((m) => m.id == item.id).length == 0;
+        return (
+          Array.isArray(mentionData) &&
+          mentionData?.filter((m) => m.id == item.id).length == 0
+        );
       })
       .slice(0, 5);
 
