@@ -1,8 +1,15 @@
-import { registerRootComponent } from 'expo';
+import App from "./App";
+import codePush from "react-native-code-push";
+import { registerRootComponent } from "expo";
 
-import App from './App';
+let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App);
+const Main = () => {
+  return (
+    <>
+      <App />
+    </>
+  );
+};
+
+registerRootComponent(codePush(codePushOptions)(Main));
