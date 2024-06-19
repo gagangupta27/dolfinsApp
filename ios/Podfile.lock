@@ -13,7 +13,13 @@ PODS:
   - Auth0 (2.7.2):
     - JWTDecode (~> 3.1)
     - SimpleKeychain (~> 1.1)
+  - Base64 (1.1.2)
   - boost (1.83.0)
+  - CodePush (8.2.2):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.12)
+    - React-Core
+    - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
   - EXApplication (5.8.4):
     - ExpoModulesCore
@@ -166,6 +172,8 @@ PODS:
   - hermes-engine (0.73.6):
     - hermes-engine/Pre-built (= 0.73.6)
   - hermes-engine/Pre-built (0.73.6)
+  - JWT (3.0.0-beta.14):
+    - Base64 (~> 1.1.2)
   - JWTDecode (3.1.0)
   - libevent (2.1.12)
   - Mixpanel (3.6.5)
@@ -1273,11 +1281,13 @@ PODS:
   - sqlite3 (3.42.0):
     - sqlite3/common (= 3.42.0)
   - sqlite3/common (3.42.0)
+  - SSZipArchive (2.2.3)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
   - A0Auth0 (from `../node_modules/react-native-auth0`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
+  - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
   - EXAV (from `../node_modules/expo-av/ios`)
@@ -1383,10 +1393,12 @@ SPEC REPOS:
   trunk:
     - AppAuth
     - Auth0
+    - Base64
     - fmt
     - GoogleSignIn
     - GTMAppAuth
     - GTMSessionFetcher
+    - JWT
     - JWTDecode
     - libevent
     - Mixpanel
@@ -1394,12 +1406,15 @@ SPEC REPOS:
     - SimpleKeychain
     - SocketRocket
     - sqlite3
+    - SSZipArchive
 
 EXTERNAL SOURCES:
   A0Auth0:
     :path: "../node_modules/react-native-auth0"
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
+  CodePush:
+    :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXApplication:
@@ -1600,7 +1615,9 @@ SPEC CHECKSUMS:
   A0Auth0: 47cb14c87d549b95b92242675ff2198ccd9dcbc5
   AppAuth: 182c5b88630569df5acb672720534756c29b3358
   Auth0: 28cb24cb19ebd51f0b07751f16d83b59f4019532
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
+  CodePush: eaa66fc8dd9ff611304ecc48397ce8831ba79ac9
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   EXApplication: 16bcea16789221bd566e64b5ea2608cf7756b005
   EXAV: e4f6137431ddc4cb025895046bfefa9612025c35
@@ -1640,6 +1657,7 @@ SPEC CHECKSUMS:
   GTMAppAuth: 99fb010047ba3973b7026e45393f51f27ab965ae
   GTMSessionFetcher: 8000756fc1c19d2e5697b90311f7832d2e33f6cd
   hermes-engine: 9cecf9953a681df7556b8cc9c74905de8f3293c0
+  JWT: ef71dfb03e1f842081e64dc42eef0e164f35d251
   JWTDecode: 3eaab1e06b6f4dcbdd6716aff09ba4c2104ca8b7
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   Mixpanel: de8296d8568806ab17bfced0f823c908b808e1e0
@@ -1708,6 +1726,7 @@ SPEC CHECKSUMS:
   SimpleKeychain: f8707c8e97b38c6a6e687b17732afc9bcef06439
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   sqlite3: f163dbbb7aa3339ad8fc622782c2d9d7b72f7e9c
+  SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
 PODFILE CHECKSUM: 667ac6a1387d8d20ba558cbdd7c42c42c7878f5a
