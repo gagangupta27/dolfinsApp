@@ -22,6 +22,7 @@ import { SafeAreaView } from "react-native";
 import { StyleSheet } from "react-native";
 import Toast from "react-native-toast-message";
 import { store } from "./src/redux/store";
+import CodePushUpdater from "./src/components/common/CodePushUpdater";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
         <Provider store={store}>
           <Navigation />
           <Toast />
+          <CodePushUpdater />
         </Provider>
       </Auth0Provider>
     </SafeAreaView>
