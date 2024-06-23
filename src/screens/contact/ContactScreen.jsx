@@ -1,13 +1,12 @@
 import * as Clipboard from "expo-clipboard";
 
-import { Alert, KeyboardAvoidingView, Linking } from "react-native";
+import { KeyboardAvoidingView, Linking } from "react-native";
 import React, { useCallback } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import {
   createNoteAndAddToContact,
   deleteNote,
   updateNote,
-  useContactNotes,
 } from "../../realm/queries/noteOperations";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useRealm } from "@realm/react";
@@ -21,9 +20,10 @@ import NewNoteContainer from "../../components/notecontainer/NoteContainer";
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
-import { getWorkHistoryList } from "../../utils/linkedin";
+import { getEducationList, getWorkHistoryList } from "../../utils/linkedin";
 import { useContact } from "../../realm/queries/contactOperations";
 import { useTrackWithPageInfo } from "../../utils/analytics";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 
 // import
 const ContactScreen = ({ route }) => {
@@ -43,6 +43,9 @@ const ContactScreen = ({ route }) => {
           _id: new BSON.ObjectId("000000000000000000000000"),
           name: "Quick Notes",
         };
+  const contactOrgMap = useQuery(ContactOrganisationMap).filter((o) => {
+    return o.contact._id == params.contactId;
+  });
   const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
@@ -62,6 +65,7 @@ const ContactScreen = ({ route }) => {
   const contactNote = useRef(null);
   const linkedinSummaryNote = useRef(null);
   const workHistoryNote = useRef(null);
+  const educationNote = useRef(null);
 
   const getContactInfo = useCallback((ct) => {
     var data = "";
@@ -85,6 +89,9 @@ const ContactScreen = ({ route }) => {
       if (ct?.note) {
         data = data + "note: " + ct?.note + "\n";
       }
+      if (contactOrgMap && contactOrgMap.length > 0) {
+        data = data + "Company: " + contactOrgMap[0].organisation.name + "\n";
+      }
     }
     if (data) {
       data = "*Contact Info*\n\n \n" + data;
@@ -101,6 +108,7 @@ const ContactScreen = ({ route }) => {
     }
     if (contact && contact.linkedinProfileData) {
       setupWorkHistory(JSON.parse(contact.linkedinProfileData));
+      setupEducation(JSON.parse(contact.linkedinProfileData));
     }
     updateNotes();
   }, [update]);
@@ -115,6 +123,9 @@ const ContactScreen = ({ route }) => {
     }
     if (workHistoryNote.current) {
       qNotes.push(workHistoryNote.current);
+    }
+    if (educationNote.current) {
+      qNotes.push(educationNote.current);
     }
     setNotes(qNotes);
   };
@@ -155,6 +166,21 @@ const ContactScreen = ({ route }) => {
         _id: "final_list",
         contactId: contact._id,
         content: "*Work history* \n\n \n\n" + finalList,
+        mentions: [],
+        type: "text",
+        nonEditable: true,
+        readOnly: true,
+      };
+    }
+  };
+
+  const setupEducation = (data) => {
+    const finalList = getEducationList(data);
+    if (finalList) {
+      educationNote.current = {
+        _id: "education",
+        contactId: contact._id,
+        content: "*Education* \n\n \n\n" + finalList,
         mentions: [],
         type: "text",
         nonEditable: true,

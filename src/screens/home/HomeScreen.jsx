@@ -39,11 +39,14 @@ import Modal from "react-native-modal";
 import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
 import NewNoteContainer from "../../components/notecontainer/NoteContainer";
 import NoteDone from "../../components/home/NoteDone";
+import OrganisationTab from "./OrganisationTab";
 import QuickNotes from "../../components/home/QuickNotes";
 import SearchResultItem from "../../components/search/SearchResultItem";
 import { getWorkHistoryList } from "../../utils/linkedin";
 import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperations";
 import { useNavigation } from "@react-navigation/native";
+import AddOrgModal from "../../components/organisation/AddOrgModal";
+import { OrgContactLink } from "../../realm/queries/organisationOperations";
 
 const SearchBar = ({ search, text, setText }) => {
   useEffect(() => {
@@ -97,6 +100,7 @@ const CommonComponent = () => {
 
   const [currentNoteAdded, setCurrentNoteAdded] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [addOrgModalVisible, setAddOrgModalVisible] = useState(false);
 
   const contacts = useQuery(
     Contact,
@@ -146,8 +150,13 @@ const CommonComponent = () => {
     );
     if (newContacts.length != 0) {
       for (let contact of newContacts) {
-        console.log(contact);
-        addContact(realm, { ...contact, image: contact?.image?.uri });
+        let createdContact = await addContact(realm, {
+          ...contact,
+          image: contact?.image?.uri,
+        });
+        if (contact?.company) {
+          OrgContactLink(realm, "", createdContact?._id, contact?.company);
+        }
       }
     }
     setModalVisible(false);
@@ -190,8 +199,11 @@ const CommonComponent = () => {
   };
 
   const onNewContactClick = () => {
+    if (activeTab == "organisation") {
+      setAddOrgModalVisible(true);
+      return;
+    }
     setModalVisible(true);
-
     track(EVENTS.BUTTON_TAPPED.NAME, {
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.ADD_NEW_CONTACT,
     });
@@ -459,6 +471,22 @@ const CommonComponent = () => {
                 Calendar
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab("organisation")}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "black",
+                  fontFamily:
+                    activeTab === "organisation"
+                      ? "WorkSans-Bold"
+                      : "WorkSans-Regular",
+                  textDecorationLine:
+                    activeTab === "organisation" ? "underline" : "none",
+                }}
+              >
+                Organisation
+              </Text>
+            </TouchableOpacity>
           </View>
           {/* When contact tab is selected */}
           {activeTab === "contacts" && (
@@ -635,6 +663,11 @@ const CommonComponent = () => {
               <CalendarTab />
             </View>
           )}
+          {activeTab === "organisation" && (
+            <View style={{ flex: 1 }}>
+              <OrganisationTab />
+            </View>
+          )}
         </View>
       </TouchableWithoutFeedback>
       {!isSearch && activeTab === "contacts" && (
@@ -663,6 +696,11 @@ const CommonComponent = () => {
           />
         </View>
       )}
+      <AddOrgModal
+        visible={addOrgModalVisible}
+        onClose={() => setAddOrgModalVisible(false)}
+        onSubmit={() => {}}
+      />
     </View>
   );
 };

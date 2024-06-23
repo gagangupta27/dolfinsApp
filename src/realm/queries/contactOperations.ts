@@ -2,7 +2,7 @@ import Realm, { BSON } from "realm";
 
 import Contact from "../models/Contact";
 
-function addContact(
+async function addContact(
   realm: Realm,
   contactData: {
     id: string;
@@ -24,6 +24,7 @@ function addContact(
     }[];
   }
 ) {
+  let createdContact;
   realm.write(() => {
     const contacts = realm
       .objects("Contact")
@@ -35,7 +36,7 @@ function addContact(
       contact.phoneNumbers = contactData.phoneNumbers;
       contact.updatedA = new Date();
     } else {
-      realm.create("Contact", {
+      createdContact = realm.create("Contact", {
         _id: new BSON.ObjectId(),
         id: contactData.id,
         name: contactData.name,
@@ -59,6 +60,8 @@ function addContact(
       });
     }
   });
+
+  return createdContact;
 }
 
 function deleteContact(

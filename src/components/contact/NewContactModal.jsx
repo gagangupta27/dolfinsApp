@@ -7,13 +7,24 @@ import {
   MODAL_NAME,
   useTrackWithPageInfo,
 } from "../../utils/analytics";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useEffect, useState } from "react";
-import { useObject, useRealm } from "@realm/react";
+import {
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { useObject, useQuery, useRealm } from "@realm/react";
 
 import Contact from "../../realm/models/Contact";
 import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
+import Dropdown from "../common/DropDown";
+import Organisation from "../../realm/models/Organisation";
+import { OrgContactLink } from "../../realm/queries/organisationOperations";
 
 async function requestContactPermission() {
   const { status } = await Contacts.requestPermissionsAsync();
@@ -33,9 +44,13 @@ const NewContactModal = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
+  const [organisation, setOrganisation] = useState([]);
 
   const realm = useRealm();
   const existingContact = existingId ? useObject(Contact, existingId) : null;
+  const orgs = useQuery(Organisation);
+
+  const _dropDownRef = useRef();
 
   useEffect(() => {
     if (existingContact) {
@@ -43,6 +58,7 @@ const NewContactModal = ({
       setPhoneNumber(existingContact?.phoneNumbers?.[0] || "");
       setEmail(existingContact?.emails?.[0] || "");
       setLinkedin(existingContact?.linkedinProfileUrl || "");
+      setShortDescription(existingContact?.note || "");
     }
   }, [existingContact]);
 
@@ -86,14 +102,19 @@ const NewContactModal = ({
         ],
       };
     }
-
-    if (contact == {}) {
-      onClose();
+    if (Array.isArray(organisation) && organisation.length > 0) {
+      contact = {
+        ...contact,
+        [Contacts.Fields.Company]: organisation[0]?.name || "",
+      };
+    }
+    if (Object.keys(contact).length == 0) {
+      Alert.alert("Error", "Please Enter Details!");
       return;
     }
 
     if (existingId) {
-      realm.write(() => {
+      realm.write(async () => {
         existingContact.name = name;
         existingContact.linkedinProfileUrl = linkedin;
         existingContact.emails = [email, ...existingContact.emails];
@@ -102,6 +123,25 @@ const NewContactModal = ({
           ...existingContact.phoneNumbers,
         ];
       });
+      if (organisation?.length > 0) {
+        organisation?.forEach((org) => {
+          OrgContactLink(realm, org._id, existingContact?._id);
+        });
+      }
+
+      try {
+        const status = await requestContactPermission();
+        if (status == "granted") {
+          await Contacts.updateContactAsync({
+            ...contact,
+            id: existingContact?.id,
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        onClose();
+      }
       onSubmit();
       return;
     }
@@ -132,7 +172,7 @@ const NewContactModal = ({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => {
@@ -176,6 +216,64 @@ const NewContactModal = ({
               placeholder="Name*"
             />
           </View>
+          <View style={{ minHeight: 50, marginVertical: 10, zIndex: 10 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 10,
+                paddingBottom: 10,
+              }}
+            >
+              {Array.isArray(organisation) &&
+                organisation?.map((o) => (
+                  <View
+                    key={o._id}
+                    style={{
+                      padding: 10,
+                      backgroundColor: "rgba(165, 166, 246, 0.3)",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      borderRadius: 7,
+                    }}
+                  >
+                    <Text>{o.name}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setOrganisation((prev) =>
+                          prev.filter(
+                            (org) => String(org._id) !== String(o._id)
+                          )
+                        );
+                      }}
+                      style={{
+                        paddingLeft: 10,
+                      }}
+                    >
+                      <Text>X</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
+
+            <Dropdown
+              options={orgs}
+              onOptionSelected={(option) => {
+                if (
+                  Array.isArray(organisation) &&
+                  !organisation?.find(
+                    (o) => String(o._id) == String(option._id)
+                  )
+                ) {
+                  setOrganisation([...organisation, option]);
+                }
+                _dropDownRef?.current?.onRefresh();
+              }}
+              ref={_dropDownRef}
+              placeholder="Organisation"
+            />
+          </View>
           <View style={{ height: 50, marginVertical: 10 }}>
             <ExactTextBox
               content={shortDescription}
@@ -205,7 +303,7 @@ const NewContactModal = ({
             />
           </View>
         </View>
-      </View>
+      </ScrollView>
     </Modal>
   );
 };

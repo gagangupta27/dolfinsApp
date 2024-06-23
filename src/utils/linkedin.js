@@ -60,4 +60,20 @@ const getWorkHistoryList = (data) => {
   return firstProfileExperiences.map(getWorkHistory).join("\n\n");
 };
 
-export { getQuickSummary, getWorkHistoryList };
+const getEducationList = (data) => {
+  return data.education
+    .map((edu) => {
+      const schoolName = edu.school?.name || "";
+      const degree = edu.degree_name || "";
+      const fieldOfStudy = edu.field_of_study || "";
+      const startYear = edu.date?.start?.year || "";
+      const endYear = edu.date?.end?.year || "";
+
+      return `${schoolName}\n${
+        degree ? `${degree}${fieldOfStudy}\n` : ""
+      }${startYear} - ${endYear}\n`;
+    })
+    .join("\n\n");
+};
+
+export { getQuickSummary, getWorkHistoryList, getEducationList };

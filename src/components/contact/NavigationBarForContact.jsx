@@ -13,7 +13,6 @@ const NavigationBarForContact = ({
   showEdit = false,
   onEdit = () => {},
 }) => {
-  console.log("contact", contact);
   const navigation = useNavigation();
   return (
     <View style={styles.navBar}>
