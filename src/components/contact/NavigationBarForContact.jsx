@@ -12,6 +12,7 @@ const NavigationBarForContact = ({
   onShare,
   showEdit = false,
   onEdit = () => {},
+  showLinkedin = true,
 }) => {
   const navigation = useNavigation();
   return (
@@ -85,21 +86,25 @@ const NavigationBarForContact = ({
         >
           <Feather name="share" size={20} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => {
-            if (
-              !contact._id.equals(new BSON.ObjectId("000000000000000000000000"))
-            )
-              onLinkedinDataConnectModalOpen();
-          }}
-        >
-          <Image
-            source={require("../../assets/linkedIn_icon_circle.png")}
-            style={{ width: 20, height: 20 }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+        {showLinkedin && (
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => {
+              if (
+                !contact._id.equals(
+                  new BSON.ObjectId("000000000000000000000000")
+                )
+              )
+                onLinkedinDataConnectModalOpen();
+            }}
+          >
+            <Image
+              source={require("../../assets/linkedIn_icon_circle.png")}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        )}
         {showEdit && (
           <TouchableOpacity
             style={[styles.iconButton, { marginLeft: 8 }]}

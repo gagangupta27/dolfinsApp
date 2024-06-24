@@ -1,7 +1,6 @@
-import { ActivityIndicator, Modal, View } from "react-native";
+import { ActivityIndicator, Modal, Text, View } from "react-native";
 import { memo, useEffect, useState } from "react";
 
-import VText from "./Text";
 import codePush from "react-native-code-push";
 
 const CodePushUpdater = ({ header = "Downloading" }) => {

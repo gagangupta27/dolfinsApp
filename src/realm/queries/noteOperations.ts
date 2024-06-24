@@ -152,6 +152,48 @@ function createNoteAndAddToContact(
   return noteId;
 }
 
+async function createNoteAndAddToOrganisation(
+  realm: Realm,
+  organisationId: BSON.ObjectId,
+  noteDetails: {
+    content: string;
+    mentions: any[];
+    type: string;
+    imageUri: string | null;
+    audioUri: string | null;
+    volumeLevels: number[];
+    documentUri: string | null;
+    documentName: string | null;
+  }
+) {
+  const noteId = new BSON.ObjectId();
+  realm.write(() => {
+    const newNote = realm.create("Note", {
+      _id: noteId,
+      content: noteDetails.content,
+      mentions: JSON.stringify(noteDetails.mentions),
+      type: noteDetails.type,
+      imageUri: noteDetails.imageUri,
+      audioUri: noteDetails.audioUri,
+      volumeLevels: noteDetails.volumeLevels,
+      documentUri: noteDetails.documentUri,
+      documentName: noteDetails.documentName,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isPinned: false,
+    });
+
+    const NoteOrganisationMap = realm.create("NoteOrganisationMap", {
+      _id: new BSON.ObjectId(),
+      organisation: realm.objectForPrimaryKey("Organisation", organisationId),
+      note: newNote,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  });
+  return noteId;
+}
+
 function addNoteToContact(
   realm: Realm,
   contactId: BSON.ObjectId,
@@ -224,8 +266,15 @@ function updateNote(
   });
 }
 
-function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
+async function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
   realm.write(() => {
+    const organisationNoteMap = realm
+      .objects("NoteOrganisationMap")
+      .filtered("note._id == $0", noteId);
+    console.log("3");
+    console.log("deleted", organisationNoteMap);
+    realm.delete(organisationNoteMap); // Delete the mapping first
+
     const calendarEventNoteMap = realm
       .objects("CalendarEventNoteMap")
       .filtered("noteId == $0", noteId);
@@ -254,4 +303,5 @@ export {
   useAllContactNotes,
   useCalendarNotes,
   useContactNotes,
+  createNoteAndAddToOrganisation,
 };

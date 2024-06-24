@@ -58,6 +58,7 @@ const NoteItem = ({
   };
   const track = useTrackWithPageInfo();
   const noteContainerRef = useRef(null);
+  const navigation = useNavigation();
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -73,6 +74,7 @@ const NoteItem = ({
   const handleCloseModal = () => {
     setModalVisible(false);
   };
+
   const TagSection = () => {
     const mentions = JSON.parse(JSON.stringify(note?.mentions));
     if (
@@ -100,6 +102,7 @@ const NoteItem = ({
       return <View></View>;
     }
   };
+
   const ImageSection = () => {
     if (note.type == "image" && note.imageUri) {
       return (
@@ -160,7 +163,10 @@ const NoteItem = ({
     const day = date.getDate();
     return day + " " + month;
   };
-  const navigation = useNavigation();
+
+  if (!note?.isValid()) {
+    return null; // or some placeholder indicating the note is no longer available
+  }
 
   return (
     <View style={{ flexDirection: "column", marginBottom: 10 }}>
@@ -251,7 +257,7 @@ const NoteItem = ({
               track(EVENTS.BUTTON_TAPPED.NAME, {
                 [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.EDIT_NOTE,
               });
-              setEditMode({ editMode: true, id: note._id });
+              setEditMode({ editMode: true, id: note._id, note: note });
               handleCloseModal();
             }}
           >

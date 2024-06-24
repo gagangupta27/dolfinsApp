@@ -19,6 +19,7 @@ import { Storage } from "../utils/storage";
 import WebViewScreen from "../screens/webview/WebViewScreen";
 import { createStackNavigator } from "@react-navigation/stack";
 import { setAuthData } from "../redux/reducer/app";
+import OrganisationScreen from "../screens/organisation/OrganisationScreen.jsx";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -41,6 +42,7 @@ function LoggedInStack() {
       <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
       <Stack.Screen name="ImagePreviewScreen" component={ImagePreviewScreen} />
       <Stack.Screen name="PDFPreviewScreen" component={PDFPreviewScreen} />
+      <Stack.Screen name="OrganisationScreen" component={OrganisationScreen} />
       <Stack.Screen
         name="CalendarEventScreen"
         component={CalendarEventScreen}

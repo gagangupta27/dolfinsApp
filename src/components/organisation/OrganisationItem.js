@@ -23,9 +23,8 @@ const OrganisationItem = ({
       [EVENTS.CARD_TAPPED.KEYS.CARD_IDENTIFIER]: item.name,
     });
 
-    navigation.navigate("ContactScreen", {
-      contactId: item._id.toHexString(),
-      setContact: setContact,
+    navigation.navigate("OrganisationScreen", {
+      organisationId: item._id.toHexString(),
     });
   };
   return (

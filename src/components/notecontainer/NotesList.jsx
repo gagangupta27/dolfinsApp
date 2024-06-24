@@ -6,7 +6,7 @@ import { forwardRef } from "react";
 const NotesList = forwardRef(
   (
     {
-      notes,
+      notes = [],
       setEditMode,
       contact,
       onDelete,
@@ -34,9 +34,9 @@ const NotesList = forwardRef(
       <View style={styles.container}>
         <FlatList
           ref={ref}
-          data={notes}
+          data={notes || []}
           renderItem={renderItem}
-          keyExtractor={(item) => "keyss__" + item._id}
+          keyExtractor={(item) => "keyss__" + item?._id}
           extraData={notes}
         />
       </View>
