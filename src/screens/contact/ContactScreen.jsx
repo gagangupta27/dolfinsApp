@@ -16,7 +16,6 @@ import ContactNoteMap from "../../realm/models/ContactNoteMap";
 import LinkedinDataConnectModal from "../../components/contact/LinkedinDataConnectModal";
 import NavigationBarForContact from "../../components/contact/NavigationBarForContact";
 import NewContactModal from "../../components/contact/NewContactModal";
-import NewNoteContainer from "../../components/notecontainer/NoteContainer";
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
@@ -24,6 +23,8 @@ import { getEducationList, getWorkHistoryList } from "../../utils/linkedin";
 import { useContact } from "../../realm/queries/contactOperations";
 import { useTrackWithPageInfo } from "../../utils/analytics";
 import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
+import Contact from "../../realm/models/Contact";
 
 // import
 const ContactScreen = ({ route }) => {
@@ -46,6 +47,7 @@ const ContactScreen = ({ route }) => {
   const contactOrgMap = useQuery(ContactOrganisationMap).filter((o) => {
     return o.contact._id == params.contactId;
   });
+  const allContacts = useQuery(Contact);
   const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
@@ -376,13 +378,15 @@ const ContactScreen = ({ route }) => {
           />
         </View>
       </TouchableWithoutFeedback>
-      <NewNoteContainer
+      <NewNoteContainerV2
         ref={noteRef}
+        mentions={allContacts}
         addNote={addNoteV2}
         contact={contact}
         note={editMode.editMode && firstNote}
         updateNote={updateNoteV2}
         mentionHasInput={false}
+        type={"contact"}
       />
     </View>
   );

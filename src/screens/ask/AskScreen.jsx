@@ -50,9 +50,11 @@ import { getWorkHistoryList } from "../../utils/linkedin";
 import useContactPermission from "../../hooks/ContactPermission";
 import { useContacts } from "../../realm/queries/contactOperations";
 import { useNavigation } from "@react-navigation/native";
-import { useRealm } from "@realm/react";
+import { useQuery, useRealm } from "@realm/react";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
 import useSearchFilter from "../../hooks/SearchFilter";
+import Organisation from "../../realm/models/Organisation";
+import Contact from "../../realm/models/Contact";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -72,13 +74,20 @@ const ChatComponent = ({ route }) => {
   const [mentionData, setMentionData] = useState([]);
   const [input, setInput] = useState("");
 
-  const contacts = useContactPermission();
+  const contacts = useQuery(Contact);
+  const allOrgs = useQuery(Organisation);
   const contactsRealm = useContacts(realm);
   const calendarEvents = useRecentCalendarEvents(realm);
   const allCalendarNotes = useAllCalendarNotes(realm);
   const allNotes = useAllContactNotes(realm);
   const { searchText, setSearchText, searchFilter, filteredContacts } =
-    useSearchFilter(contacts, mentionData);
+    useSearchFilter(
+      [
+        ...contacts.map((o) => ({ ...o, type: "contact" })),
+        ...allOrgs.map((o) => ({ ...o, type: "organisation" })),
+      ],
+      mentionData
+    );
 
   const submit = () => {
     track(EVENTS.INPUT_DONE.NAME, {
@@ -94,7 +103,14 @@ const ChatComponent = ({ route }) => {
   };
 
   const getSystemPrompt = async (mentions = []) => {
-    const contactIds = mentions?.map((o) => o?.contactId);
+    const contactIds = mentions
+      ?.filter((o) => o?.type == "contact")
+      ?.map((o) => o?._id);
+
+    const orgIds = mentions
+      ?.filter((o) => o?.type == "organisation")
+      ?.map((o) => o?._id);
+
     const quickNotesContact = {
       _id: "000000000000000000000000",
       name: "Quick Notes",
@@ -334,12 +350,16 @@ const ChatComponent = ({ route }) => {
 
   const handleOptionSelect = async (option) => {
     const exisiting = mentionData.filter(
-      (mention) => mention.contactId == option.id
+      (mention) => mention._id == option._id
     );
     if (exisiting.length == 0) {
       setMentionData([
         ...mentionData,
-        { contactId: option.id, name: option.name },
+        {
+          _id: option?._id,
+          name: option?.name,
+          type: option?.type,
+        },
       ]);
     }
     const str = await getLastSubstringAfterAt(input);
@@ -358,9 +378,7 @@ const ChatComponent = ({ route }) => {
   };
 
   const handleMentionSelect = (user) => {
-    const remaining = mentionData.filter(
-      (mention) => mention.contactId != (user.id || user?.contactId)
-    );
+    const remaining = mentionData.filter((mention) => mention._id != user?._id);
     setInput((prev) => {
       return prev?.replace(`*${user?.name}*`, "");
     });
@@ -782,8 +800,6 @@ const CommonComponent = ({}) => {
 };
 
 const AskScreen = () => {
-  const realm = useRealm();
-
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={64}
@@ -794,14 +810,5 @@ const AskScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#7879F1",
-    borderWidth: 1,
-    borderColor: "red",
-  },
-});
 
 export default AskScreen;

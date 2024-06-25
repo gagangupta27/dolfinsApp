@@ -7,7 +7,6 @@ import { KeyboardAvoidingView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
 import { useRef, useState, useEffect } from "react";
-import NewNoteContainer from "../../components/notecontainer/NoteContainer";
 import NotesList from "../../components/notecontainer/NotesList";
 import {
   useCalendarNotes,
@@ -16,10 +15,12 @@ import {
   deleteNote,
 } from "../../realm/queries/noteOperations";
 import { useCalendarEvent } from "../../realm/queries/calendarEventOperations";
-import { useRealm } from "@realm/react";
+import { useQuery, useRealm } from "@realm/react";
 import RenderHtml from "react-native-render-html"; // Import RenderHtml
 import { Dimensions } from "react-native";
 import { ScrollView } from "react-native";
+import Contact from "../../realm/models/Contact";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 
 const contact = { id: -5, name: "Calendar" };
 
@@ -43,7 +44,7 @@ const NavigationBar = ({ event }) => {
 const CalendarEventScreen = ({ route }) => {
   const params = route.params;
   const realm = useRealm(); // Get the realm instance
-  const [, forceUpdate] = useState(0);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const event_id = new BSON.ObjectId(params.event_id);
   const noteRef = useRef(null);
@@ -52,8 +53,8 @@ const CalendarEventScreen = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
 
   const event = useCalendarEvent(event_id)[0];
-
   const notes = useCalendarNotes(realm, event_id);
+  const allContacts = useQuery(Contact);
 
   const filteredNotes = notes.filter((n) => n._id.equals(editMode.id));
   const firstNote = filteredNotes.length > 0 ? filteredNotes[0] : null;
@@ -87,7 +88,7 @@ const CalendarEventScreen = ({ route }) => {
     };
 
     addNoteToCalendar(realm, event_id, newNote);
-    forceUpdate(new Date().getTime());
+    setForceUpdate(new Date().getTime());
   };
 
   const updateNoteV2 = async (
@@ -120,12 +121,12 @@ const CalendarEventScreen = ({ route }) => {
     };
     updateNote(realm, noteId, updatedNote);
     setEditMode({ editMode: false, id: null });
-    forceUpdate(new Date().getTime());
+    setForceUpdate(new Date().getTime());
   };
 
   const deleteNoteV2 = async (noteId) => {
     deleteNote(realm, noteId);
-    forceUpdate(new Date().getTime());
+    setForceUpdate(new Date().getTime());
   };
 
   const [isDescriptionVisible, setDescriptionVisible] = useState(false); // State for description visibility
@@ -231,12 +232,14 @@ const CalendarEventScreen = ({ route }) => {
             />
           </View>
         </View>
-        <NewNoteContainer
+        <NewNoteContainerV2
           ref={noteRef}
+          mentions={allContacts}
           addNote={addNoteV2}
           contact={contact}
           note={editMode.id && firstNote}
           updateNote={updateNoteV2}
+          type={"contact"}
         />
       </View>
     </KeyboardAvoidingView>

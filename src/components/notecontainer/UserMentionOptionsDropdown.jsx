@@ -19,7 +19,15 @@ const UserMentionOptionsDropdown = ({
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>
-      <View style={styles.item}>
+      <View
+        style={[
+          styles.item,
+          {
+            backgroundColor:
+              item.type === "organisation" ? "#F8E6EF" : "#D0A0BF",
+          },
+        ]}
+      >
         <Text style={styles.itemText}>{item.name}</Text>
       </View>
     </TouchableOpacity>

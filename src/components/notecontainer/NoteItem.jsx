@@ -164,8 +164,8 @@ const NoteItem = ({
     return day + " " + month;
   };
 
-  if (!note?.isValid()) {
-    return null; // or some placeholder indicating the note is no longer available
+  if (!note || (note?.isValid && !note?.isValid())) {
+    return <></>;
   }
 
   return (

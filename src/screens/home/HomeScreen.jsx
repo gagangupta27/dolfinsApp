@@ -37,7 +37,6 @@ import ContactList from "../../components/contact/ContactList";
 import ContactSelectionModal from "../../components/contact/ContactSelectionModal";
 import Modal from "react-native-modal";
 import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
-import NewNoteContainer from "../../components/notecontainer/NoteContainer";
 import NoteDone from "../../components/home/NoteDone";
 import OrganisationTab from "./OrganisationTab";
 import QuickNotes from "../../components/home/QuickNotes";
@@ -47,6 +46,7 @@ import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperation
 import { useNavigation } from "@react-navigation/native";
 import AddOrgModal from "../../components/organisation/AddOrgModal";
 import { OrgContactLink } from "../../realm/queries/organisationOperations";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 
 const SearchBar = ({ search, text, setText }) => {
   useEffect(() => {
@@ -115,6 +115,7 @@ const CommonComponent = () => {
   );
   // const contacts = useContacts(realm);
   const allNotes = useAllContactNotes(realm);
+  const allContacts = useQuery(Contact);
   const contactMap = contacts.reduce((acc, contact) => {
     acc[contact._id] = contact;
     return acc;
@@ -689,10 +690,12 @@ const CommonComponent = () => {
             <Image source={require("../../assets/chat.png")} />
           </TouchableOpacity>
           {currentNoteAdded && <NoteDone note={currentNoteAdded} />}
-          <NewNoteContainer
+          <NewNoteContainerV2
             ref={noteRef}
+            mentions={allContacts}
             addNote={addNoteV2}
             contact={contact}
+            type={"contact"}
           />
         </View>
       )}

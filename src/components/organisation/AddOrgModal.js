@@ -42,6 +42,13 @@ const AddOrgModal = ({
 
   useEffect(() => {
     if (existingOrg) {
+      setName(existingOrg?.name);
+      setLinkedin(existingOrg?.linkedinUrl);
+      setContacts(
+        existingOrg?.contacts
+          ? existingOrg?.contacts?.map((o) => o?.contact)
+          : []
+      );
     }
   }, [existingOrg]);
 
@@ -50,6 +57,9 @@ const AddOrgModal = ({
       realm.write(() => {
         existingOrg.name = name;
         existingOrg.linkedinUrl = linkedin;
+      });
+      contacts?.forEach((contact) => {
+        OrgContactLink(realm, String(existingOrg?._id), String(contact?._id));
       });
     } else {
       if (name?.trim()?.length == 0) {
@@ -65,11 +75,7 @@ const AddOrgModal = ({
         updatedAt: new Date(),
       });
 
-      contacts.forEach((contact) => {
-        console.log(
-          createdOrg?._id?.toHexString(),
-          contact?._id?.toHexString()
-        );
+      contacts?.forEach((contact) => {
         OrgContactLink(realm, String(createdOrg?._id), String(contact?._id));
       });
     }

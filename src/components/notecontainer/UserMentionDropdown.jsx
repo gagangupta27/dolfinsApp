@@ -23,7 +23,16 @@ const UserMentionDropdown = ({
       <View style={styles.list}>
         {Array.isArray(data) &&
           data?.map((item, index) => (
-            <View style={styles.item} key={index}>
+            <View
+              style={[
+                styles.item,
+                {
+                  backgroundColor:
+                    item?.type === "organisation" ? "#F8E6EF" : "#D0A0BF",
+                },
+              ]}
+              key={index}
+            >
               <Text style={styles.itemText}>{item.name}</Text>
               <TouchableOpacity
                 key={index}
