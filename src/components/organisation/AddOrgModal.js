@@ -15,6 +15,7 @@ import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import Organisation from "../../realm/models/Organisation";
 import { BSON } from "realm";
+import Api from "../../utils/Api";
 import {
   OrgContactLink,
   addOrganisation,
@@ -31,7 +32,9 @@ const AddOrgModal = ({
   title = "Create New",
 }) => {
   const [name, setName] = useState("");
-  const [linkedin, setLinkedin] = useState("");
+  const [linkedin, setLinkedin] = useState(
+    "https://www.linkedin.com/company/google/"
+  );
   const [contacts, setContacts] = useState([]);
 
   const realm = useRealm();
@@ -43,7 +46,9 @@ const AddOrgModal = ({
   useEffect(() => {
     if (existingOrg) {
       setName(existingOrg?.name);
-      setLinkedin(existingOrg?.linkedinUrl);
+      setLinkedin(
+        existingOrg?.linkedinUrl || "https://www.linkedin.com/company/google/"
+      );
       setContacts(
         existingOrg?.contacts
           ? existingOrg?.contacts?.map((o) => o?.contact)
@@ -66,11 +71,12 @@ const AddOrgModal = ({
         Alert.alert("Error", "Please Enter Organisation Name!");
         return;
       }
+      const summary = await fetchOrgSummary();
       const createdOrg = await addOrganisation(realm, {
         name: name,
         linkedinUrl: linkedin,
         linkedinProfile: "",
-        summary: "",
+        summary: summary,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -80,8 +86,36 @@ const AddOrgModal = ({
       });
     }
     setName("");
-    setLinkedin("");
-    onClose();
+    /*     setLinkedin("");
+     */ onClose();
+  };
+
+  const fetchOrgSummary = async () => {
+    if (linkedin) {
+      const data = await fetchLinkedinData();
+      return data?.summary || "";
+    } else {
+      return "";
+    }
+  };
+
+  const fetchLinkedinData = async (linkedinId = "google") => {
+    return new Promise((resolve, reject) => {
+      Api.post("/api/1.0/user/linkedin-details", {
+        profile_id: linkedinId,
+        profile_type: "personal",
+        contact_info: false,
+        recommendations: false,
+        related_profiles: false,
+      })
+        .then((response) => {
+          resolve(response.data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          resolve(null);
+        });
+    });
   };
 
   return (

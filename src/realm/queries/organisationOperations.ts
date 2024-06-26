@@ -34,6 +34,19 @@ function deleteOrganisation(
       organisationId2
     );
     if (organisation) {
+      // Delete all related ContactOrganisationMap entries
+      const contactOrgMaps = realm
+        .objects("ContactOrganisationMap")
+        .filtered("organisation._id == $0", organisationId2);
+      realm.delete(contactOrgMaps);
+
+      // Delete all related NoteOrganisationMap entries
+      const noteOrgMaps = realm
+        .objects("NoteOrganisationMap")
+        .filtered("organisation._id == $0", organisationId2);
+      realm.delete(noteOrgMaps);
+
+      // Finally, delete the organisation
       realm.delete(organisation);
     }
   });
@@ -78,7 +91,7 @@ async function OrgContactLink(
         organisationId2
       );
 
-    if (existingLink.length === 0) {
+    if (existingLink.length === 0 && contactId2 && organisationId2) {
       const tempContact = realm.objectForPrimaryKey("Contact", contactId2);
       const tempOrg = realm.objectForPrimaryKey(
         "Organisation",

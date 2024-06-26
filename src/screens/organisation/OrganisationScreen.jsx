@@ -45,6 +45,20 @@ const OrganisationScreen = ({ route }) => {
 
   const contacts = useQuery(Contact);
 
+  const summaryNote = organisation.summary
+    ? [
+        {
+          _id: "summary",
+          contactId: organisation._id,
+          content: "*Summary* \n\n" + organisation.summary,
+          mentions: [],
+          type: "text",
+          nonEditable: true,
+          readOnly: true,
+        },
+      ]
+    : [];
+
   const addNoteV2 = async (
     content,
     mentions,
@@ -239,16 +253,13 @@ const OrganisationScreen = ({ route }) => {
               )}
               title={organisation?.name}
             />
-            {/*             <NavigationBarForContact
-              contact={{}}
-              showEdit={true}
-              onShare={onShare}
-              showLinkedin={false}
-              onEdit={() => {}}
-            />  */}
             <NotesList
               ref={notesListRef}
-              notes={Array.isArray(storedNotes) ? storedNotes : []}
+              notes={
+                Array.isArray(storedNotes)
+                  ? [...storedNotes, ...summaryNote]
+                  : [...summaryNote]
+              }
               setEditMode={setEditMode}
               contact={{}}
               onDelete={onDelete}
