@@ -1,9 +1,10 @@
 import Realm, { BSON, ObjectSchema } from "realm";
+import Mentions from "./Mentions";
 
 export default class Note extends Realm.Object {
   _id!: BSON.ObjectId;
   content!: string;
-  mentions!: string;
+  mentions: Mentions[];
   type!: string;
   imageUri!: string | null;
   audioUri!: string | null;
@@ -19,7 +20,7 @@ export default class Note extends Realm.Object {
     properties: {
       _id: "objectId",
       content: "string",
-      mentions: "string",
+      mentions: "Mentions[]",
       type: "string",
       imageUri: "string?",
       audioUri: "string?",

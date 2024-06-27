@@ -47,7 +47,6 @@ const ContactScreen = ({ route }) => {
   const contactOrgMap = useQuery(ContactOrganisationMap).filter((o) => {
     return o.contact._id == params.contactId;
   });
-  const allContacts = useQuery(Contact);
   const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
@@ -200,10 +199,17 @@ const ContactScreen = ({ route }) => {
     document
   ) => {
     if (
-      Array.isArray(mentions) &&
-      !mentions.some((mention) => mention.contactId === contact.id)
+      mentions &&
+      !mentions.some(
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(contact._id)
+      )
     ) {
-      mentions.push({ contactId: contact.id, name: contact.name });
+      mentions.push({
+        _id: new BSON.ObjectId(),
+        contact: contact,
+      });
     }
     let newLineIndex = content.indexOf("\n");
     let newConent = "";
@@ -217,7 +223,14 @@ const ContactScreen = ({ route }) => {
     }
     const newNote = {
       content: newConent,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions
+        ? mentions?.map((o) => ({
+            _id: new BSON.ObjectId(),
+            ...(o?.contact
+              ? { contact: o?.contact }
+              : { organisation: o?.organisation }),
+          }))
+        : [],
       type: imageUri
         ? "image"
         : audioUri
@@ -233,9 +246,6 @@ const ContactScreen = ({ route }) => {
     };
 
     const noteId = createNoteAndAddToContact(realm, contact._id, newNote);
-    // for (let mention of mentions) {
-    //   await saveMapping(db.current, noteId, mention.id);
-    // }
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
     }, 500);
@@ -253,14 +263,21 @@ const ContactScreen = ({ route }) => {
     document
   ) => {
     if (
-      Array.isArray(mentions) &&
-      !mentions.some((mention) => mention.contactId === contact.id)
+      mentions &&
+      !mentions.some(
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(contact._id)
+      )
     ) {
-      mentions.push({ contactId: contact.id, name: contact.name });
+      mentions.push({
+        _id: new BSON.ObjectId(),
+        contact: contact,
+      });
     }
     const updatedNote = {
       content: content,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -297,7 +314,7 @@ const ContactScreen = ({ route }) => {
         {
           ...note,
           isPinned: !note?.isPinned,
-          mentions: JSON.stringify(note?.mentions || []),
+          mentions: note?.mentions || [],
         },
         "modified"
       );
@@ -380,7 +397,6 @@ const ContactScreen = ({ route }) => {
       </TouchableWithoutFeedback>
       <NewNoteContainerV2
         ref={noteRef}
-        mentions={allContacts}
         addNote={addNoteV2}
         contact={contact}
         note={editMode.editMode && firstNote}

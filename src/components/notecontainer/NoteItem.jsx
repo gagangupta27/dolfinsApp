@@ -76,23 +76,32 @@ const NoteItem = ({
   };
 
   const TagSection = () => {
-    const mentions = JSON.parse(JSON.stringify(note?.mentions));
     if (
-      note?.mentions?.length > 0 &&
-      Array.isArray(note?.mentions) &&
-      note?.mentions?.some((item) => item.contactId != contact.id)
+      note?.mentions &&
+      note?.mentions?.some(
+        (item) =>
+          String(item?.contact?._id || item?.organization?._id) !=
+          String(contact?._id)
+      )
     ) {
       return (
         <View style={styles.tagsection}>
           <Text style={styles.tagnote}>Also tagged to: </Text>
-          {note.mentions
-            .filter((item) => item.contactId != contact.id)
+          {note?.mentions
+            .filter(
+              (item) =>
+                String(item?.contact?._id || item?.organization?._id) !=
+                String(contact?._id)
+            )
             .map((item) => (
               <Text
                 style={styles.individualTag}
-                key={"mentions_" + item.contactId}
+                key={
+                  "mentions_" +
+                  String(item?.contact?._id || item?.organization?._id)
+                }
               >
-                {item.name}
+                {item?.contact?.name || item?.organization?.name}
               </Text>
             ))}
           <View style={styles.horizontalline}></View>

@@ -18,19 +18,13 @@ import useAudioRecording from "../../hooks/AudioRecording";
 import useDocumentHandler from "../../hooks/DocumentHandler";
 import useImageHandler from "../../hooks/ImageHandler";
 import useSearchFilter from "../../hooks/SearchFilter";
+import { BSON } from "realm";
+import { useQuery } from "@realm/react";
+import Contact from "../../realm/models/Contact";
+import Organisation from "../../realm/models/Organisation";
 
 const NewNoteContainerV2 = forwardRef(
-  (
-    {
-      addNote,
-      mentions = [],
-      note,
-      updateNote,
-      mentionHasInput = true,
-      type = "contact",
-    },
-    ref
-  ) => {
+  ({ addNote, note, updateNote, mentionHasInput = true }, ref) => {
     const noteInputFieldRef = useRef();
     const [shouldIncreaseHeight, setShouldIncreaseHeight] = useState(
       note ? true : false
@@ -40,18 +34,17 @@ const NewNoteContainerV2 = forwardRef(
     const [content, setContent] = useState(note ? note?.content || "" : "");
     const [mentionData, setMentionData] = useState([]);
 
+    const allContacts = useQuery(Contact);
+    const allOrgs = useQuery(Organisation);
+
+    console.log("mentionData", mentionData);
+
     useEffect(() => {
       if (note) {
         setShouldIncreaseHeight(true);
         setIsFocused(true);
         setContent(note.content);
-        if (note?.mentions && Array?.isArray(note.mentions)) {
-          setMentionData(note.mentions);
-        }
-
-        if (note?.mentions && typeof note?.mentions == "string") {
-          setMentionData(JSON.parse(note.mentions));
-        }
+        setMentionData(note?.mentions || []);
       } else {
         setShouldIncreaseHeight(false);
         setIsFocused(false);
@@ -60,7 +53,13 @@ const NewNoteContainerV2 = forwardRef(
     }, [note]);
 
     const { searchText, setSearchText, searchFilter, filteredContacts } =
-      useSearchFilter(mentions, mentionData);
+      useSearchFilter(
+        [
+          ...allContacts.map((o) => ({ contact: o })),
+          ...allOrgs.map((o) => ({ organisation: o })),
+        ],
+        mentionData
+      );
 
     const {
       recording,
@@ -83,11 +82,19 @@ const NewNoteContainerV2 = forwardRef(
 
     const handleMentionSelect = (user) => {
       setContent((prev) => {
-        return prev?.replace(`*${user?.name}*`, "");
+        return prev?.replace(
+          `*${user?.contact?.name || user?.organisation?.name}*`,
+          ""
+        );
       });
       setSearchText("");
       setMentionData((prev) =>
-        prev.filter((mention) => mention._id != user._id)
+        prev.filter((o) => {
+          return (
+            String(o?.contact?._id || o?.organisation?._id) !=
+            String(user?.contact?._id || user?.organisation?._id)
+          );
+        })
       );
     };
 
@@ -95,15 +102,16 @@ const NewNoteContainerV2 = forwardRef(
       setMentionData([
         ...mentionData,
         {
-          _id: option._id,
-          name: option.name,
-          type: type,
+          _id: new BSON.ObjectId(),
+          ...option,
         },
       ]);
       const str = await getLastSubstringAfterAt(content);
       let newConent = content;
       if (str !== null) {
-        const boldSubstring = `*${option?.name}* `;
+        const boldSubstring = `*${
+          option?.organisation?.name || option?.contact?.name
+        }* `;
         newConent = newConent.replace(`@${str}`, boldSubstring);
       }
       setContent(newConent);
@@ -202,7 +210,7 @@ const NewNoteContainerV2 = forwardRef(
         )}
         {shouldIncreaseHeight && (
           <View style={styles.container}>
-            {searchText && filteredContacts.length > 0 && (
+            {searchText && (
               <UserMentionOptionsDropdown
                 filteredContacts={filteredContacts}
                 onSelectOption={handleOptionSelect}

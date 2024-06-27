@@ -17,18 +17,21 @@ const UserMentionOptionsDropdown = ({
     onSelectOption(item);
   };
 
+  console.log("filteredContacts", filteredContacts);
+
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>
       <View
         style={[
           styles.item,
           {
-            backgroundColor:
-              item.type === "organisation" ? "#F8E6EF" : "#D0A0BF",
+            backgroundColor: item?.organisation ? "#F8E6EF" : "#D0A0BF",
           },
         ]}
       >
-        <Text style={styles.itemText}>{item.name}</Text>
+        <Text style={styles.itemText}>
+          {item?.organisation?.name || item?.contact?.name}
+        </Text>
       </View>
     </TouchableOpacity>
   );

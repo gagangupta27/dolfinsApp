@@ -54,7 +54,6 @@ const CalendarEventScreen = ({ route }) => {
 
   const event = useCalendarEvent(event_id)[0];
   const notes = useCalendarNotes(realm, event_id);
-  const allContacts = useQuery(Contact);
 
   const filteredNotes = notes.filter((n) => n._id.equals(editMode.id));
   const firstNote = filteredNotes.length > 0 ? filteredNotes[0] : null;
@@ -67,12 +66,9 @@ const CalendarEventScreen = ({ route }) => {
     volumeLevels,
     document
   ) => {
-    // if (!mentions.some((mention) => mention.contactId === contact.id)) {
-    //     mentions.push({contactId:contact.id, name: contact.name});
-    // }
     const newNote = {
       content: content,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -100,12 +96,9 @@ const CalendarEventScreen = ({ route }) => {
     volumeLevels,
     document
   ) => {
-    // if (!mentions.some((mention) => mention.contactId === contact.id)) {
-    //     mentions.push({contactId:contact.id, name: contact.name});
-    // }
     const updatedNote = {
       content: content,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -234,7 +227,6 @@ const CalendarEventScreen = ({ route }) => {
         </View>
         <NewNoteContainerV2
           ref={noteRef}
-          mentions={allContacts}
           addNote={addNoteV2}
           contact={contact}
           note={editMode.id && firstNote}

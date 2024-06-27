@@ -115,7 +115,6 @@ const CommonComponent = () => {
   );
   // const contacts = useContacts(realm);
   const allNotes = useAllContactNotes(realm);
-  const allContacts = useQuery(Contact);
   const contactMap = contacts.reduce((acc, contact) => {
     acc[contact._id] = contact;
     return acc;
@@ -171,13 +170,21 @@ const CommonComponent = () => {
     volumeLevels,
     document
   ) => {
-    if (!mentions.some((mention) => mention.contactId === contact.id)) {
-      // Basically Add Quick Notes if user has not added
-      mentions.push({ contactId: contact.id, name: contact.name });
+    if (
+      !mentions.some(
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(contact._id)
+      )
+    ) {
+      mentions.push({
+        _id: new BSON.ObjectId(),
+        contact: contact,
+      });
     }
     const newNote = {
       content: content,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -692,7 +699,6 @@ const CommonComponent = () => {
           {currentNoteAdded && <NoteDone note={currentNoteAdded} />}
           <NewNoteContainerV2
             ref={noteRef}
-            mentions={allContacts}
             addNote={addNoteV2}
             contact={contact}
             type={"contact"}

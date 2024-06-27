@@ -47,7 +47,6 @@ import UserMentionOptionsDropdown from "../../components/notecontainer/UserMenti
 import { chatGptStream } from "../../utils/gpt";
 import { getLastSubstringAfterAt } from "../../utils/common";
 import { getWorkHistoryList } from "../../utils/linkedin";
-import useContactPermission from "../../hooks/ContactPermission";
 import { useContacts } from "../../realm/queries/contactOperations";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery, useRealm } from "@realm/react";
@@ -83,8 +82,8 @@ const ChatComponent = ({ route }) => {
   const { searchText, setSearchText, searchFilter, filteredContacts } =
     useSearchFilter(
       [
-        ...contacts.map((o) => ({ ...o, type: "contact" })),
-        ...allOrgs.map((o) => ({ ...o, type: "organisation" })),
+        ...contacts.map((o) => ({ contact: o })),
+        ...allOrgs.map((o) => ({ organisation: o })),
       ],
       mentionData
     );
@@ -103,13 +102,9 @@ const ChatComponent = ({ route }) => {
   };
 
   const getSystemPrompt = async (mentions = []) => {
-    const contactIds = mentions
-      ?.filter((o) => o?.type == "contact")
-      ?.map((o) => o?._id);
+    const contactIds = mentions?.filter((o) => o?.contact)?.map((o) => o?._id);
 
-    const orgIds = mentions
-      ?.filter((o) => o?.type == "organisation")
-      ?.map((o) => o?._id);
+    const orgIds = mentions?.filter((o) => o?.organisation)?.map((o) => o?._id);
 
     const quickNotesContact = {
       _id: "000000000000000000000000",

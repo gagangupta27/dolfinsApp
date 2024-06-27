@@ -27,17 +27,20 @@ const NoteDone = ({ note, contact = { id: 0, name: "Quick Notes" } }) => {
   const navigation = useNavigation();
 
   const TagSection = () => {
-    if (note.mentions.length > 0) {
+    if (note?.mentions) {
       return (
         <View style={{ flexDirection: "column" }}>
           <View style={styles.tagsection}>
             <Text style={styles.tagnote}>Tagged to: </Text>
-            {note.mentions.map((item) => (
+            {note?.mentions?.map((item) => (
               <Text
                 style={styles.individualTag}
-                key={"mentions_" + item.contactId}
+                key={
+                  "mentions_" +
+                  String(item?.contact?._id || item?.organization?._id)
+                }
               >
-                {item.name}
+                {item?.contact?.name || item?.organization?.name}
               </Text>
             ))}
           </View>

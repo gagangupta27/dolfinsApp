@@ -10,6 +10,7 @@ import Address from "../realm/models/ContactAddress";
 import Organisation from "../realm/models/Organisation";
 import NoteOrganisationMap from "../realm/models/NoteOrganisationMap";
 import ContactOrganisationMap from "../realm/models/ContactOrganisationMap";
+import Mentions from "../realm/models/Mentions";
 
 const RealmWrapper = ({ children }) => {
   const migration = (oldRealm, newRealm) => {
@@ -35,10 +36,11 @@ const RealmWrapper = ({ children }) => {
     Organisation,
     NoteOrganisationMap,
     ContactOrganisationMap,
+    Mentions,
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={6} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={9} onMigration={migration}>
       {children}
     </RealmProvider>
   );

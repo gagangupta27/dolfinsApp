@@ -9,11 +9,14 @@ const useSearchFilter = (contacts, mentionData = []) => {
     searchFilterWithout(text);
   };
 
+  console.log(contacts);
+
   const searchFilterWithout = (text) => {
     const textData = text.toUpperCase();
     const newData = contacts
       .map((item) => {
-        const itemData = item.name ? item.name.toUpperCase() : "";
+        const name = item?.contact?.name || item?.organisation?.name || "";
+        const itemData = name ? name.toUpperCase() : "";
         const matchIndex = itemData.indexOf(textData);
         return {
           ...item,
@@ -23,8 +26,11 @@ const useSearchFilter = (contacts, mentionData = []) => {
       .filter((item) => item.matchIndex > -1)
       .filter((item) => {
         return (
-          Array.isArray(mentionData) &&
-          mentionData?.filter((m) => m.id == item.id).length == 0
+          mentionData?.filter(
+            (m) =>
+              String(m?.contact?._id || m?.organization?._id) ==
+              String(item?._id)
+          ).length == 0
         );
       })
       .slice(0, 5);

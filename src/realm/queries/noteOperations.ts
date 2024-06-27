@@ -4,6 +4,9 @@ import CalendarEventNoteMap from "../models/CalendarEventNoteMap";
 import ContactNoteMap from "../models/ContactNoteMap";
 import Note from "../models/Note";
 import { useQuery } from "@realm/react";
+import Mentions from "../models/Mentions";
+import Contact from "../models/Contact";
+import Organisation from "../models/Organisation";
 
 function useCalendarNotes(realm: Realm, calendarEventId: BSON.ObjectId) {
   const noteMaps = useQuery(CalendarEventNoteMap).filtered(
@@ -14,7 +17,7 @@ function useCalendarNotes(realm: Realm, calendarEventId: BSON.ObjectId) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: JSON.parse(note.mentions),
+      mentions: note?.mentions || [],
       calendarEventId: noteMap.calendarEventId,
     };
   });
@@ -31,7 +34,7 @@ function useContactNotes(realm: Realm, contactId: BSON.ObjectId) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: JSON.parse(note.mentions),
+      mentions: note?.mentions || [],
       contactId: noteMap.contactId,
     };
   });
@@ -45,7 +48,7 @@ function useAllContactNotes(realm: Realm) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: JSON.parse(note.mentions),
+      mentions: note?.mentions || [],
       contactId: noteMap.contactId,
     };
   });
@@ -59,7 +62,7 @@ function useAllCalendarNotes(realm: Realm) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: JSON.parse(note.mentions),
+      mentions: note?.mentions || [],
       calendarEventId: noteMap.calendarEventId,
     };
   });
@@ -72,7 +75,7 @@ function addNoteToCalendar(
   calendarEventId: BSON.ObjectId,
   noteDetails: {
     content: string;
-    mentions: any[];
+    mentions: Mentions[];
     type: string;
     imageUri: string | null;
     audioUri: string | null;
@@ -87,7 +90,7 @@ function addNoteToCalendar(
     const newNote = realm.create("Note", {
       _id: noteId,
       content: noteDetails.content,
-      mentions: JSON.stringify(noteDetails.mentions),
+      mentions: noteDetails.mentions || [],
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
@@ -115,7 +118,7 @@ function createNoteAndAddToContact(
   contactId: BSON.ObjectId,
   noteDetails: {
     content: string;
-    mentions: any[];
+    mentions: Mentions[];
     type: string;
     imageUri: string | null;
     audioUri: string | null;
@@ -129,7 +132,19 @@ function createNoteAndAddToContact(
     const newNote = realm.create("Note", {
       _id: noteId,
       content: noteDetails.content,
-      mentions: JSON.stringify(noteDetails.mentions),
+      mentions: noteDetails?.mentions
+        ? noteDetails.mentions?.map((o) => ({
+            _id: o?._id || new BSON.ObjectId(),
+            ...(o?.contact
+              ? { contact: realm.objectForPrimaryKey(Contact, o?.contact?._id) }
+              : {
+                  organisation: realm.objectForPrimaryKey(
+                    Organisation,
+                    o?.organisation?._id
+                  ),
+                }),
+          }))
+        : [],
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
@@ -157,7 +172,7 @@ async function createNoteAndAddToOrganisation(
   organisationId: BSON.ObjectId,
   noteDetails: {
     content: string;
-    mentions: any[];
+    mentions: Mentions[];
     type: string;
     imageUri: string | null;
     audioUri: string | null;
@@ -171,7 +186,7 @@ async function createNoteAndAddToOrganisation(
     const newNote = realm.create("Note", {
       _id: noteId,
       content: noteDetails.content,
-      mentions: JSON.stringify(noteDetails.mentions),
+      mentions: noteDetails.mentions || [],
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
@@ -241,7 +256,7 @@ function updateNote(
   noteId: BSON.ObjectId,
   noteDetails: {
     content: string;
-    mentions: any[];
+    mentions: Mentions[];
     type: string;
     imageUri: string | null;
     audioUri: string | null;
@@ -254,7 +269,7 @@ function updateNote(
     const note = realm.objectForPrimaryKey("Note", noteId);
     if (note) {
       note.content = noteDetails.content;
-      note.mentions = JSON.stringify(noteDetails.mentions);
+      note.mentions = noteDetails.mentions || [];
       note.type = noteDetails.type;
       note.imageUri = noteDetails.imageUri;
       note.audioUri = noteDetails.audioUri;
@@ -271,8 +286,6 @@ async function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
     const organisationNoteMap = realm
       .objects("NoteOrganisationMap")
       .filtered("note._id == $0", noteId);
-    console.log("3");
-    console.log("deleted", organisationNoteMap);
     realm.delete(organisationNoteMap); // Delete the mapping first
 
     const calendarEventNoteMap = realm

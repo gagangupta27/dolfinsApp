@@ -43,8 +43,6 @@ const OrganisationScreen = ({ route }) => {
     .filter((o) => o?.note)
     .map((o) => o?.note);
 
-  const contacts = useQuery(Contact);
-
   const summaryNote = organisation.summary
     ? [
         {
@@ -68,15 +66,16 @@ const OrganisationScreen = ({ route }) => {
     document
   ) => {
     if (
-      Array.isArray(mentions) &&
+      mentions &&
       !mentions.some(
-        (mention) => String(mention._id) === String(organisation._id)
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(organisation._id)
       )
     ) {
       mentions.push({
-        _id: organisation._id,
-        name: organisation.name,
-        type: "organisation",
+        _id: new BSON.ObjectId(),
+        organisation: organisation,
       });
     }
     let newLineIndex = content.indexOf("\n");
@@ -91,7 +90,7 @@ const OrganisationScreen = ({ route }) => {
     }
     const newNote = {
       content: newConent,
-      mentions: mentions,
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -127,20 +126,21 @@ const OrganisationScreen = ({ route }) => {
     document
   ) => {
     if (
-      Array.isArray(mentions) &&
+      mentions &&
       !mentions.some(
-        (mention) => String(mention._id) === String(organisation._id)
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(organisation._id)
       )
     ) {
       mentions.push({
-        _id: organisation._id,
-        name: organisation.name,
-        type: "organisation",
+        _id: new BSON.ObjectId(),
+        organisation: organisation,
       });
     }
     const updatedNote = {
       content: content,
-      mentions: mentions, // Assuming mentions is an array of ids
+      mentions: mentions || [],
       type: imageUri
         ? "image"
         : audioUri
@@ -175,7 +175,7 @@ const OrganisationScreen = ({ route }) => {
         {
           ...note,
           isPinned: !note?.isPinned,
-          mentions: JSON.stringify(note?.mentions || []),
+          mentions: note?.mentions || [],
         },
         "modified"
       );
@@ -270,7 +270,6 @@ const OrganisationScreen = ({ route }) => {
         </TouchableWithoutFeedback>
         <NewNoteContainerV2
           ref={noteRef}
-          mentions={contacts}
           addNote={addNoteV2}
           note={editMode.editMode && editMode.note}
           updateNote={updateNoteV2}
