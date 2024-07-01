@@ -24,7 +24,12 @@ import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import Dropdown from "../common/DropDown";
 import Organisation from "../../realm/models/Organisation";
-import { OrgContactLink } from "../../realm/queries/organisationOperations";
+import {
+  OrgContactLink,
+  updateContactOrg,
+} from "../../realm/queries/organisationOperations";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
+import Toast from "react-native-toast-message";
 
 async function requestContactPermission() {
   const { status } = await Contacts.requestPermissionsAsync();
@@ -50,6 +55,13 @@ const NewContactModal = ({
   const existingContact = existingId ? useObject(Contact, existingId) : null;
   const orgs = useQuery(Organisation);
 
+  const contactOrgs = existingContact
+    ? useQuery(ContactOrganisationMap).filtered(
+        `contact._id == $0`,
+        existingContact._id
+      )
+    : [];
+
   const _dropDownRef = useRef();
 
   useEffect(() => {
@@ -61,6 +73,12 @@ const NewContactModal = ({
       setShortDescription(existingContact?.note || "");
     }
   }, [existingContact]);
+
+  useEffect(() => {
+    if (contactOrgs) {
+      setOrganisation(contactOrgs?.map((o) => o.organisation));
+    }
+  }, [contactOrgs?.length]);
 
   const onCreate = async () => {
     let contact = {};
@@ -117,16 +135,14 @@ const NewContactModal = ({
       realm.write(async () => {
         existingContact.name = name;
         existingContact.linkedinProfileUrl = linkedin;
-        existingContact.emails = [email, ...existingContact.emails];
-        existingContact.phoneNumbers = [
+        existingContact.emails = new Set([email, ...existingContact.emails]);
+        existingContact.phoneNumbers = new Set([
           phoneNumber,
           ...existingContact.phoneNumbers,
-        ];
+        ]);
       });
       if (organisation?.length > 0) {
-        organisation?.forEach((org) => {
-          OrgContactLink(realm, org._id, existingContact?._id);
-        });
+        await updateContactOrg(realm, existingContact?._id, organisation);
       }
 
       try {
@@ -136,6 +152,8 @@ const NewContactModal = ({
             ...contact,
             id: existingContact?.id,
           });
+        } else {
+          Toast.show("Error");
         }
       } catch (e) {
         console.log(e);
@@ -153,7 +171,6 @@ const NewContactModal = ({
         if (contactId) {
           const newContact = await Contacts.getContactByIdAsync(contactId);
           onSubmit(newContact);
-          console.log("Contact was added!");
         } else {
           console.log("Failed to add contact.");
         }

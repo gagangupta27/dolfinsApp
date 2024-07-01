@@ -37,8 +37,6 @@ const NewNoteContainerV2 = forwardRef(
     const allContacts = useQuery(Contact);
     const allOrgs = useQuery(Organisation);
 
-    console.log("mentionData", mentionData);
-
     useEffect(() => {
       if (note) {
         setShouldIncreaseHeight(true);

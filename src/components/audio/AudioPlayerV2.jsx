@@ -54,7 +54,6 @@ const AudioPlayer = ({ audioUri, volumeLevels }) => {
   useEffect(() => {
     return sound
       ? () => {
-          console.log("Unloading Sound");
           sound.unloadAsync();
         }
       : undefined;
@@ -72,7 +71,6 @@ const AudioPlayer = ({ audioUri, volumeLevels }) => {
 
   const playPauseAudio = async () => {
     if (!sound) {
-      console.log("Loading Sound");
       const { sound: newSound, status } = await Audio.Sound.createAsync(
         { uri: audioUri },
         { shouldPlay: true },
@@ -83,13 +81,10 @@ const AudioPlayer = ({ audioUri, volumeLevels }) => {
       setIsPlaying(true);
       startProgressUpdater(newSound);
     } else {
-      console.log(sound);
       if (isPlaying) {
-        console.log("Pausing Sound");
         await sound.pauseAsync();
         clearInterval(intervalRef.current);
       } else {
-        console.log("Playing Sound");
         const status = await sound.getStatusAsync();
         if (runComplete) {
           await sound.setPositionAsync(0); // Reset position if the audio has finished

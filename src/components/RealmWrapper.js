@@ -40,7 +40,7 @@ const RealmWrapper = ({ children }) => {
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={9} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={10} onMigration={migration}>
       {children}
     </RealmProvider>
   );

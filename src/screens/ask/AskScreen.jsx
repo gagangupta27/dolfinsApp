@@ -54,6 +54,12 @@ import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperat
 import useSearchFilter from "../../hooks/SearchFilter";
 import Organisation from "../../realm/models/Organisation";
 import Contact from "../../realm/models/Contact";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
+import ContactNoteMap from "../../realm/models/ContactNoteMap";
+import Note from "../../realm/models/Note";
+import CalendarEventNoteMap from "../../realm/models/CalendarEventNoteMap";
+import CalendarEvent from "../../realm/models/CalendarEvent";
+import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -73,16 +79,15 @@ const ChatComponent = ({ route }) => {
   const [mentionData, setMentionData] = useState([]);
   const [input, setInput] = useState("");
 
-  const contacts = useQuery(Contact);
+  const allContacts = useQuery(Contact);
   const allOrgs = useQuery(Organisation);
-  const contactsRealm = useContacts(realm);
   const calendarEvents = useRecentCalendarEvents(realm);
   const allCalendarNotes = useAllCalendarNotes(realm);
   const allNotes = useAllContactNotes(realm);
   const { searchText, setSearchText, searchFilter, filteredContacts } =
     useSearchFilter(
       [
-        ...contacts.map((o) => ({ contact: o })),
+        ...allContacts.map((o) => ({ contact: o })),
         ...allOrgs.map((o) => ({ organisation: o })),
       ],
       mentionData
@@ -102,168 +107,57 @@ const ChatComponent = ({ route }) => {
   };
 
   const getSystemPrompt = async (mentions = []) => {
-    const contactIds = mentions?.filter((o) => o?.contact)?.map((o) => o?._id);
-
-    const orgIds = mentions?.filter((o) => o?.organisation)?.map((o) => o?._id);
-
     const quickNotesContact = {
       _id: "000000000000000000000000",
       name: "Quick Notes",
     };
 
-    const contactMap = contactsRealm
-      .filter((o) => contactIds?.includes(o?.id))
-      .reduce((acc, contact) => {
-        acc[contact._id] = contact;
-        return acc;
-      }, {});
+    const mentionedContactsIds = mentions
+      ?.filter((o) => o?.contact)
+      ?.map((o) => o?._id);
 
-    contactMap[quickNotesContact._id] = quickNotesContact;
-    const notesMap = allNotes
-      ?.filter((o) => {
-        if (Array.isArray(o?.mentions)) {
-          const mentionIDs = o?.mentions?.map((o) => o?.contactId);
-          if (
-            contactIds?.includes(o?.contactId) ||
-            mentionIDs?.includes(o?.contactId)
-          ) {
-            return true;
-          }
+    const mentionedOrgsIds = mentions
+      ?.filter((o) => o?.organisation)
+      ?.map((o) => o?._id);
 
-          return false;
-        } else {
-          return true;
-        }
-      })
-      .reduce((acc, note) => {
-        if (!acc[note.contactId]) {
-          acc[note.contactId] = [];
-        }
-        acc[note.contactId].push(note);
-        return acc;
-      }, {});
-    const calendarEventMap = calendarEvents.reduce((acc, calendarEvent) => {
-      acc[calendarEvent._id] = calendarEvent;
-      return acc;
-    }, {});
-    const notesCalendarMap = allCalendarNotes
-      .filter((o) => {
-        const mentionIDs = JSON.parse(o?.mentions)?.map((o) => o?.contactId);
-        if (mentionIDs.includes(o?.contactId)) {
-          return true;
-        }
-        return false;
-      })
-      .reduce((acc, note) => {
-        if (!acc[note.calendarEventId]) {
-          acc[note.calendarEventId] = [];
-        }
-        acc[note.calendarEventId].push(note);
-        return acc;
-      }, {});
+    const orgContactsIds = realm
+      .objects(ContactOrganisationMap)
+      .filtered(`organisation._id IN {0}`, mentionedOrgsIds)
+      .map((o) => o.contact?._id);
 
-    async function setupSystemPrompt(allNotes, contactMap) {
-      const systemPrompt = Object.keys(contactMap)
-        .map((contactId, entityIndex) => {
-          const contact = contactMap[contactId];
-          const entityName = contact.name;
-          const linkedinProfileData = JSON.parse(
-            contact.linkedinProfileData ? contact.linkedinProfileData : null
-          );
-          const linkedinSummary = contact.linkedinSummary;
-          const workHistoryNote = getWorkHistoryList(linkedinProfileData);
+    const allContactNoteIds = realm
+      .objects(ContactNoteMap)
+      .filtered("contactId IN {0}", [
+        ...mentionedContactsIds,
+        ...orgContactsIds,
+      ])
+      .map((o) => o.noteId);
 
-          const savedNotes = allNotes[contactId];
+    const allOrgNoteIds = realm
+      .objects(NoteOrganisationMap)
+      .filtered("organisation._id IN {0}", mentionedOrgsIds)
+      .map((o) => o.note._id);
 
-          const notes = [];
+    const allCalendarEventIds = realm
+      .objects(CalendarEventNoteMap)
+      .filtered("contactId IN {0}", [...allContactNoteIds, ...allOrgNoteIds])
+      .map((o) => o.noteId);
 
-          if (workHistoryNote) {
-            notes.push({ content: "Work History \n" + workHistoryNote });
-          }
-          if (linkedinSummary) {
-            notes.push({ content: "Linkedin Summary \n" + linkedinSummary });
-          }
-
-          if (savedNotes && savedNotes.length > 0) {
-            notes.push(...savedNotes);
-          }
-
-          const noteData = notes
-            .map((note, index) => {
-              const lastNoteContent = note.content;
-              const lastNoteUpdatedAt = note.updatedAt;
-              if (note.content && note.content.trim()) {
-                return `  Note ${entityIndex + 1}.${
-                  index + 1
-                } - ${lastNoteContent} \n$`;
-              } else {
-                return;
-              }
-            })
-            .join("\n");
-
-          return `Entity ${
-            entityIndex + 1
-          } - ${entityName} \n\n All Notes about ${entityName} \n\n${noteData}`;
-        })
-        .join("\n\n------------------------\n\n");
-
-      const calendarNotesPrompt = Object.keys(calendarEventMap)
-        .map((calendarEventId, entityIndex) => {
-          const calendarEvent = calendarEventMap[calendarEventId];
-          const entityName = calendarEvent.title;
-
-          const calendarDescription = calendarEvent.description;
-          const attendees = calendarEvent.attendees
-            ? calendarEvent.attendees.join("\n")
-            : "";
-          const organizer = calendarEvent.organizer;
-          const startTime = calendarEvent.eventStartTime;
-          const endTime = calendarEvent.eventEndTime;
-
-          const savedNotes = notesCalendarMap[calendarEventId];
-          const notes = [];
-
-          if (savedNotes && savedNotes.length > 0) {
-            notes.push(...savedNotes);
-          }
-
-          const noteData = notes
-            .map((note, index) => {
-              const lastNoteContent = note.content;
-              if (note.content && note.content.trim()) {
-                return `  Note ${entityIndex + 1}.${
-                  index + 1
-                } - ${lastNoteContent} \n$`;
-              } else {
-                return;
-              }
-            })
-            .join("\n");
-
-          return `Entity ${
-            entityIndex + 1
-          } - ${entityName} \n\n All Notes about Calendar Event \n
-          Title - ${entityName}\n
-          Description - ${calendarDescription}\n
-          Attendees - ${attendees}\n
-          Organizer - ${organizer} \n
-          Start Time - ${startTime}\n
-          End Time - ${endTime}\n
-          \n${noteData}\n`;
-        })
-        .join("\n\n------------------------\n\n");
-      return (
-        ASK_MODULE_TOP_LEVEL_PROMPT +
-        "\n\n\n" +
-        systemPrompt +
-        "\n\n\n" +
-        calendarNotesPrompt
-      );
-    }
-
-    const systemPrompt = await setupSystemPrompt(notesMap, contactMap);
-    return systemPrompt;
+    return {
+      contacts: allContacts.filtered("_id IN {0}", [
+        ...mentionedContactsIds,
+        ...orgContactsIds,
+      ]),
+      notes: realm
+        .objects(Note)
+        .filtered("_id IN {0}", [...allContactNoteIds, ...allOrgNoteIds]),
+      calendarEvents: realm
+        .objects(CalendarEvent)
+        .filtered("_id IN {0}", allCalendarEventIds),
+      organisation: realm
+        .objects(Organisation)
+        .filtered("_id IN {0}", mentionedOrgsIds),
+    };
   };
 
   // <-- add this line
@@ -280,7 +174,7 @@ const ChatComponent = ({ route }) => {
       let updatedMessages = [
         ...allMessages.map((entry) => {
           if (entry.role == "system") {
-            return { role: "system", content: systemPrompt };
+            return { role: "system", content: JSON.stringify(systemPrompt) };
           } else return entry;
         }),
         { role: "user", content: question.trim() },

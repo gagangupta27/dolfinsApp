@@ -80,7 +80,7 @@ const NoteItem = ({
       note?.mentions &&
       note?.mentions?.some(
         (item) =>
-          String(item?.contact?._id || item?.organization?._id) !=
+          String(item?.contact?._id || item?.organisation?._id) !=
           String(contact?._id)
       )
     ) {
@@ -90,7 +90,7 @@ const NoteItem = ({
           {note?.mentions
             .filter(
               (item) =>
-                String(item?.contact?._id || item?.organization?._id) !=
+                String(item?.contact?._id || item?.organisation?._id) !=
                 String(contact?._id)
             )
             .map((item) => (
@@ -98,10 +98,10 @@ const NoteItem = ({
                 style={styles.individualTag}
                 key={
                   "mentions_" +
-                  String(item?.contact?._id || item?.organization?._id)
+                  String(item?.contact?._id || item?.organisation?._id)
                 }
               >
-                {item?.contact?.name || item?.organization?.name}
+                {item?.contact?.name || item?.organisation?.name}
               </Text>
             ))}
           <View style={styles.horizontalline}></View>

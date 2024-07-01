@@ -1,4 +1,5 @@
 import Realm, { BSON } from "realm";
+import Organisation from "../models/Organisation";
 
 async function addOrganisation(
   realm: Realm,
@@ -75,6 +76,7 @@ async function OrgContactLink(
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      organisationId2 = organisation?._id;
     } else {
       organisationId2 = organisation?._id;
     }
@@ -108,4 +110,29 @@ async function OrgContactLink(
   });
 }
 
-export { deleteOrganisation, addOrganisation, OrgContactLink };
+async function updateContactOrg(
+  realm: Realm,
+  contactId: string,
+  organisations: Organisation[]
+) {
+  realm.write(() => {
+    const contactOrgMap = realm
+      .objects("ContactOrganisationMap")
+      .filtered("contact._id == $0", contactId);
+    realm.delete(contactOrgMap);
+    organisations.map((org) => {
+      realm.create("ContactOrganisationMap", {
+        _id: new BSON.ObjectId(),
+        contact: realm.objectForPrimaryKey("Contact", contactId),
+        organisation: realm.objectForPrimaryKey("Organisation", org._id),
+      });
+    });
+  });
+}
+
+export {
+  deleteOrganisation,
+  addOrganisation,
+  OrgContactLink,
+  updateContactOrg,
+};

@@ -17,8 +17,6 @@ const UserMentionOptionsDropdown = ({
     onSelectOption(item);
   };
 
-  console.log("filteredContacts", filteredContacts);
-
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>
       <View

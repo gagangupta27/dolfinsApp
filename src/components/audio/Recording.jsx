@@ -7,10 +7,9 @@ const Recording = ({ onStopRecording }) => {
 
   /**
    * This was an attempt to make recording look like a waveform similar to Whatsapp
-   * 
+   *
    */
 
-  
   // const BAR_WIDTH = 4;
   // const BAR_MARGIN = 1;
   // const MAX_BAR_HEIGHT = 40;
@@ -30,7 +29,6 @@ const Recording = ({ onStopRecording }) => {
   //         bars = normalizedVolumeLevels;
   //     }
   // }
-  // console.log(bars);
   // return bars;
   // };
 
@@ -41,7 +39,6 @@ const Recording = ({ onStopRecording }) => {
   // }, [volumeLevels]);
 
   // const Waveform = ({bars}) => {
-  //     console.log(bars);
   //   return (
   //       <View style={{flexDirection: 'row', height: MAX_BAR_HEIGHT,  alignItems: 'center', justifyContent: 'center'}}>
   //         {bars.map((height, index) => (

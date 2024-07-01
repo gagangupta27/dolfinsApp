@@ -37,10 +37,10 @@ const NoteDone = ({ note, contact = { id: 0, name: "Quick Notes" } }) => {
                 style={styles.individualTag}
                 key={
                   "mentions_" +
-                  String(item?.contact?._id || item?.organization?._id)
+                  String(item?.contact?._id || item?.organisation?._id)
                 }
               >
-                {item?.contact?.name || item?.organization?.name}
+                {item?.contact?.name || item?.organisation?.name}
               </Text>
             ))}
           </View>

@@ -2,7 +2,7 @@ import * as Clipboard from "expo-clipboard";
 
 import { KeyboardAvoidingView, Linking } from "react-native";
 import React, { useCallback } from "react";
-import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { TouchableWithoutFeedback, View } from "react-native";
 import {
   createNoteAndAddToContact,
   deleteNote,
@@ -25,6 +25,7 @@ import { useTrackWithPageInfo } from "../../utils/analytics";
 import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import Contact from "../../realm/models/Contact";
+import { useFocusEffect } from "@react-navigation/native";
 
 // import
 const ContactScreen = ({ route }) => {
@@ -44,9 +45,15 @@ const ContactScreen = ({ route }) => {
           _id: new BSON.ObjectId("000000000000000000000000"),
           name: "Quick Notes",
         };
-  const contactOrgMap = useQuery(ContactOrganisationMap).filter((o) => {
-    return o.contact._id == params.contactId;
-  });
+
+  const contactOrgMap = useQuery(
+    ContactOrganisationMap,
+    (tasks) => {
+      return tasks.filtered("contact._id == $0", contact._id);
+    },
+    [update]
+  );
+
   const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
@@ -68,37 +75,58 @@ const ContactScreen = ({ route }) => {
   const workHistoryNote = useRef(null);
   const educationNote = useRef(null);
 
-  const getContactInfo = useCallback((ct) => {
-    var data = "";
-    if (ct) {
-      if (ct.phoneNumbers && ct.phoneNumbers.length > 0) {
-        data = data + "Phone: <" + ct.phoneNumbers[0] + ">\n";
+  useFocusEffect(
+    useCallback(() => {
+      forceUpdate(new Date().valueOf());
+    }, [])
+  );
+
+  const getContactInfo = useCallback(
+    (ct) => {
+      var data = "";
+      if (ct) {
+        if (ct.phoneNumbers && ct.phoneNumbers.length > 0) {
+          data += "Phones: ";
+          ct.phoneNumbers.forEach((phone, index) => {
+            data += `<${phone}>${
+              index < ct.phoneNumbers.length - 1 ? ", " : ""
+            }`;
+          });
+          data += "\n";
+        }
+        if (ct.emails && ct.emails.length > 0 && ct.emails[0]) {
+          data = data + "Email: <" + ct.emails[0] + ">\n";
+        }
+        if (
+          ct?.addresses &&
+          Array.isArray(JSON.parse(JSON.stringify(ct?.addresses))) &&
+          ct?.addresses?.length > 0
+        ) {
+          const address = JSON.parse(JSON.stringify(ct?.addresses))?.[0];
+          data =
+            data +
+            `Address: ${address?.street} ${address?.city} ${address?.region} ${address?.country} ${address?.postalCode}  \n`;
+        }
+        if (ct?.note) {
+          data = data + "note: " + ct?.note + "\n";
+        }
+        if (contactOrgMap && contactOrgMap.length > 0) {
+          data += "Company: ";
+          contactOrgMap.forEach((org, index) => {
+            data += `${org.organisation.name}${
+              index < contactOrgMap.length - 1 ? ", " : ""
+            }`;
+          });
+          data += "\n";
+        }
       }
-      if (ct.emails && ct.emails.length > 0 && ct.emails[0]) {
-        data = data + "Email: <" + ct.emails[0] + ">\n";
+      if (data) {
+        data = "*Contact Info*\n\n \n" + data;
       }
-      if (
-        ct?.addresses &&
-        Array.isArray(JSON.parse(JSON.stringify(ct?.addresses))) &&
-        ct?.addresses?.length > 0
-      ) {
-        const address = JSON.parse(JSON.stringify(ct?.addresses))?.[0];
-        data =
-          data +
-          `Address: ${address?.street} ${address?.city} ${address?.region} ${address?.country} ${address?.postalCode}  \n`;
-      }
-      if (ct?.note) {
-        data = data + "note: " + ct?.note + "\n";
-      }
-      if (contactOrgMap && contactOrgMap.length > 0) {
-        data = data + "Company: " + contactOrgMap[0].organisation.name + "\n";
-      }
-    }
-    if (data) {
-      data = "*Contact Info*\n\n \n" + data;
-    }
-    return data;
-  }, []);
+      return data;
+    },
+    [update]
+  );
 
   useEffect(() => {
     if (contact) {
@@ -112,7 +140,7 @@ const ContactScreen = ({ route }) => {
       setupEducation(JSON.parse(contact.linkedinProfileData));
     }
     updateNotes();
-  }, [update]);
+  }, [update, contactOrgMap]);
 
   const updateNotes = () => {
     const qNotes = [];
@@ -245,7 +273,7 @@ const ContactScreen = ({ route }) => {
       documentName: document ? document.documentName : null,
     };
 
-    const noteId = createNoteAndAddToContact(realm, contact._id, newNote);
+    const noteId = await createNoteAndAddToContact(realm, contact._id, newNote);
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
     }, 500);
@@ -291,12 +319,12 @@ const ContactScreen = ({ route }) => {
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,
     };
-    updateNote(realm, noteId, updatedNote);
+    await updateNote(realm, noteId, updatedNote);
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
+      forceUpdate(new Date().valueOf());
     }, 500);
     setEditMode({ editMode: false, id: null });
-    forceUpdate(new Date().getTime());
   };
 
   const onDelete = async (noteId) => {
@@ -314,7 +342,6 @@ const ContactScreen = ({ route }) => {
         {
           ...note,
           isPinned: !note?.isPinned,
-          mentions: note?.mentions || [],
         },
         "modified"
       );
@@ -425,10 +452,4 @@ const ContactScreen = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-});
 export default ContactScreen;

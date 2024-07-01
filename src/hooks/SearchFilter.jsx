@@ -9,8 +9,6 @@ const useSearchFilter = (contacts, mentionData = []) => {
     searchFilterWithout(text);
   };
 
-  console.log(contacts);
-
   const searchFilterWithout = (text) => {
     const textData = text.toUpperCase();
     const newData = contacts
@@ -28,7 +26,7 @@ const useSearchFilter = (contacts, mentionData = []) => {
         return (
           mentionData?.filter(
             (m) =>
-              String(m?.contact?._id || m?.organization?._id) ==
+              String(m?.contact?._id || m?.organisation?._id) ==
               String(item?._id)
           ).length == 0
         );

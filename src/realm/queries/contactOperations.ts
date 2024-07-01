@@ -81,27 +81,6 @@ function deleteContact(
   });
 }
 
-function updateContact(
-  realm: Realm,
-  contactId: BSON.ObjectId,
-  updates: Partial<{
-    name: string;
-    emails: string[];
-    phoneNumbers: string[];
-  }>
-) {
-  realm.write(() => {
-    let contact = realm.objectForPrimaryKey("Contact", contactId);
-    if (contact) {
-      contact.name = updates.name;
-      contact.emails = updates.emails;
-      contact.phoneNumbers = updates.phoneNumbers;
-      contact.updatedAt = new Date();
-    }
-  });
-}
-
-// update contact through name
 function updateContactById(
   realm: Realm,
   id: string,
@@ -181,7 +160,6 @@ function useContact(realm, contactId: string) {
 
 export {
   addContact,
-  updateContact,
   updateContactById,
   updateLinkedinProfile,
   updateLinkedinSummary,

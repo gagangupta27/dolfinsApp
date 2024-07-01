@@ -237,6 +237,7 @@ const ContactSelectionModal = ({
   );
 
   const onSubmitModal = (item) => {
+    addContactsAndClose([item]);
     setContacts([item, ...contacts]);
     setSelectedContacts([...selectedContacts, item]);
   };
