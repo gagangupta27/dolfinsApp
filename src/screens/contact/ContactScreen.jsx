@@ -232,7 +232,8 @@ const ContactScreen = ({ route }) => {
         (mention) =>
           String(mention?.contact?._id || mention?.organisation?._id) ===
           String(contact._id)
-      )
+      ) &&
+      params.contactId != "000000000000000000000000"
     ) {
       mentions.push({
         _id: new BSON.ObjectId(),
@@ -336,15 +337,9 @@ const ContactScreen = ({ route }) => {
   };
 
   const onPinPress = async (note) => {
-    realm.write(() => {
-      realm.create(
-        "Note",
-        {
-          ...note,
-          isPinned: !note?.isPinned,
-        },
-        "modified"
-      );
+    await updateNote(realm, new BSON.ObjectId(note._id), {
+      ...note,
+      isPinned: !note?.isPinned,
     });
   };
 

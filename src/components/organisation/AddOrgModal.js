@@ -1,4 +1,3 @@
-import { useTrackWithPageInfo } from "../../utils/analytics";
 import {
   Alert,
   Modal,
@@ -14,15 +13,14 @@ import { useObject, useQuery, useRealm } from "@realm/react";
 import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import Organisation from "../../realm/models/Organisation";
-import { BSON } from "realm";
 import Api from "../../utils/Api";
 import {
   OrgContactLink,
   addOrganisation,
 } from "../../realm/queries/organisationOperations";
-import Toast from "react-native-toast-message";
 import Dropdown from "../common/DropDown";
 import Contact from "../../realm/models/Contact";
+import MultiInput from "../common/MultiInput";
 
 const AddOrgModal = ({
   visible = false,
@@ -36,6 +34,7 @@ const AddOrgModal = ({
     "https://www.linkedin.com/company/google/"
   );
   const [contacts, setContacts] = useState([]);
+  const [links, setLinks] = useState([]);
 
   const realm = useRealm();
   const existingOrg = existingId ? useObject(Organisation, existingId) : null;
@@ -54,6 +53,7 @@ const AddOrgModal = ({
           ? existingOrg?.contacts?.map((o) => o?.contact)
           : []
       );
+      setLinks(existingOrg?.links || []);
     }
   }, [existingOrg]);
 
@@ -62,6 +62,7 @@ const AddOrgModal = ({
       realm.write(() => {
         existingOrg.name = name;
         existingOrg.linkedinUrl = linkedin;
+        existingOrg.links = new Set([...links]);
       });
       contacts?.forEach((contact) => {
         OrgContactLink(realm, String(existingOrg?._id), String(contact?._id));
@@ -79,6 +80,7 @@ const AddOrgModal = ({
         summary: summary,
         createdAt: new Date(),
         updatedAt: new Date(),
+        links: new Set([...links]),
       });
 
       contacts?.forEach((contact) => {
@@ -87,7 +89,8 @@ const AddOrgModal = ({
     }
     setName("");
     /*     setLinkedin("");
-     */ onClose();
+     */
+    onClose();
   };
 
   const fetchOrgSummary = async () => {
@@ -168,6 +171,7 @@ const AddOrgModal = ({
               placeholder="Linkedin Profile Url"
             />
           </View>
+
           <View style={{ minHeight: 50, marginVertical: 10, zIndex: 10 }}>
             <View
               style={{
@@ -223,6 +227,12 @@ const AddOrgModal = ({
               placeholder="Contacts"
             />
           </View>
+          <MultiInput
+            inputs={links}
+            setInputs={setLinks}
+            addText="Add Additional Link"
+            placeholder="Additional Links"
+          />
         </View>
       </ScrollView>
     </Modal>

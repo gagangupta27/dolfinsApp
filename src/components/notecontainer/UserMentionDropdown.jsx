@@ -16,7 +16,7 @@ const UserMentionDropdown = ({
   searchText,
   setSearchText,
   setIsMentionFocused,
-  hasTextInput = true,
+  hasTextInput = false,
 }) => {
   return (
     <View style={styles.container}>

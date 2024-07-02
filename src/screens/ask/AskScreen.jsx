@@ -39,15 +39,12 @@ import {
   useAllContactNotes,
 } from "../../realm/queries/noteOperations";
 
-import { ASK_MODULE_TOP_LEVEL_PROMPT } from "../../../prompts";
 import { BSON } from "realm";
 import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
 import { getLastSubstringAfterAt } from "../../utils/common";
-import { getWorkHistoryList } from "../../utils/linkedin";
-import { useContacts } from "../../realm/queries/contactOperations";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery, useRealm } from "@realm/react";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
@@ -81,9 +78,6 @@ const ChatComponent = ({ route }) => {
 
   const allContacts = useQuery(Contact);
   const allOrgs = useQuery(Organisation);
-  const calendarEvents = useRecentCalendarEvents(realm);
-  const allCalendarNotes = useAllCalendarNotes(realm);
-  const allNotes = useAllContactNotes(realm);
   const { searchText, setSearchText, searchFilter, filteredContacts } =
     useSearchFilter(
       [
@@ -107,62 +101,89 @@ const ChatComponent = ({ route }) => {
   };
 
   const getSystemPrompt = async (mentions = []) => {
-    const quickNotesContact = {
-      _id: "000000000000000000000000",
-      name: "Quick Notes",
-    };
-
-    const mentionedContactsIds = mentions
-      ?.filter((o) => o?.contact)
-      ?.map((o) => o?._id);
-
-    const mentionedOrgsIds = mentions
-      ?.filter((o) => o?.organisation)
-      ?.map((o) => o?._id);
-
-    const orgContactsIds = realm
-      .objects(ContactOrganisationMap)
-      .filtered(`organisation._id IN {0}`, mentionedOrgsIds)
-      .map((o) => o.contact?._id);
-
-    const allContactNoteIds = realm
-      .objects(ContactNoteMap)
-      .filtered("contactId IN {0}", [
-        ...mentionedContactsIds,
-        ...orgContactsIds,
-      ])
-      .map((o) => o.noteId);
-
-    const allOrgNoteIds = realm
-      .objects(NoteOrganisationMap)
-      .filtered("organisation._id IN {0}", mentionedOrgsIds)
-      .map((o) => o.note._id);
-
-    const allCalendarEventIds = realm
-      .objects(CalendarEventNoteMap)
-      .filtered("contactId IN {0}", [...allContactNoteIds, ...allOrgNoteIds])
-      .map((o) => o.noteId);
-
-    return {
-      contacts: allContacts.filtered("_id IN {0}", [
-        ...mentionedContactsIds,
-        ...orgContactsIds,
-      ]),
-      notes: realm
+    if (mentions && mentions?.length > 0) {
+      const mentionedContactsIds = mentions
+        ?.filter((o) => o?.contact)
+        ?.map((o) => o?.contact?._id);
+      const mentionedOrgsIds = mentions
+        ?.filter((o) => o?.organisation)
+        ?.map((o) => o?.organisation?._id);
+      const orgContactsIds = realm
+        .objects(ContactOrganisationMap)
+        .filtered(`organisation._id IN $0`, mentionedOrgsIds)
+        .map((o) => o.contact?._id);
+      const allContactNoteIds = realm
+        .objects(ContactNoteMap)
+        .filtered(`contactId IN $0`, [
+          ...mentionedContactsIds,
+          ...orgContactsIds,
+        ])
+        .map((o) => o.noteId);
+      const allOrgNoteIds = realm
+        .objects(NoteOrganisationMap)
+        .filtered(`organisation._id IN $0`, mentionedOrgsIds)
+        .map((o) => o.note._id);
+      const allCalendarEventIds = realm
+        .objects(CalendarEventNoteMap)
+        .filtered(`noteId IN $0`, [...allContactNoteIds, ...allOrgNoteIds])
+        .map((o) => o.noteId);
+      const allQuichNotesIds = realm
+        .objects(ContactNoteMap)
+        .filtered(
+          "contactId == $0",
+          new BSON.ObjectId("000000000000000000000000")
+        )
+        .map((o) => o?.noteId);
+      const allQuichNotes = realm
         .objects(Note)
-        .filtered("_id IN {0}", [...allContactNoteIds, ...allOrgNoteIds]),
-      calendarEvents: realm
-        .objects(CalendarEvent)
-        .filtered("_id IN {0}", allCalendarEventIds),
-      organisation: realm
-        .objects(Organisation)
-        .filtered("_id IN {0}", mentionedOrgsIds),
-    };
+        .filtered(`_id IN $0`, allQuichNotesIds);
+      const quichNotes = allQuichNotes.filter((o) => {
+        const Ids = o?.mentions
+          ?.filter((o) => o?.contact?._id || o?.organisation?._id)
+          ?.map((o) => o?.contact?._id || o?.organisation?._id);
+        return Ids.some((id) =>
+          [...mentionedContactsIds, ...orgContactsIds]
+            .map(String)
+            .includes(String(id))
+        );
+      });
+
+      return {
+        contacts: allContacts.filtered(`_id IN $0`, [
+          ...mentionedContactsIds,
+          ...orgContactsIds,
+        ]),
+        notes: realm
+          .objects(Note)
+          .filtered(`_id IN $0`, [...allContactNoteIds, ...allOrgNoteIds]),
+        calendarEvents: realm
+          .objects(CalendarEvent)
+          .filtered(`_id IN $0`, allCalendarEventIds),
+        organisation: realm
+          .objects(Organisation)
+          .filtered(`_id IN $0`, mentionedOrgsIds),
+        quichNotes: realm
+          .objects(ContactNoteMap)
+          .filtered(
+            "contactId == $0",
+            new BSON.ObjectId("000000000000000000000000")
+          ),
+      };
+    } else {
+      return {
+        contacts: allContacts,
+        notes: realm.objects(Note),
+        calendarEvents: realm.objects(CalendarEvent),
+        organisation: realm.objects(Organisation),
+        quichNotes: realm.objects(Note),
+      };
+    }
   };
 
   // <-- add this line
   const handleNewQuestion = async (question) => {
     try {
+      setError();
       track(EVENTS.LOADING_START.NAME, {
         [EVENTS.LOADING_START.KEYS.TEXT_NAME]:
           LOADING_TEXT_NAME.RESPONSE_TO_QUERY,
@@ -221,6 +242,7 @@ const ChatComponent = ({ route }) => {
         messages: updatedMessages,
       });
       setAllMessages(updatedMessages);
+      setMentionData([]);
     } catch (e) {
       setFetchingAnswer(false);
       setError("Having trouble at the moment. Please try again later.");
@@ -238,23 +260,19 @@ const ChatComponent = ({ route }) => {
   };
 
   const handleOptionSelect = async (option) => {
-    const exisiting = mentionData.filter(
-      (mention) => mention._id == option._id
-    );
-    if (exisiting.length == 0) {
-      setMentionData([
-        ...mentionData,
-        {
-          _id: option?._id,
-          name: option?.name,
-          type: option?.type,
-        },
-      ]);
-    }
+    setMentionData([
+      ...mentionData,
+      {
+        _id: new BSON.ObjectId(),
+        ...option,
+      },
+    ]);
     const str = await getLastSubstringAfterAt(input);
     let newConent = input;
     if (str !== null) {
-      const boldSubstring = `*${option?.name}* `;
+      const boldSubstring = `*${
+        option?.organisation?.name || option?.contact?.name
+      }* `;
       newConent = newConent.replace(`@${str}`, boldSubstring);
     }
     setInput(newConent);
@@ -267,12 +285,21 @@ const ChatComponent = ({ route }) => {
   };
 
   const handleMentionSelect = (user) => {
-    const remaining = mentionData.filter((mention) => mention._id != user?._id);
     setInput((prev) => {
-      return prev?.replace(`*${user?.name}*`, "");
+      return prev?.replace(
+        `*${user?.contact?.name || user?.organisation?.name}*`,
+        ""
+      );
     });
     setSearchText("");
-    setMentionData(remaining);
+    setMentionData((prev) =>
+      prev.filter((o) => {
+        return (
+          String(o?.contact?._id || o?.organisation?._id) !=
+          String(user?.contact?._id || user?.organisation?._id)
+        );
+      })
+    );
   };
 
   const renderItem = ({ item }) => {

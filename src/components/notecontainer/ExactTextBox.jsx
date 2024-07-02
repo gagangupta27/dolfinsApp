@@ -7,9 +7,11 @@ const ExactTextBox = ({
   setContent,
   setIsFocused = (x) => {},
   placeholder = "Add Note",
+  containerStyle = {},
+  rightIcons = () => {},
 }) => {
   return (
-    <View style={styles.textinputview1}>
+    <View style={[styles.textinputview1, containerStyle]}>
       <View style={styles.shadowContainer}>
         {/* Top Shadow */}
         <LinearGradient
@@ -33,14 +35,7 @@ const ExactTextBox = ({
           style={[styles.rightShadow]}
         />
       </View>
-      {/* <BackgroundSVG width={layout.width} height={layout.height} /> */}
       <View style={styles.container}>
-        {/* <MyTextInput
-          content={content}
-          setContent={setContent}
-          placeholder={placeholder}
-          onFocus={() => setIsFocused(true)}
-        /> */}
         <TextInput
           style={styles.textinput1}
           multiline
@@ -48,9 +43,9 @@ const ExactTextBox = ({
           onChangeText={setContent}
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}
-          // onBlur={() => setIsFocused(false)}
           placeholderTextColor="#858585" // This is to give the placeholder the subtle color
         />
+        {rightIcons()}
       </View>
     </View>
   );
@@ -60,14 +55,10 @@ const styles = StyleSheet.create({
   textinputview1: {
     height: 50,
     flex: 1,
-
     borderRadius: 15,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
-
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
     overflow: "hidden",
   },
   container: {
@@ -76,12 +67,15 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(165, 166, 246, 0.17)",
     position: "absolute", // Position text input absolutely to overlap the SVG
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   textinput1: {
     flex: 1,
@@ -89,7 +83,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    backgroundColor: "rgba(165, 166, 246, 0.17)", // Make sure TextInput has a transparent background
     textAlignVertical: "top", // Add this line
   },
   shadowContainer: {

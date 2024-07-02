@@ -17,7 +17,6 @@ function useCalendarNotes(realm: Realm, calendarEventId: BSON.ObjectId) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: note?.mentions || [],
       calendarEventId: noteMap.calendarEventId,
     };
   });
@@ -34,7 +33,6 @@ function useContactNotes(realm: Realm, contactId: BSON.ObjectId) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: note?.mentions || [],
       contactId: noteMap.contactId,
     };
   });
@@ -48,7 +46,6 @@ function useAllContactNotes(realm: Realm) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: note?.mentions || [],
       contactId: noteMap.contactId,
     };
   });
@@ -62,7 +59,6 @@ function useAllCalendarNotes(realm: Realm) {
     const note = realm.objectForPrimaryKey(Note, noteMap.noteId);
     return {
       ...note,
-      mentions: note?.mentions || [],
       calendarEventId: noteMap.calendarEventId,
     };
   });
@@ -287,6 +283,7 @@ async function updateNote(
     volumeLevels: number[];
     documentUri: string | null;
     documentName: string | null;
+    isPinned: boolean;
   }
 ) {
   await realm.write(async () => {
@@ -294,7 +291,6 @@ async function updateNote(
     if (note) {
       note.content = noteDetails.content;
       // Clear existing mentions and add updated ones
-      note.mentions = []; // Clear existing mentions
       note.mentions = noteDetails?.mentions
         ? noteDetails.mentions?.map((o) => ({
             _id: new BSON.ObjectId(),
@@ -315,6 +311,7 @@ async function updateNote(
       note.documentUri = noteDetails.documentUri;
       note.documentName = noteDetails.documentName;
       note.updatedAt = new Date();
+      note.isPinned = noteDetails.isPinned || false;
     }
   });
 }

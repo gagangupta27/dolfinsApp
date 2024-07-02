@@ -43,8 +43,7 @@ function updateChat(
 
 function removeChat(realm: Realm, chatId: BSON.ObjectId) {
   realm.write(() => {
-    const chat = realm.objectForPrimaryKey("Chat", chatId);
-
+    const chat = realm.objectForPrimaryKey("Chat", new BSON.ObjectId(chatId));
     // If the chat object is found, delete it
     if (chat) {
       realm.delete(chat);

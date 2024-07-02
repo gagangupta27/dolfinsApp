@@ -42,7 +42,11 @@ const NewNoteContainerV2 = forwardRef(
         setShouldIncreaseHeight(true);
         setIsFocused(true);
         setContent(note.content);
-        setMentionData(note?.mentions || []);
+        setMentionData(
+          note?.mentions?.filter((o) => {
+            return String(o?._id) != "000000000000000000000000";
+          }) || []
+        );
       } else {
         setShouldIncreaseHeight(false);
         setIsFocused(false);

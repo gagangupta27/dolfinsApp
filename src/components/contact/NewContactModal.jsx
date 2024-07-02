@@ -30,6 +30,7 @@ import {
 } from "../../realm/queries/organisationOperations";
 import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import Toast from "react-native-toast-message";
+import MultiInput from "../common/MultiInput";
 
 async function requestContactPermission() {
   const { status } = await Contacts.requestPermissionsAsync();
@@ -46,7 +47,7 @@ const NewContactModal = ({
   const track = useTrackWithPageInfo();
   const [name, setName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumbers, setPhoneNumbers] = useState([""]);
   const [email, setEmail] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [organisation, setOrganisation] = useState([]);
@@ -67,7 +68,7 @@ const NewContactModal = ({
   useEffect(() => {
     if (existingContact) {
       setName(existingContact?.name || "");
-      setPhoneNumber(existingContact?.phoneNumbers?.[0] || "");
+      setPhoneNumbers(existingContact?.phoneNumbers || [""]);
       setEmail(existingContact?.emails?.[0] || "");
       setLinkedin(existingContact?.linkedinProfileUrl || "");
       setShortDescription(existingContact?.note || "");
@@ -83,20 +84,23 @@ const NewContactModal = ({
   const onCreate = async () => {
     let contact = {};
     if (name != "") {
-      contact = { ...contact, [Contacts.Fields.FirstName]: name };
+      const nameParts = name.split(" ");
+      contact = {
+        ...contact,
+        [Contacts.Fields.FirstName]: nameParts[0],
+        [Contacts.Fields.LastName]: nameParts.slice(1).join(" ") || "", // Correctly join the rest of the parts to form the last name
+      };
     }
     if (shortDescription != "") {
       contact = { ...contact, [Contacts.Fields.Note]: shortDescription };
     }
-    if (phoneNumber != "") {
+    if (Array.isArray(phoneNumbers)) {
       contact = {
         ...contact,
-        [Contacts.Fields.PhoneNumbers]: [
-          {
-            label: "mobile",
-            number: phoneNumber,
-          },
-        ],
+        [Contacts.Fields.PhoneNumbers]: phoneNumbers.map((ph) => ({
+          label: "mobile",
+          number: ph,
+        })),
       };
     }
     if (email != "") {
@@ -136,10 +140,7 @@ const NewContactModal = ({
         existingContact.name = name;
         existingContact.linkedinProfileUrl = linkedin;
         existingContact.emails = new Set([email, ...existingContact.emails]);
-        existingContact.phoneNumbers = new Set([
-          phoneNumber,
-          ...existingContact.phoneNumbers,
-        ]);
+        existingContact.phoneNumbers = [...phoneNumbers];
       });
       if (organisation?.length > 0) {
         await updateContactOrg(realm, existingContact?._id, organisation);
@@ -298,11 +299,12 @@ const NewContactModal = ({
               placeholder="Short Description"
             />
           </View>
-          <View style={{ height: 50, marginVertical: 10 }}>
-            <ExactTextBox
-              content={phoneNumber}
-              setContent={setPhoneNumber}
+          <View style={{ marginVertical: 10 }}>
+            <MultiInput
               placeholder="Phone number"
+              addText="Add Phone number"
+              inputs={phoneNumbers}
+              setInputs={setPhoneNumbers}
             />
           </View>
           <View style={{ height: 50, marginVertical: 10 }}>
