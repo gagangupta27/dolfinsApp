@@ -24,7 +24,7 @@ import Contact from "../../realm/models/Contact";
 import Organisation from "../../realm/models/Organisation";
 
 const NewNoteContainerV2 = forwardRef(
-  ({ addNote, note, updateNote, mentionHasInput = true }, ref) => {
+  ({ addNote, note, updateNote, mentionHasInput = false }, ref) => {
     const noteInputFieldRef = useRef();
     const [shouldIncreaseHeight, setShouldIncreaseHeight] = useState(
       note ? true : false
