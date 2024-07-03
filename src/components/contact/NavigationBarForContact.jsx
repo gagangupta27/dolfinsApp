@@ -5,6 +5,7 @@ import Svg, { Path } from "react-native-svg";
 import { BSON } from "realm";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
+import useQuickNote from "../../hooks/useQuickNote";
 
 const NavigationBarForContact = ({
   contact,
@@ -15,6 +16,8 @@ const NavigationBarForContact = ({
   showLinkedin = true,
 }) => {
   const navigation = useNavigation();
+  const quickNoteRef = useQuickNote();
+
   return (
     <View style={styles.navBar}>
       <View style={styles.nameContainer}>
@@ -26,7 +29,7 @@ const NavigationBarForContact = ({
         >
           <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
         </TouchableOpacity>
-        {contact && contact?._id != "000000000000000000000000" && (
+        {contact && contact?._id != String(quickNoteRef._id) && (
           <View
             style={{
               paddingRight: 10,
@@ -75,9 +78,7 @@ const NavigationBarForContact = ({
       <View
         style={[
           styles.iconsContainer,
-          contact._id.equals(new BSON.ObjectId("000000000000000000000000"))
-            ? { opacity: 0 }
-            : {},
+          contact._id.equals(quickNoteRef._id) ? { opacity: 0 } : {},
         ]}
       >
         <TouchableOpacity
@@ -90,11 +91,7 @@ const NavigationBarForContact = ({
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => {
-              if (
-                !contact._id.equals(
-                  new BSON.ObjectId("000000000000000000000000")
-                )
-              )
+              if (!contact._id.equals(quickNoteRef._id))
                 onLinkedinDataConnectModalOpen();
             }}
           >

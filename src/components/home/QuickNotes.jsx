@@ -1,15 +1,17 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
+import useQuickNote from "../../hooks/useQuickNote";
 
 const QuickNotes = () => {
   const navigation = useNavigation();
+  const quickNoteRef = useQuickNote();
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() =>
         navigation.navigate("ContactScreen", {
-          contactId: "000000000000000000000000", // 24 times 0
+          contactId: String(quickNoteRef._id), // 24 times 0
           name: "Quick Notes",
         })
       }

@@ -47,6 +47,7 @@ import { useNavigation } from "@react-navigation/native";
 import AddOrgModal from "../../components/organisation/AddOrgModal";
 import { OrgContactLink } from "../../realm/queries/organisationOperations";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
+import useQuickNote from "../../hooks/useQuickNote";
 
 const SearchBar = ({ search, text, setText }) => {
   useEffect(() => {
@@ -92,11 +93,7 @@ const CommonComponent = () => {
 
   const noteRef = useRef(null);
   const navigation = useNavigation();
-
-  const contact = {
-    _id: new BSON.ObjectId("000000000000000000000000"),
-    name: "Quick Notes",
-  };
+  const quickNoteRef = useQuickNote();
 
   const [currentNoteAdded, setCurrentNoteAdded] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -119,7 +116,7 @@ const CommonComponent = () => {
     acc[contact._id] = contact;
     return acc;
   }, {});
-  contactMap[contact._id] = contact;
+  contactMap[quickNoteRef._id] = quickNoteRef;
 
   const calendarEvents = useAllCalendarEvents(realm);
   const allCalendarEventNotes = useAllCalendarNotes(realm);
@@ -174,12 +171,12 @@ const CommonComponent = () => {
       !mentions.some(
         (mention) =>
           String(mention?.contact?._id || mention?.organisation?._id) ===
-          String(contact._id)
+          String(quickNoteRef._id)
       )
     ) {
       mentions.push({
         _id: new BSON.ObjectId(),
-        contact: contact,
+        contact: quickNoteRef,
       });
     }
     const newNote = {
@@ -199,7 +196,7 @@ const CommonComponent = () => {
       documentName: document ? document.documentName : null,
     };
 
-    createNoteAndAddToContact(realm, contact._id, newNote);
+    createNoteAndAddToContact(realm, quickNoteRef._id, newNote);
     setCurrentNoteAdded(newNote);
     setTimeout(() => {
       setCurrentNoteAdded(null);
@@ -559,7 +556,7 @@ const CommonComponent = () => {
                               note={item.note}
                               onPress={() => {
                                 navigation.navigate("ContactScreen", {
-                                  contactId: contact._id.toHexString(),
+                                  contactId: quickNoteRef._id.toHexString(),
                                 });
                               }}
                             />
@@ -700,7 +697,7 @@ const CommonComponent = () => {
           <NewNoteContainerV2
             ref={noteRef}
             addNote={addNoteV2}
-            contact={contact}
+            contact={quickNoteRef}
             type={"contact"}
           />
         </View>

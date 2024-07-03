@@ -23,14 +23,18 @@ import { StyleSheet } from "react-native";
 import Toast from "react-native-toast-message";
 import { store } from "./src/redux/store";
 import CodePushUpdater from "./src/components/common/CodePushUpdater";
+import InitialWrapper from "./src/components/InitialWrapper";
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Auth0Provider domain={AUTH0DOMAIN} clientId={AUTH0CLIENTID}>
         <Provider store={store}>
-          <Navigation />
-          <Toast />
+          <InitialWrapper>
+            <Navigation />
+            <Toast />
+          </InitialWrapper>
+
           <CodePushUpdater />
         </Provider>
       </Auth0Provider>

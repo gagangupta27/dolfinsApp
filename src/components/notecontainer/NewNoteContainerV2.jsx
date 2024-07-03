@@ -22,6 +22,7 @@ import { BSON } from "realm";
 import { useQuery } from "@realm/react";
 import Contact from "../../realm/models/Contact";
 import Organisation from "../../realm/models/Organisation";
+import useQuickNote from "../../hooks/useQuickNote";
 
 const NewNoteContainerV2 = forwardRef(
   ({ addNote, note, updateNote, mentionHasInput = false }, ref) => {
@@ -36,6 +37,7 @@ const NewNoteContainerV2 = forwardRef(
 
     const allContacts = useQuery(Contact);
     const allOrgs = useQuery(Organisation);
+    const quickNoteRef = useQuickNote();
 
     useEffect(() => {
       if (note) {
@@ -44,7 +46,7 @@ const NewNoteContainerV2 = forwardRef(
         setContent(note.content);
         setMentionData(
           note?.mentions?.filter((o) => {
-            return String(o?._id) != "000000000000000000000000";
+            return String(o?._id) != String(quickNoteRef._id);
           }) || []
         );
       } else {

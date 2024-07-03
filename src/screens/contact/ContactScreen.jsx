@@ -26,6 +26,7 @@ import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import Contact from "../../realm/models/Contact";
 import { useFocusEffect } from "@react-navigation/native";
+import useQuickNote from "../../hooks/useQuickNote";
 
 // import
 const ContactScreen = ({ route }) => {
@@ -33,18 +34,14 @@ const ContactScreen = ({ route }) => {
   const realm = useRealm();
 
   const noteRef = useRef(null);
-
   const notesListRef = useRef(null);
-
+  const quickNoteRef = useQuickNote();
   const params = route.params;
 
   const contact =
-    params.contactId != "000000000000000000000000"
+    params.contactId != String(quickNoteRef._id)
       ? useContact(realm, new BSON.ObjectId(params.contactId))
-      : {
-          _id: new BSON.ObjectId("000000000000000000000000"),
-          name: "Quick Notes",
-        };
+      : quickNoteRef;
 
   const contactOrgMap = useQuery(
     ContactOrganisationMap,
@@ -233,7 +230,7 @@ const ContactScreen = ({ route }) => {
           String(mention?.contact?._id || mention?.organisation?._id) ===
           String(contact._id)
       ) &&
-      params.contactId != "000000000000000000000000"
+      params.contactId != String(quickNoteRef._id)
     ) {
       mentions.push({
         _id: new BSON.ObjectId(),

@@ -57,6 +57,7 @@ import Note from "../../realm/models/Note";
 import CalendarEventNoteMap from "../../realm/models/CalendarEventNoteMap";
 import CalendarEvent from "../../realm/models/CalendarEvent";
 import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
+import useQuickNote from "../../hooks/useQuickNote";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -65,7 +66,7 @@ const ChatComponent = ({ route }) => {
 
   const textInputRef = useRef(null);
   const flatListRef = useRef();
-
+  const quickNoteRef = useQuickNote();
   const chat = useChat(realm, new BSON.ObjectId(id));
   const [allMessages, setAllMessages] = useState([
     ...JSON.parse(chat.messages),
@@ -129,10 +130,7 @@ const ChatComponent = ({ route }) => {
         .map((o) => o.noteId);
       const allQuichNotesIds = realm
         .objects(ContactNoteMap)
-        .filtered(
-          "contactId == $0",
-          new BSON.ObjectId("000000000000000000000000")
-        )
+        .filtered("contactId == $0", quickNoteRef._id)
         .map((o) => o?.noteId);
       const allQuichNotes = realm
         .objects(Note)
@@ -164,10 +162,7 @@ const ChatComponent = ({ route }) => {
           .filtered(`_id IN $0`, mentionedOrgsIds),
         quichNotes: realm
           .objects(ContactNoteMap)
-          .filtered(
-            "contactId == $0",
-            new BSON.ObjectId("000000000000000000000000")
-          ),
+          .filtered("contactId == $0", quickNoteRef._id),
       };
     } else {
       return {
