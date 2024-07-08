@@ -109,7 +109,7 @@ const CommonComponent = () => {
       ]);
     },
     []
-  );
+  ).filtered("_id != $0", quickNoteRef._id);
   // const contacts = useContacts(realm);
   const allNotes = useAllContactNotes(realm);
   const contactMap = contacts.reduce((acc, contact) => {
