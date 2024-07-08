@@ -51,7 +51,6 @@ const ContactScreen = ({ route }) => {
     [update]
   );
 
-  const [linkedinModalVisible, setLinkedinModalVisible] = useState(false);
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
 
@@ -71,6 +70,7 @@ const ContactScreen = ({ route }) => {
   const linkedinSummaryNote = useRef(null);
   const workHistoryNote = useRef(null);
   const educationNote = useRef(null);
+  const _linkedInRef = useRef();
 
   useFocusEffect(
     useCallback(() => {
@@ -341,7 +341,7 @@ const ContactScreen = ({ route }) => {
   };
 
   const onLinkedinDataConnectModalOpen = () => {
-    setLinkedinModalVisible(true);
+    _linkedInRef.current?.show();
   };
   const filteredNotes = storedNotes.filter((n) => n._id.equals(editMode.id));
   const firstNote = filteredNotes.length > 0 ? filteredNotes[0] : null;
@@ -379,60 +379,51 @@ const ContactScreen = ({ route }) => {
     // copied to clipboard
   };
 
-  const CommonComponent = () => (
-    <View style={{ flex: 1 }}>
-      <LinkedinDataConnectModal
-        db={db.current}
-        visible={linkedinModalVisible}
-        onClose={() => {
-          setLinkedinModalVisible(false);
-        }}
-        contact={contact}
-        forceUpdate={forceUpdate}
-      />
-      <TouchableWithoutFeedback
-        onPress={() => {
-          noteRef.current.unfocus();
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <NavigationBarForContact
-            contact={contact}
-            showEdit={true}
-            onLinkedinDataConnectModalOpen={onLinkedinDataConnectModalOpen}
-            onShare={onShare}
-            onEdit={() => setContactEditVisible(true)}
-          />
-          <NotesList
-            ref={notesListRef}
-            notes={[...notes, ...storedNotes]}
-            setEditMode={setEditMode}
-            contact={contact}
-            onDelete={onDelete}
-            showPin={true}
-            onPinPress={onPinPress}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-      <NewNoteContainerV2
-        ref={noteRef}
-        addNote={addNoteV2}
-        contact={contact}
-        note={editMode.editMode && firstNote}
-        updateNote={updateNoteV2}
-        mentionHasInput={false}
-        type={"contact"}
-      />
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={64}
       behavior={"padding"}
       style={{ flex: 1 }}
     >
-      <CommonComponent />
+      <View style={{ flex: 1 }}>
+        <LinkedinDataConnectModal
+          contacId={contact?._id || ""}
+          ref={_linkedInRef}
+        />
+        <TouchableWithoutFeedback
+          onPress={() => {
+            noteRef.current.unfocus();
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <NavigationBarForContact
+              contact={contact}
+              showEdit={true}
+              onLinkedinDataConnectModalOpen={onLinkedinDataConnectModalOpen}
+              onShare={onShare}
+              onEdit={() => setContactEditVisible(true)}
+            />
+            <NotesList
+              ref={notesListRef}
+              notes={[...notes, ...storedNotes]}
+              setEditMode={setEditMode}
+              contact={contact}
+              onDelete={onDelete}
+              showPin={true}
+              onPinPress={onPinPress}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        <NewNoteContainerV2
+          ref={noteRef}
+          addNote={addNoteV2}
+          contact={contact}
+          note={editMode.editMode && firstNote}
+          updateNote={updateNoteV2}
+          mentionHasInput={false}
+          type={"contact"}
+        />
+      </View>
       <NewContactModal
         visible={contactEditVisible}
         onClose={() => setContactEditVisible(false)}

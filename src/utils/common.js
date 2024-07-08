@@ -11,3 +11,32 @@ export async function getLastSubstringAfterAt(text) {
     resolve(lastMatch);
   });
 }
+
+export function asyncWrite(realm, cb) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        if (!realm.isInTransaction) {
+          realm.write(() => {
+            resolve(cb(realm));
+          });
+        } else {
+          console.warn(
+            "Realm (write) was already in a transaction, delaying call one more loop."
+          );
+          setTimeout(() => {
+            try {
+              realm.write(() => {
+                resolve(cb(realm));
+              });
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}

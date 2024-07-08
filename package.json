@@ -60,6 +60,7 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-get-random-values": "~1.8.0",
     "react-native-inappbrowser-reborn": "^3.7.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-markdown-view": "^1.1.4",
     "react-native-mixpanel": "^1.2.5",
     "react-native-modal": "^13.0.1",

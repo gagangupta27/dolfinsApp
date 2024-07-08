@@ -28,6 +28,7 @@ const ContactItem = ({
       setContact: setContact,
     });
   };
+
   return (
     <TouchableOpacity
       style={styles.container}

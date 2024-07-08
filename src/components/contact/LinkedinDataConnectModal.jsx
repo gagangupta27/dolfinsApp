@@ -23,25 +23,29 @@ import {
   updateLinkedinSummary,
   updateLinkedinUrl,
 } from "../../realm/queries/contactOperations";
-import { useEffect, useState } from "react";
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 
 import Api from "../../utils/Api";
 import { Entypo } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import NotesList from "../notecontainer/NotesList";
-import { useRealm } from "@realm/react";
+import { useObject, useRealm } from "@realm/react";
 
-const LinkedinDataConnectModal = ({
-  visible,
-  onClose,
-  contact,
-  forceUpdate,
-}) => {
+const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   const track = useTrackWithPageInfo();
   const realm = useRealm();
 
+  const contact = contacId ? useObject("Contact", contacId) : {};
+
+  const [visible, setVisible] = useState(false);
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
-    contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
+    contact.linkedinProfileUrl || ""
   );
   const [linkedinProfileData, setLinkedProfileData] = useState(
     contact.linkedinProfileData ? JSON.parse(contact.linkedinProfileData) : null
@@ -57,6 +61,20 @@ const LinkedinDataConnectModal = ({
       contact.linkedinSummary
     )
   );
+
+  useImperativeHandle(ref, () => ({
+    show: () => {
+      setVisible(true);
+    },
+  }));
+
+  useEffect(() => {
+    console.log("visible", visible);
+  }, [visible]);
+
+  useEffect(() => {
+    console.log("refresh");
+  }, []);
 
   const [fetchingData, setFetchingData] = useState(false);
 
@@ -154,33 +172,37 @@ const LinkedinDataConnectModal = ({
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.ADD_LINKEDIN_URL,
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_IDENTIFIER]: linkedinProfileUrl,
     });
+    console.log("1");
     setFetchingDataError(null);
     setIsSettingTabEnabled(true);
-
+    console.log("2");
     setFetchingData(true);
     const { linkedinId, linkedinProfileUrlLower } =
       fetchLinkedinUrl(linkedinProfileUrl);
     if (!linkedinId) {
       setFetchingData(false);
+      console.log("3");
       return;
     }
     setLinkedinProfileUrl(linkedinProfileUrlLower);
-
+    console.log("4");
     const data = await fetchLinkedinData(linkedinId);
+    console.log("5");
     if (!data || !data.object_urn) {
       setFetchingData(false);
       return;
     }
+    console.log("6");
     setLinkedProfileData(data);
 
     const quickSummary = await fetchLinkedinSummary(data);
-    setFetchingData(false);
     if (!quickSummary) {
       return;
     }
+    console.log("7");
     setLinkedinSummary(quickSummary);
     setIsSettingTabEnabled(false);
-    forceUpdate();
+    setFetchingData(false);
   };
 
   useEffect(() => {
@@ -223,7 +245,7 @@ const LinkedinDataConnectModal = ({
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={() => setVisible(false)}
     >
       <View style={styles.container}>
         <View style={{ flex: 1 }}>
@@ -243,7 +265,7 @@ const LinkedinDataConnectModal = ({
             >
               {contact.name}'s LinkedIn
             </Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={() => setVisible(false)}>
               <Entypo name="circle-with-cross" size={24} color="black" />
             </TouchableOpacity>
           </View>
@@ -441,7 +463,9 @@ const LinkedinDataConnectModal = ({
       </View>
     </Modal>
   );
-};
+});
+
+export default memo(LinkedinDataConnectModal);
 
 const styles = StyleSheet.create({
   container: {
@@ -550,4 +574,3 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 });
-export default LinkedinDataConnectModal;

@@ -9,6 +9,7 @@ import {
 } from "../../utils/analytics";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
   ScrollView,
   StyleSheet,
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useObject, useQuery, useRealm } from "@realm/react";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import Contact from "../../realm/models/Contact";
 import ExactTextBox from "../notecontainer/ExactTextBox";
@@ -88,7 +90,8 @@ const NewContactModal = ({
       contact = {
         ...contact,
         [Contacts.Fields.FirstName]: nameParts[0],
-        [Contacts.Fields.LastName]: nameParts.slice(1).join(" ") || "", // Correctly join the rest of the parts to form the last name
+        [Contacts.Fields.MiddleName]: nameParts[1] || "", // Correctly join the rest of the parts to form the last name
+        [Contacts.Fields.LastName]: nameParts.slice(2).join(" ") || "", // Correctly join the rest of the parts to form the last name
       };
     }
     if (shortDescription != "") {
@@ -190,139 +193,154 @@ const NewContactModal = ({
       visible={visible}
       onRequestClose={onClose}
     >
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => {
-              track(EVENTS.BUTTON_TAPPED.NAME, {
-                [GLOBAL_KEYS.MODAL_NAME]: MODAL_NAME.CREATE_NEW_CONTACT_MODAL,
-                [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.CLOSE,
-              });
-              onClose();
-            }}
-          >
-            <Ionicons
-              style={{
-                backgroundColor: "#F5F1F8",
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-              }}
-              name="chevron-back"
-              size={24}
-              color="black"
-            />
-          </TouchableOpacity>
-          <Text style={styles.createtext}>{title}</Text>
-          <TouchableOpacity
-            onPress={() => {
-              track(EVENTS.BUTTON_TAPPED.NAME, {
-                [GLOBAL_KEYS.MODAL_NAME]: MODAL_NAME.CREATE_NEW_CONTACT_MODAL,
-                [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.DONE,
-              });
-              onCreate();
-            }}
-          >
-            <Text style={styles.done}>Done</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.form}>
-          <View style={{ height: 50, marginVertical: 10 }}>
-            <ExactTextBox
-              content={name}
-              setContent={setName}
-              placeholder="Name*"
-            />
-          </View>
-          <View style={{ minHeight: 50, marginVertical: 10, zIndex: 10 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: 10,
-                paddingBottom: 10,
-              }}
-            >
-              {Array.isArray(organisation) &&
-                organisation?.map((o) => (
-                  <View
-                    key={o._id}
-                    style={{
-                      padding: 10,
-                      backgroundColor: "rgba(165, 166, 246, 0.3)",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      borderRadius: 7,
-                    }}
-                  >
-                    <Text>{o.name}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setOrganisation((prev) =>
-                          prev.filter(
-                            (org) => String(org._id) !== String(o._id)
-                          )
-                        );
-                      }}
-                      style={{
-                        paddingLeft: 10,
-                      }}
-                    >
-                      <Text>X</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps="handled"
+        scrollEnabled={true}
+        style={{ flex: 1, backgroundColor: "white" }}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            paddingBottom: 200,
+          }}
+          style={styles.container}
+        >
+          <TouchableOpacity>
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={() => {
+                  track(EVENTS.BUTTON_TAPPED.NAME, {
+                    [GLOBAL_KEYS.MODAL_NAME]:
+                      MODAL_NAME.CREATE_NEW_CONTACT_MODAL,
+                    [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.CLOSE,
+                  });
+                  onClose();
+                }}
+              >
+                <Ionicons
+                  style={{
+                    backgroundColor: "#F5F1F8",
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                  }}
+                  name="chevron-back"
+                  size={24}
+                  color="black"
+                />
+              </TouchableOpacity>
+              <Text style={styles.createtext}>{title}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  track(EVENTS.BUTTON_TAPPED.NAME, {
+                    [GLOBAL_KEYS.MODAL_NAME]:
+                      MODAL_NAME.CREATE_NEW_CONTACT_MODAL,
+                    [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.DONE,
+                  });
+                  onCreate();
+                }}
+              >
+                <Text style={styles.done}>Done</Text>
+              </TouchableOpacity>
             </View>
+            <View style={styles.form}>
+              <View style={{ height: 50, marginVertical: 10 }}>
+                <ExactTextBox
+                  content={name}
+                  setContent={setName}
+                  placeholder="Name*"
+                />
+              </View>
+              <View style={{ minHeight: 50, marginVertical: 10, zIndex: 10 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: 10,
+                    paddingBottom: 10,
+                  }}
+                >
+                  {Array.isArray(organisation) &&
+                    organisation?.map((o) => (
+                      <View
+                        key={o._id}
+                        style={{
+                          padding: 10,
+                          backgroundColor: "rgba(165, 166, 246, 0.3)",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          borderRadius: 7,
+                        }}
+                      >
+                        <Text>{o.name}</Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setOrganisation((prev) =>
+                              prev.filter(
+                                (org) => String(org._id) !== String(o._id)
+                              )
+                            );
+                          }}
+                          style={{
+                            paddingLeft: 10,
+                          }}
+                        >
+                          <Text>X</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                </View>
 
-            <Dropdown
-              options={orgs}
-              onOptionSelected={(option) => {
-                if (
-                  Array.isArray(organisation) &&
-                  !organisation?.find(
-                    (o) => String(o._id) == String(option._id)
-                  )
-                ) {
-                  setOrganisation([...organisation, option]);
-                }
-                _dropDownRef?.current?.onRefresh();
-              }}
-              ref={_dropDownRef}
-              placeholder="Organisation"
-            />
-          </View>
-          <View style={{ height: 50, marginVertical: 10 }}>
-            <ExactTextBox
-              content={shortDescription}
-              setContent={setShortDescription}
-              placeholder="Short Description"
-            />
-          </View>
-          <View style={{ marginVertical: 10 }}>
-            <MultiInput
-              placeholder="Phone number"
-              addText="Add Phone number"
-              inputs={phoneNumbers}
-              setInputs={setPhoneNumbers}
-            />
-          </View>
-          <View style={{ height: 50, marginVertical: 10 }}>
-            <ExactTextBox
-              content={email}
-              setContent={setEmail}
-              placeholder="Email"
-            />
-          </View>
-          <View style={{ height: 50, marginVertical: 10 }}>
-            <ExactTextBox
-              content={linkedin}
-              setContent={setLinkedin}
-              placeholder="Linkedin Profile Url"
-            />
-          </View>
-        </View>
-      </ScrollView>
+                <Dropdown
+                  options={orgs}
+                  onOptionSelected={(option) => {
+                    if (
+                      Array.isArray(organisation) &&
+                      !organisation?.find(
+                        (o) => String(o._id) == String(option._id)
+                      )
+                    ) {
+                      setOrganisation([...organisation, option]);
+                    }
+                    _dropDownRef?.current?.onRefresh();
+                  }}
+                  ref={_dropDownRef}
+                  placeholder="Organisation"
+                />
+              </View>
+              <View style={{ height: 50, marginVertical: 10 }}>
+                <ExactTextBox
+                  content={shortDescription}
+                  setContent={setShortDescription}
+                  placeholder="Short Description"
+                />
+              </View>
+              <View style={{ marginVertical: 10 }}>
+                <MultiInput
+                  placeholder="Phone number"
+                  addText="Add Phone number"
+                  inputs={phoneNumbers}
+                  setInputs={setPhoneNumbers}
+                />
+              </View>
+              <View style={{ height: 50, marginVertical: 10 }}>
+                <ExactTextBox
+                  content={email}
+                  setContent={setEmail}
+                  placeholder="Email"
+                />
+              </View>
+              <View style={{ height: 50, marginVertical: 10 }}>
+                <ExactTextBox
+                  content={linkedin}
+                  setContent={setLinkedin}
+                  placeholder="Linkedin Profile Url"
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAwareScrollView>
     </Modal>
   );
 };
@@ -334,8 +352,6 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderColor: "#A5A6F6",
-    borderWidth: 1,
     padding: 20,
   },
   header: {
