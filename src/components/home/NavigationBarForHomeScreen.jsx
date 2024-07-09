@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
@@ -18,11 +18,14 @@ const NavigationBarForHomeScreen = ({ onNewContactClick }) => {
   return (
     <View style={styles.navBar}>
       <TouchableOpacity onPress={clear}>
-        <Image
-          source={require("../../assets/DolfinsCropped.png")}
-          style={{ width: 80, height: 25 }}
-          resizeMode="contain"
-        />
+        <Text
+          style={{
+            fontWeight: "bold",
+            fontSize: 20,
+          }}
+        >
+          dolfins
+        </Text>
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
         <TouchableOpacity style={styles.iconButton} onPress={onNewContactClick}>

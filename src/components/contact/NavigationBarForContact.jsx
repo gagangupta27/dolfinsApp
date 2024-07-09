@@ -73,7 +73,9 @@ const NavigationBarForContact = ({
           </View>
         )}
 
-        <Text style={styles.navTitle}>{contact.name}</Text>
+        <Text numberOfLines={2} style={styles.navTitle}>
+          {contact.name}
+        </Text>
       </View>
       <View
         style={[
@@ -143,11 +145,12 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: "row",
     alignItems: "center",
+    width: "70%",
   },
   navTitle: {
-    // fontWeight: '600', // Bold font for the title
     fontSize: 18, // Font size for the title
     color: "#000", // Assuming the title is black
+    flexShrink: 1,
   },
   iconsContainer: {
     flexDirection: "row", // Layout icons horizontally

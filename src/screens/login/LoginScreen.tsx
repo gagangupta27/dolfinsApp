@@ -8,24 +8,44 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useRef } from "react";
-import Svg, { Rect } from "react-native-svg";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "../../redux/store";
 import { Storage } from "../../utils/storage";
-import Swiper from "react-native-swiper";
 import auth0 from "../../utils/auth";
 import { identify } from "../../utils/analytics";
 import { setAuthData } from "../../redux/reducer/app";
 import { useAuth0 } from "react-native-auth0";
 import { useTrackWithPageInfo } from "../../utils/analytics";
+import Carousel from "react-native-reanimated-carousel";
+import Animated from "react-native-reanimated";
+
+const width = Dimensions.get("window").width;
+
+const DATA = [
+  {
+    src: require("../../assets/Onboarding2.webp"),
+    title: "Converse",
+    style: { width: 298, height: 292 },
+  },
+  {
+    src: require("../../assets/Onboarding1.webp"),
+    title: "Contextualize",
+    style: { width: 331, height: 274 },
+  },
+  {
+    src: require("../../assets/Onboarding3.webp"),
+    title: "Connect ",
+    style: { width: 293, height: 293.6 },
+  },
+];
 
 const LoginScreen = ({ navigation }) => {
   const track = useTrackWithPageInfo();
 
   const { authorize } = useAuth0();
-
+  const [currentIndex, setCurrentIndex] = useState(0);
   const authData = useSelector((state: RootState) => state.app.authData);
   const dispatch = useDispatch();
 
@@ -70,202 +90,19 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const swiperRef = useRef(null);
+  const _carouselRef = useRef(null);
 
   const handleLoginFailure = (e) => {
     track("Login Failure", { Reason: e.toString() });
   };
 
   const nextStep = () => {
-    swiperRef.current.scrollBy(1);
+    const currentIdx = _carouselRef.current?.getCurrentIndex() || currentIndex;
+    setCurrentIndex(currentIdx + 1);
+    _carouselRef.current.next({ count: 1, animated: true });
   };
 
   const screenWidth = Dimensions.get("window").width;
-
-  const OnboardingPage1 = () => (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Image
-        source={require("../../assets/onboarding1_resize.png")}
-        style={{
-          marginVertical: 10,
-          width: screenWidth * 0.9,
-          height: screenWidth * 0.9,
-        }}
-        resizeMode="contain"
-      />
-      <Text
-        style={{
-          marginHorizontal: 20,
-          marginVertical: 10,
-          color: "#7879F1",
-          fontSize: 24,
-          fontFamily: "WorkSans-Medium",
-        }}
-      >
-        This is your Note corner
-      </Text>
-      <Text
-        style={{
-          minHeight: 90,
-          marginHorizontal: 20,
-          marginVertical: 20,
-          color: "#59606E",
-          fontFamily: "WorkSans-Medium",
-          fontSize: 18,
-        }}
-      >
-        Understand your customers better. Let’s close more deals.
-      </Text>
-      <View
-        style={{
-          marginVertical: 20,
-          marginHorizontal: 20,
-          flexDirection: "row",
-          paddingHorizontal: 15,
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Svg width="58" height="8" viewBox="0 0 58 8" fill="none">
-            <Rect x="0.5" width="33" height="8" rx="4" fill="#7879F1" />
-            <Rect x="37.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-            <Rect x="49.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-          </Svg>
-        </View>
-        <TouchableOpacity onPress={nextStep}>
-          <Image
-            source={require("../../assets/Next.png")}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const OnboardingPage2 = () => (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Image
-        source={require("../../assets/onboarding2_resize.png")}
-        style={{
-          marginVertical: 10,
-          width: screenWidth * 0.9,
-          height: screenWidth * 0.9,
-        }}
-        resizeMode="contain"
-      />
-      <Text
-        style={{
-          marginHorizontal: 20,
-          marginVertical: 10,
-          color: "#7879F1",
-          fontSize: 24,
-          fontFamily: "WorkSans-Medium",
-        }}
-      >
-        Sync and add notes on the go
-      </Text>
-      <Text
-        style={{
-          minHeight: 90,
-          marginHorizontal: 20,
-          marginVertical: 20,
-          color: "#59606E",
-          fontFamily: "WorkSans-Medium",
-          fontSize: 18,
-        }}
-      >
-        Instantly add notes during travels, events, or meetings. Sync contacts
-        effortlessly with LinkedIn and your calendar.
-      </Text>
-      <View
-        style={{
-          marginVertical: 20,
-          marginHorizontal: 20,
-          flexDirection: "row",
-          paddingHorizontal: 15,
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Svg width="58" height="8" viewBox="0 0 58 8" fill="none">
-            <Rect x="0.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-            <Rect x="12.5" width="33" height="8" rx="4" fill="#7879F1" />
-            <Rect x="49.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-          </Svg>
-        </View>
-        <TouchableOpacity onPress={nextStep}>
-          <Image
-            source={require("../../assets/Next.png")}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const OnboardingPage3 = () => (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Image
-        source={require("../../assets/onboarding3_resize.png")}
-        style={{
-          marginVertical: 10,
-          width: screenWidth * 0.9,
-          height: screenWidth * 0.9,
-        }}
-        resizeMode="contain"
-      />
-      <Text
-        style={{
-          marginHorizontal: 20,
-          marginVertical: 10,
-          color: "#7879F1",
-          fontSize: 24,
-          fontFamily: "WorkSans-Medium",
-        }}
-      >
-        Connect Better, Sell Smarter
-      </Text>
-      <Text
-        style={{
-          minHeight: 90,
-          marginHorizontal: 20,
-          marginVertical: 20,
-          color: "#59606E",
-          fontFamily: "WorkSans-Medium",
-          fontSize: 18,
-        }}
-      >
-        With Dolfin's AI assistant, remember little details that make big
-        differences.
-      </Text>
-      <View
-        style={{
-          marginVertical: 20,
-          marginHorizontal: 20,
-          flexDirection: "row",
-          paddingHorizontal: 15,
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Svg width="58" height="8" viewBox="0 0 58 8" fill="none">
-            <Rect x="0.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-            <Rect x="12.5" width="8" height="8" rx="4" fill="#D9D9D9" />
-            <Rect x="24.5" width="33" height="8" rx="4" fill="#7879F1" />
-          </Svg>
-        </View>
-        <TouchableOpacity onPress={nextStep}>
-          <Image
-            source={require("../../assets/Next.png")}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   const LoginPage = () => (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -321,17 +158,104 @@ const LoginScreen = ({ navigation }) => {
 
   const renderContent = () => {
     return (
-      <Swiper
-        ref={swiperRef}
-        loop={false}
-        showsButtons={false}
-        showsPagination={false}
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          marginTop: 100,
+        }}
       >
-        <OnboardingPage1 />
-        <OnboardingPage2 />
-        <OnboardingPage3 />
-        <LoginPage />
-      </Swiper>
+        {currentIndex == 3 && <LoginPage />}
+        {currentIndex != 3 && (
+          <>
+            <Carousel
+              width={width}
+              enabled={false}
+              ref={_carouselRef}
+              height={500}
+              autoPlay={false}
+              data={DATA}
+              scrollAnimationDuration={1000}
+              onSnapToItem={(index: number) => setCurrentIndex(index)}
+              renderItem={({ item, index }) => (
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                  }}
+                >
+                  <Image source={item?.src} style={item.style} />
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 36,
+                      color: "#040404",
+                      marginTop: 52,
+                    }}
+                  >
+                    {item?.title}
+                  </Text>
+                </View>
+              )}
+            />
+            <View
+              style={{
+                position: "absolute",
+                padding: 38,
+                bottom: 0,
+                width: "100%",
+              }}
+            >
+              <View
+                style={[
+                  {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingBottom: 40,
+                  },
+                ]}
+              >
+                {DATA &&
+                  Array.isArray(DATA) &&
+                  DATA?.map((item, index) => (
+                    <Animated.View
+                      key={index}
+                      style={{
+                        backgroundColor:
+                          currentIndex == index ? "#040404" : "#D9D9D9",
+                        borderRadius: 100,
+                        marginHorizontal: 5,
+                        height: 8,
+                        width: currentIndex == index ? 25 : 8,
+                      }}
+                    ></Animated.View>
+                  ))}
+              </View>
+              <TouchableOpacity
+                style={{
+                  width: "100%",
+                  backgroundColor: "#040404",
+                  padding: 10,
+                  borderRadius: 15,
+                }}
+                activeOpacity={0.8}
+                onPress={nextStep}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: "#FCFCFC",
+                    textAlign: "center",
+                  }}
+                >
+                  NEXT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
     );
   };
 

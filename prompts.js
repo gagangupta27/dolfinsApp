@@ -6,7 +6,7 @@ Example output -
 
 "Chirag Gandhi co-founded a venture (Stealth) in September 2023. Prior to that, he was a career venture capital investor, having worked at Kalaari Capital and Growth Equity in Trifecta Capital. He holds a B.Tech. degree from IIT Bombay (2013-17) and has cleared HBS Online CORe and CFA Level-1."
 
-Now, take a deep breath, think step by step and execute.`
+Now, take a deep breath, think step by step and execute.`;
 
 export const ASK_MODULE_TOP_LEVEL_PROMPT = `You will now enter 'Note querying' mode. Given the complete notes about an entity, answer the question for the user. All notes with the same number as the entity are tagged to the entity, so notes-1 are about entity-1, notes-2 are about entity-2, and so on. Your answer should be crisp, accurate, and helpful.
 
@@ -34,4 +34,6 @@ Question: Vaishali just got promoted to a Healthcare Partner at ABC Capital. How
 
 Example output: {"Hey Vaishali! Congratulations on your recent promotion at ABC Capital! Despite not being a doctor in your family, you will be enabling the creation and prosperity of several others. Wish you all the best!"}
 
-Now, take a deep breath, think step by step and execute.`
+Ensure that your responses are concise. Don't write too verbose answers unless explicitly asked by user.
+Now, take a deep breath, think step by step and execute.
+`;

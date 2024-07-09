@@ -27,6 +27,7 @@ import {
 } from "../../realm/queries/noteOperations";
 import { useQuery, useRealm } from "@realm/react";
 
+import AddOrgModal from "../../components/organisation/AddOrgModal";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { BSON } from "realm";
 import CalendarItem from "../../components/calendar/CalendarItem";
@@ -37,16 +38,15 @@ import ContactList from "../../components/contact/ContactList";
 import ContactSelectionModal from "../../components/contact/ContactSelectionModal";
 import Modal from "react-native-modal";
 import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import NoteDone from "../../components/home/NoteDone";
+import { OrgContactLink } from "../../realm/queries/organisationOperations";
 import OrganisationTab from "./OrganisationTab";
 import QuickNotes from "../../components/home/QuickNotes";
 import SearchResultItem from "../../components/search/SearchResultItem";
 import { getWorkHistoryList } from "../../utils/linkedin";
 import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperations";
 import { useNavigation } from "@react-navigation/native";
-import AddOrgModal from "../../components/organisation/AddOrgModal";
-import { OrgContactLink } from "../../realm/queries/organisationOperations";
-import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import useQuickNote from "../../hooks/useQuickNote";
 
 const SearchBar = ({ search, text, setText }) => {
@@ -420,7 +420,7 @@ const CommonComponent = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <TouchableWithoutFeedback
         onPress={() => {
           if (noteRef.current) {

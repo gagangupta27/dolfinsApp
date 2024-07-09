@@ -1,13 +1,6 @@
 import * as Contacts from "expo-contacts";
 
 import {
-  BUTTON_NAME,
-  EVENTS,
-  GLOBAL_KEYS,
-  MODAL_NAME,
-  useTrackWithPageInfo,
-} from "../../utils/analytics";
-import {
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -17,22 +10,29 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { useObject, useQuery, useRealm } from "@realm/react";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
-import Contact from "../../realm/models/Contact";
-import ExactTextBox from "../notecontainer/ExactTextBox";
-import { Ionicons } from "@expo/vector-icons";
-import Dropdown from "../common/DropDown";
-import Organisation from "../../realm/models/Organisation";
+import {
+  BUTTON_NAME,
+  EVENTS,
+  GLOBAL_KEYS,
+  MODAL_NAME,
+  useTrackWithPageInfo,
+} from "../../utils/analytics";
 import {
   OrgContactLink,
   updateContactOrg,
 } from "../../realm/queries/organisationOperations";
+import { useEffect, useRef, useState } from "react";
+import { useObject, useQuery, useRealm } from "@realm/react";
+
+import Contact from "../../realm/models/Contact";
 import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
-import Toast from "react-native-toast-message";
+import Dropdown from "../common/DropDown";
+import ExactTextBox from "../notecontainer/ExactTextBox";
+import { Ionicons } from "@expo/vector-icons";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import MultiInput from "../common/MultiInput";
+import Organisation from "../../realm/models/Organisation";
+import Toast from "react-native-toast-message";
 
 async function requestContactPermission() {
   const { status } = await Contacts.requestPermissionsAsync();
@@ -330,13 +330,13 @@ const NewContactModal = ({
                   placeholder="Email"
                 />
               </View>
-              <View style={{ height: 50, marginVertical: 10 }}>
+              {/* <View style={{ height: 50, marginVertical: 10 }}>
                 <ExactTextBox
                   content={linkedin}
                   setContent={setLinkedin}
                   placeholder="Linkedin Profile Url"
                 />
-              </View>
+              </View> */}
             </View>
           </TouchableOpacity>
         </ScrollView>

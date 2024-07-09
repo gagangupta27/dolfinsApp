@@ -109,8 +109,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#A5A6F62B",
+    backgroundColor: "#fff",
     paddingRight: 10,
+    borderBottomWidth: 1,
+    borderColor: "#00000014",
   },
   rightBox: {
     flexDirection: "row",
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   contactbase: {
     // backgroundColor: "#A5A6F62B",
     justifyContent: "center",
-    padding: 15,
+    padding: 5,
     marginTop: 5,
     marginBottom: 5,
   },
@@ -148,8 +150,7 @@ const styles = StyleSheet.create({
   contactname: {
     color: "#000000",
     fontSize: 16,
-    // fontWeight: 600, // 'normal' is not a valid value in React Native, '400' is equivalent to normal
-    fontFamily: "WorkSans-Bold", // You will need to include the font in your project
+    fontWeight: "500",
   },
   contactposition: {
     color: "#000000",

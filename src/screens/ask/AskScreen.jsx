@@ -38,26 +38,26 @@ import {
   useAllCalendarNotes,
   useAllContactNotes,
 } from "../../realm/queries/noteOperations";
+import { useQuery, useRealm } from "@realm/react";
 
 import { BSON } from "realm";
+import CalendarEvent from "../../realm/models/CalendarEvent";
+import CalendarEventNoteMap from "../../realm/models/CalendarEventNoteMap";
+import Contact from "../../realm/models/Contact";
+import ContactNoteMap from "../../realm/models/ContactNoteMap";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
+import Note from "../../realm/models/Note";
+import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
+import Organisation from "../../realm/models/Organisation";
 import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
 import { getLastSubstringAfterAt } from "../../utils/common";
 import { useNavigation } from "@react-navigation/native";
-import { useQuery, useRealm } from "@realm/react";
+import useQuickNote from "../../hooks/useQuickNote";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
 import useSearchFilter from "../../hooks/SearchFilter";
-import Organisation from "../../realm/models/Organisation";
-import Contact from "../../realm/models/Contact";
-import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
-import ContactNoteMap from "../../realm/models/ContactNoteMap";
-import Note from "../../realm/models/Note";
-import CalendarEventNoteMap from "../../realm/models/CalendarEventNoteMap";
-import CalendarEvent from "../../realm/models/CalendarEvent";
-import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
-import useQuickNote from "../../hooks/useQuickNote";
 
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -615,8 +615,11 @@ const CommonComponent = ({}) => {
   const Drawer = createDrawerNavigator();
 
   const createNewChat = (navigation) => {
+    const maxChatNumber = Math.max(
+      ...chats.map((chat) => parseInt(chat?.title?.split(" ")[1]))
+    );
     const newChat = {
-      title: `Chat ${chats.length + 1}`,
+      title: `Chat ${maxChatNumber + 1}`,
       messages: [{ role: "assistant", content: "Hi, How can I help you?" }],
     };
     const id = addChat(realm, newChat);
