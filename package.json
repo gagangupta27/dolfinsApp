@@ -86,7 +86,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/react-native": "^0.73.0"
+    "@types/react-native": "^0.73.0",
+    "reactotron-react-native": "^5.1.7"
   },
   "private": true
 }

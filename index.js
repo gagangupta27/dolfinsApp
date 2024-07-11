@@ -1,3 +1,7 @@
+if (__DEV__) {
+  import("./ReactotronConfig").then(() => {});
+}
+
 import App from "./App";
 import codePush from "react-native-code-push";
 import { registerRootComponent } from "expo";

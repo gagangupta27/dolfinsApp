@@ -1,4 +1,5 @@
 import * as Clipboard from "expo-clipboard";
+import Realm from "realm";
 
 import {
   ActivityIndicator,
@@ -53,7 +54,10 @@ import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
-import { getLastSubstringAfterAt } from "../../utils/common";
+import {
+  getCircularReplacer,
+  getLastSubstringAfterAt,
+} from "../../utils/common";
 import { useNavigation } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
@@ -160,9 +164,7 @@ const ChatComponent = ({ route }) => {
         organisation: realm
           .objects(Organisation)
           .filtered(`_id IN $0`, mentionedOrgsIds),
-        quichNotes: realm
-          .objects(ContactNoteMap)
-          .filtered("contactId == $0", quickNoteRef._id),
+        quichNotes: quichNotes,
       };
     } else {
       return {
@@ -170,7 +172,9 @@ const ChatComponent = ({ route }) => {
         notes: realm.objects(Note),
         calendarEvents: realm.objects(CalendarEvent),
         organisation: realm.objects(Organisation),
-        quichNotes: realm.objects(Note),
+        quichNotes: realm
+          .objects(ContactNoteMap)
+          .filtered("contactId == $0", quickNoteRef._id),
       };
     }
   };
@@ -186,14 +190,13 @@ const ChatComponent = ({ route }) => {
       const start = Date.now();
 
       const systemPrompt = await getSystemPrompt(mentionData);
-
       let updatedMessages = [
-        ...allMessages.map((entry) => {
-          if (entry.role == "system") {
-            return { role: "system", content: JSON.stringify(systemPrompt) };
-          } else return entry;
-        }),
-        { role: "user", content: question.trim() },
+        ...allMessages,
+        {
+          role: "user",
+          content: question.trim(),
+          data: systemPrompt,
+        },
       ];
       let title = chat.title;
       if (!title) {
@@ -204,7 +207,6 @@ const ChatComponent = ({ route }) => {
         messages: updatedMessages,
       });
       setAllMessages(updatedMessages);
-
       let answer = "";
       setFetchingAnswer(true);
       // Use chatGptStream with a callback for each streamed message
@@ -239,6 +241,7 @@ const ChatComponent = ({ route }) => {
       setAllMessages(updatedMessages);
       setMentionData([]);
     } catch (e) {
+      console.log("err", e);
       setFetchingAnswer(false);
       setError("Having trouble at the moment. Please try again later.");
     }

@@ -68,14 +68,6 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     },
   }));
 
-  useEffect(() => {
-    console.log("visible", visible);
-  }, [visible]);
-
-  useEffect(() => {
-    console.log("refresh");
-  }, []);
-
   const [fetchingData, setFetchingData] = useState(false);
 
   const [fetchingDataError, setFetchingDataError] = useState(null);
@@ -172,34 +164,27 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.ADD_LINKEDIN_URL,
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_IDENTIFIER]: linkedinProfileUrl,
     });
-    console.log("1");
     setFetchingDataError(null);
     setIsSettingTabEnabled(true);
-    console.log("2");
     setFetchingData(true);
     const { linkedinId, linkedinProfileUrlLower } =
       fetchLinkedinUrl(linkedinProfileUrl);
     if (!linkedinId) {
       setFetchingData(false);
-      console.log("3");
       return;
     }
     setLinkedinProfileUrl(linkedinProfileUrlLower);
-    console.log("4");
     const data = await fetchLinkedinData(linkedinId);
-    console.log("5");
     if (!data || !data.object_urn) {
       setFetchingData(false);
       return;
     }
-    console.log("6");
     setLinkedProfileData(data);
 
     const quickSummary = await fetchLinkedinSummary(data);
     if (!quickSummary) {
       return;
     }
-    console.log("7");
     setLinkedinSummary(quickSummary);
     setIsSettingTabEnabled(false);
     setFetchingData(false);
