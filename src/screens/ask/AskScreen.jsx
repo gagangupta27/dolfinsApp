@@ -1,5 +1,4 @@
 import * as Clipboard from "expo-clipboard";
-import Realm from "realm";
 
 import {
   ActivityIndicator,
@@ -36,6 +35,10 @@ import {
   useChats,
 } from "../../realm/queries/chatOperations";
 import {
+  getCircularReplacer,
+  getLastSubstringAfterAt,
+} from "../../utils/common";
+import {
   useAllCalendarNotes,
   useAllContactNotes,
 } from "../../realm/queries/noteOperations";
@@ -50,14 +53,11 @@ import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import Note from "../../realm/models/Note";
 import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
 import Organisation from "../../realm/models/Organisation";
+import Realm from "realm";
 import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
-import {
-  getCircularReplacer,
-  getLastSubstringAfterAt,
-} from "../../utils/common";
 import { useNavigation } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
@@ -150,6 +150,12 @@ const ChatComponent = ({ route }) => {
         );
       });
 
+      console.log("mentionedContactsIds", mentionedContactsIds);
+      console.log("mentionedOrgsIds", mentionedOrgsIds);
+      console.log("orgContactsIds", orgContactsIds);
+      console.log("allContactNoteIds", allContactNoteIds);
+      console.log("allOrgNoteIds", allOrgNoteIds);
+
       return {
         contacts: allContacts.filtered(`_id IN $0`, [
           ...mentionedContactsIds,
@@ -190,13 +196,20 @@ const ChatComponent = ({ route }) => {
       const start = Date.now();
 
       const systemPrompt = await getSystemPrompt(mentionData);
+      console.log(
+        systemPrompt,
+        JSON.stringify(systemPrompt, getCircularReplacer())
+      );
       let updatedMessages = [
-        ...allMessages,
-        {
-          role: "user",
-          content: question.trim(),
-          data: systemPrompt,
-        },
+        ...allMessages.map((entry) => {
+          if (entry.role == "system") {
+            return {
+              role: "system",
+              content: JSON.stringify(systemPrompt, getCircularReplacer()),
+            };
+          } else return entry;
+        }),
+        { role: "user", content: question.trim() },
       ];
       let title = chat.title;
       if (!title) {
@@ -610,7 +623,7 @@ const CommonComponent = ({}) => {
   if (chats.length == 0) {
     const newChat = {
       title: `Chat 1`,
-      messages: [{ role: "assistant", content: "Hi, How can I help you?" }],
+      messages: [{ role: "system", content: "" }],
     };
     addChat(realm, newChat);
   }
@@ -623,7 +636,7 @@ const CommonComponent = ({}) => {
     );
     const newChat = {
       title: `Chat ${maxChatNumber + 1}`,
-      messages: [{ role: "assistant", content: "Hi, How can I help you?" }],
+      messages: [{ role: "system", content: "" }],
     };
     const id = addChat(realm, newChat);
     setTimeout(() => {
