@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   searchbar: {
-    backgroundColor: "#A5A6F62B",
+    backgroundColor: "#fff",
     justifyContent: "center",
     padding: 15,
     marginTop: 5,

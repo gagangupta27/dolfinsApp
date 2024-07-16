@@ -29,7 +29,7 @@ const NavigationBarForHomeScreen = ({ onNewContactClick }) => {
       </TouchableOpacity>
       <View style={styles.iconsContainer}>
         <TouchableOpacity style={styles.iconButton} onPress={onNewContactClick}>
-          <AntDesign name="pluscircle" size={20} color="#7879F1" />
+          <AntDesign name="pluscircle" size={20} color="#000" />
         </TouchableOpacity>
       </View>
     </View>

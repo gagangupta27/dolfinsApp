@@ -148,21 +148,21 @@ const NoteInputField = forwardRef(
         <View style={styles.shadowContainer}>
           {/* Top Shadow */}
           <LinearGradient
-            colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0)"]}
+            colors={["black", "rgba(0, 0, 0, 0)"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.topShadow}
           />
           {/* Left Shadow */}
           <LinearGradient
-            colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0.17)"]}
+            colors={["black", "rgba(0, 0, 0, 0)"]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={styles.sideShadow}
           />
           {/* Right Shadow */}
           <LinearGradient
-            colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0.17)"]}
+            colors={["black", "rgba(0, 0, 0, 0)"]}
             start={{ x: 1, y: 0.5 }}
             end={{ x: 0, y: 0.5 }}
             style={[styles.rightShadow]}
@@ -173,7 +173,7 @@ const NoteInputField = forwardRef(
             style={{
               flex: 1,
               flexDirection: "row",
-              backgroundColor: "rgba(165, 166, 246, 0.17)",
+              backgroundColor: "rgba(255, 255, 255, 0.17)",
               paddingBottom: 5,
             }}
           >
@@ -243,11 +243,9 @@ const NoteInputField = forwardRef(
 const styles = StyleSheet.create({
   textinputview: {
     backgroundColor: "#FFFFFF",
-    height: Dimensions.get("screen").height * 0.3,
-    // flex:1,
+    height: Dimensions.get("screen").height * 0.4,
     borderRadius: 15,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
-
+    backgroundColor: "rgba(255, 255, 255, 0.17)",
     flexDirection: "row",
     justifyContent: "space-between", // This will position the children at either end
     alignItems: "center",

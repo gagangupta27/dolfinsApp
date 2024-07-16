@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   contactbase: {
-    // backgroundColor: "#A5A6F62B",
+    // backgroundColor: "#fff",
     justifyContent: "center",
     padding: 5,
     marginTop: 5,

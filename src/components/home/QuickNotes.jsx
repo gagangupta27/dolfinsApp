@@ -29,7 +29,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginTop: 10,
     marginBottom: 15,
-    backgroundColor: "#A5A6F64F",
+    backgroundColor: "fff",
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: "#00000014",
   },
   quicknotes: {
     margin: 15,

@@ -17,12 +17,6 @@ import {
   useTrackWithPageInfo,
 } from "../../utils/analytics";
 import Svg, { Path } from "react-native-svg";
-import { getQuickSummary, getWorkHistoryList } from "../../utils/linkedin";
-import {
-  updateLinkedinProfile,
-  updateLinkedinSummary,
-  updateLinkedinUrl,
-} from "../../realm/queries/contactOperations";
 import {
   forwardRef,
   memo,
@@ -30,12 +24,18 @@ import {
   useImperativeHandle,
   useState,
 } from "react";
+import { getQuickSummary, getWorkHistoryList } from "../../utils/linkedin";
+import {
+  updateLinkedinProfile,
+  updateLinkedinSummary,
+  updateLinkedinUrl,
+} from "../../realm/queries/contactOperations";
+import { useObject, useRealm } from "@realm/react";
 
 import Api from "../../utils/Api";
 import { Entypo } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import NotesList from "../notecontainer/NotesList";
-import { useObject, useRealm } from "@realm/react";
 
 const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   const track = useTrackWithPageInfo();
@@ -260,7 +260,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                 style={{
                   marginHorizontal: 5,
                   fontFamily: "WorkSans-Bold",
-                  color: isSettingTabEnabled ? "#7879F1" : "#000000",
+                  color: isSettingTabEnabled ? "#000" : "#000000",
                 }}
               >
                 Add URL
@@ -271,7 +271,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                 style={{
                   marginHorizontal: 5,
                   fontFamily: "WorkSans-Bold",
-                  color: !isSettingTabEnabled ? "#7879F1" : "#000000",
+                  color: !isSettingTabEnabled ? "#000" : "#000000",
                 }}
               >
                 LinkedIn Data
@@ -315,27 +315,21 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                 <View style={styles.shadowContainer}>
                   {/* Top Shadow */}
                   <LinearGradient
-                    colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0)"]}
+                    colors={["black", "rgba(0, 0, 0, 0)"]}
                     start={{ x: 0.5, y: 0 }}
                     end={{ x: 0.5, y: 1 }}
                     style={styles.topShadow}
                   />
                   {/* Left Shadow */}
                   <LinearGradient
-                    colors={[
-                      "rgba(174,175,220, 1)",
-                      "rgba(165, 166, 246, 0.17)",
-                    ]}
+                    colors={["black", "rgba(0, 0, 0, 0)"]}
                     start={{ x: 0, y: 0.5 }}
                     end={{ x: 1, y: 0.5 }}
                     style={styles.sideShadow}
                   />
                   {/* Right Shadow */}
                   <LinearGradient
-                    colors={[
-                      "rgba(174,175,220, 1)",
-                      "rgba(165, 166, 246, 0.17)",
-                    ]}
+                    colors={["black", "rgba(0, 0, 0, 0)"]}
                     start={{ x: 1, y: 0.5 }}
                     end={{ x: 0, y: 0.5 }}
                     style={[styles.rightShadow]}
@@ -346,7 +340,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                     style={{
                       flex: 1,
                       flexDirection: "row",
-                      backgroundColor: "rgba(165, 166, 246, 0.17)",
+                      backgroundColor: "rgba(255, 255, 255, 0.17)",
                     }}
                   >
                     <View style={{ flex: 1, flexDirection: "column" }}>
@@ -478,7 +472,7 @@ const styles = StyleSheet.create({
   done: {
     fontSize: 20,
     fontFamily: "WorkSans-Bold",
-    color: "#7879F1",
+    color: "#000",
   },
   form: {
     flex: 1,
@@ -490,7 +484,7 @@ const styles = StyleSheet.create({
     height: 50,
     // flex:1,
     borderRadius: 15,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
+    backgroundColor: "rgba(255, 255, 255, 0.17)",
 
     flexDirection: "row",
     justifyContent: "space-between", // This will position the children at either end

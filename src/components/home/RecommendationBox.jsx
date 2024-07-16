@@ -1,9 +1,10 @@
-import { Entypo } from "@expo/vector-icons";
-import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import { Entypo } from "@expo/vector-icons";
+import React from "react";
+
 /**
- * 
+ *
  * This is not getting used but can be used.
  */
 const RecommendationBox = ({
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     marginBottom: 16, // Space below the message
   },
   connectButton: {
-    backgroundColor: "#7879F1", // iOS blue color for the button
+    backgroundColor: "#000", // iOS blue color for the button
     paddingVertical: 8, // Vertical padding for the button
     paddingHorizontal: 10, // Horizontal padding for the button
     borderRadius: 6, // Rounded corners for the button

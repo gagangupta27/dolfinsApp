@@ -1,6 +1,7 @@
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 const MultiModalOptions = ({
   recording,
@@ -15,7 +16,7 @@ const MultiModalOptions = ({
       {line && <View style={styles.verticalline}></View>}
       {recording && (
         <TouchableOpacity onPress={onStopRecording} style={styles.optionButton}>
-          <Feather name="stop-circle" size={24} color="#7879F1" />
+          <Feather name="stop-circle" size={24} color="#000" />
         </TouchableOpacity>
       )}
       {!recording && (
@@ -23,14 +24,14 @@ const MultiModalOptions = ({
           onPress={onStartRecording}
           style={styles.optionButton}
         >
-          <Feather name="mic" size={24} color="#7879F1" />
+          <Feather name="mic" size={24} color="#000" />
         </TouchableOpacity>
       )}
       <TouchableOpacity onPress={onImagePress} style={styles.optionButton}>
-        <Feather name="image" size={24} color="#7879F1" />
+        <Feather name="image" size={24} color="#000" />
       </TouchableOpacity>
       <TouchableOpacity onPress={onDocumentPress} style={styles.optionButton}>
-        <Feather name="file" size={24} color="#7879F1" />
+        <Feather name="file" size={24} color="#000" />
       </TouchableOpacity>
     </View>
   );
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     padding: 5,
-    color: "#7879F1",
+    color: "#000",
   },
   optionText: {
     color: "#black",

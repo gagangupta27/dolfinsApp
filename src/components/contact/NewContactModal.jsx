@@ -265,11 +265,12 @@ const NewContactModal = ({
                         key={o._id}
                         style={{
                           padding: 10,
-                          backgroundColor: "rgba(165, 166, 246, 0.3)",
+                          backgroundColor: "white",
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "space-between",
                           borderRadius: 7,
+                          borderWidth: 0.7,
                         }}
                       >
                         <Text>{o.name}</Text>
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
   done: {
     fontSize: 20,
     fontFamily: "WorkSans-Bold",
-    color: "#7879F1",
+    color: "#000",
   },
   form: {
     flex: 1,

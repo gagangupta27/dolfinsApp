@@ -4,6 +4,7 @@ import Animated, {
   SlideInRight,
   SlideOutRight,
 } from "react-native-reanimated";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import {
   Image,
   StyleSheet,
@@ -12,9 +13,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
 
+import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

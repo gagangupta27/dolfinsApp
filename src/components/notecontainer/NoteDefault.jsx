@@ -1,9 +1,6 @@
 import React, { useRef } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  View
-} from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
+
 import MultiModalOptions from "./MultiModalOptions";
 
 const onClick = () => {};
@@ -51,7 +48,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 10,
     borderRadius: 15,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
+    backgroundColor: "rgba(255, 255, 255, 0.17)",
 
     flexDirection: "row",
     justifyContent: "space-between", // This will position the children at either end

@@ -10,14 +10,14 @@ const SendButtonIcon = () => (
   >
     <Path
       d="M19.9581 8.98235L1 16.9647L4.55464 8.98235L1 1L19.9581 8.98235Z"
-      stroke="#7879F1"
+      stroke="#000"
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M4.49231 8.98242H19.9581"
-      stroke="#7879F1"
+      stroke="#000"
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"

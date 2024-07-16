@@ -1063,7 +1063,7 @@ PODS:
   - react-native-mixpanel (1.2.5):
     - Mixpanel (~> 3.6.0)
     - React
-  - react-native-pager-view (6.3.1):
+  - react-native-pager-view (6.2.3):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1687,7 +1687,7 @@ SPEC CHECKSUMS:
   react-native-config: 86038147314e2e6d10ea9972022aa171e6b1d4d8
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-mixpanel: 5d0bcea791fd938c35138be2d00e50e19b9de601
-  react-native-pager-view: f1e72cb827406f1b49f007ab07400197d421b6e7
+  react-native-pager-view: d5f3adb58a4e6e0d200055e9a4afdcda9b9022ce
   react-native-render-html: 984dfe2294163d04bf5fe25d7c9f122e60e05ebe
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d

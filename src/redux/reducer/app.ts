@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Credentials } from "react-native-auth0";
 import Api, { setToken } from "../../utils/Api";
+import { Storage } from "../../utils/storage";
 
 const shouldFetchCalendarEvents = (lastSynced: number | null): boolean => {
   if (!lastSynced) return true;
@@ -51,6 +52,11 @@ const appSlice = createSlice({
   reducers: {
     setAuthData: (state, action) => {
       state.authData = action.payload;
+      if (action.payload) {
+        Storage.setItem("authData", JSON.stringify(action.payload));
+      } else {
+        Storage.removeItem("authData");
+      }
       if (state.authData && state.authData.idToken)
         setToken(state.authData.idToken);
     },

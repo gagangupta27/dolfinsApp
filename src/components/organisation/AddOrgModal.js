@@ -7,20 +7,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { useObject, useQuery, useRealm } from "@realm/react";
-
-import ExactTextBox from "../notecontainer/ExactTextBox";
-import { Ionicons } from "@expo/vector-icons";
-import Organisation from "../../realm/models/Organisation";
-import Api from "../../utils/Api";
 import {
   OrgContactLink,
   addOrganisation,
 } from "../../realm/queries/organisationOperations";
-import Dropdown from "../common/DropDown";
+import { useEffect, useRef, useState } from "react";
+import { useObject, useQuery, useRealm } from "@realm/react";
+
+import Api from "../../utils/Api";
 import Contact from "../../realm/models/Contact";
+import Dropdown from "../common/DropDown";
+import ExactTextBox from "../notecontainer/ExactTextBox";
+import { Ionicons } from "@expo/vector-icons";
 import MultiInput from "../common/MultiInput";
+import Organisation from "../../realm/models/Organisation";
 
 const AddOrgModal = ({
   visible = false,
@@ -187,11 +187,12 @@ const AddOrgModal = ({
                     key={o._id}
                     style={{
                       padding: 10,
-                      backgroundColor: "rgba(165, 166, 246, 0.3)",
+                      backgroundColor: "white",
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "space-between",
                       borderRadius: 7,
+                      borderWidth: 0.7,
                     }}
                   >
                     <Text>{o.name}</Text>
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
   done: {
     fontSize: 20,
     fontFamily: "WorkSans-Bold",
-    color: "#7879F1",
+    color: "#000",
   },
   form: {
     flex: 1,

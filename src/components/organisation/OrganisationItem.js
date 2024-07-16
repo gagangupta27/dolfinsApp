@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#A5A6F62B",
+    backgroundColor: "#fff",
     paddingRight: 10,
   },
   rightBox: {
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   organisationbase: {
-    // backgroundColor: "#A5A6F62B",
+    // backgroundColor: "#fff",
     justifyContent: "center",
     padding: 15,
     marginTop: 5,

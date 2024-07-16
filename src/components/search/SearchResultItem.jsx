@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     // padding:5
     // margin: 5,
     // padding: 10,
-    // backgroundColor: '#A5A6F62B',
+    // backgroundColor: '#fff',
     // borderRadius: 5,
   },
   content: {

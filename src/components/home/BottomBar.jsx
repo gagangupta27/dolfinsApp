@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 10,
     borderRadius: 15,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
+    backgroundColor: "rgba(255, 255, 255, 0.17)",
     shadowColor: "#FFF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25, // This is not exactly the same as CSS due to lack of 'inset' support

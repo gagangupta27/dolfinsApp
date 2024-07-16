@@ -11,7 +11,9 @@ import ContactScreen from "../screens/contact/ContactScreen";
 import HomeScreen from "../screens/home/HomeScreen";
 import ImagePreviewScreen from "../screens/imagepreview/ImagePreviewScreen";
 import LoginScreen from "../screens/login/LoginScreen";
+import Menu from "../screens/profile/Menu";
 import { NavigationContainer } from "@react-navigation/native";
+import OrganisationScreen from "../screens/organisation/OrganisationScreen.jsx";
 import PDFPreviewScreen from "../screens/pdfpreview/PDFPreviewScreen";
 import React from "react";
 import { RootState } from "../redux/store";
@@ -19,7 +21,6 @@ import { Storage } from "../utils/storage";
 import WebViewScreen from "../screens/webview/WebViewScreen";
 import { createStackNavigator } from "@react-navigation/stack";
 import { setAuthData } from "../redux/reducer/app";
-import OrganisationScreen from "../screens/organisation/OrganisationScreen.jsx";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -43,6 +44,7 @@ function LoggedInStack() {
       <Stack.Screen name="ImagePreviewScreen" component={ImagePreviewScreen} />
       <Stack.Screen name="PDFPreviewScreen" component={PDFPreviewScreen} />
       <Stack.Screen name="OrganisationScreen" component={OrganisationScreen} />
+      <Stack.Screen name="Menu" component={Menu} />
       <Stack.Screen
         name="CalendarEventScreen"
         component={CalendarEventScreen}
@@ -100,13 +102,10 @@ export default function Navigation() {
     },
   };
 
-  const currentTime = new Date().getTime();
-  const isLoggedIn = authData;
-
   return fontsLoaded ? (
     <View style={styles.container}>
       <NavigationContainer linking={linking}>
-        {isLoggedIn ? <LoggedInStack /> : <LoggedOutStack />}
+        {authData ? <LoggedInStack /> : <LoggedOutStack />}
       </NavigationContainer>
     </View>
   ) : (

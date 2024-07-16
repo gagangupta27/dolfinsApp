@@ -38,13 +38,13 @@ const Checked = () => {
     >
       <Path
         d="M13 24C19.0751 24 24 19.0751 24 13C24 6.92487 19.0751 2 13 2C6.92487 2 2 6.92487 2 13C2 19.0751 6.92487 24 13 24Z"
-        fill="#A5A6F6"
-        stroke="#A5A6F6"
+        fill="#000"
+        stroke="#000"
         stroke-width="3.19171"
         stroke-linecap="round"
         stroke-linejoin="round"
       />
-      <Path d="M7.5 13.55L10.8 16.85L18.5 9.15002" fill="#A5A6F6" />
+      <Path d="M7.5 13.55L10.8 16.85L18.5 9.15002" fill="#000" />
       <Path
         d="M7.5 13.55L10.8 16.85L18.5 9.15002"
         stroke="white"
@@ -208,7 +208,7 @@ const ContactSelectionModal = ({
       key={"selected_" + item.id}
       style={{
         borderRadius: 5,
-        backgroundColor: "rgba(165, 166, 246, 0.30)",
+        backgroundColor: "black",
         justifyContent: "space-between",
         flexDirection: "row",
         alignItems: "center",
@@ -219,8 +219,10 @@ const ContactSelectionModal = ({
     >
       <Text
         style={{
-          paddingHorizontal: 2,
+          paddingHorizontal: 5,
           fontFamily: "Inter-Regular",
+          color: "white",
+          padding: 5,
         }}
       >
         {item.name}
@@ -231,7 +233,7 @@ const ContactSelectionModal = ({
           setSelectedContacts(selectedContacts.filter((p) => p.id != item.id));
         }}
       >
-        <Entypo name="cross" size={16} color="black" />
+        <Entypo name="cross" size={16} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -295,7 +297,7 @@ const ContactSelectionModal = ({
               style={{
                 fontSize: 20,
                 fontFamily: "WorkSans-Bold",
-                color: "#7879F1",
+                color: "#000",
               }}
             >
               Done
@@ -314,9 +316,10 @@ const ContactSelectionModal = ({
           style={{
             flexDirection: "row",
             padding: 10,
-            backgroundColor: "rgba(165, 166, 246, 0.31)",
+            backgroundColor: "white",
             marginVertical: 15,
             alignItems: "center",
+            borderWidth: 1,
           }}
         >
           <View
@@ -324,13 +327,13 @@ const ContactSelectionModal = ({
               paddingHorizontal: 10,
               height: 34,
               width: 34,
-              backgroundColor: "rgba(165, 166, 246, 0.48)",
+              backgroundColor: "black",
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 40,
             }}
           >
-            <Text style={{ fontSize: 20 }}>+</Text>
+            <Text style={{ fontSize: 20, color: "white" }}>+</Text>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -357,8 +360,7 @@ const ContactSelectionModal = ({
           ).length > 0 && (
             <View
               style={{
-                backgroundColor: "rgba(165, 166, 246, 0.15)",
-                padding: 10,
+                backgroundColor: "white",
                 flexDirection: "row",
                 flexWrap: "wrap",
                 marginVertical: 10,
@@ -369,7 +371,7 @@ const ContactSelectionModal = ({
                 .map((item) => renderSelectedContact({ item }))}
             </View>
           )}
-        <View style={{ backgroundColor: "rgba(165, 166, 246, 0.31)" }}>
+        <View style={{ backgroundColor: "white" }}>
           <VirtualizedList
             initialNumToRender={15}
             data={filteredContacts}
@@ -399,7 +401,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderColor: "#A5A6F6",
+    borderColor: "#000",
     borderWidth: 1,
     padding: 20,
   },
@@ -435,7 +437,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: "#A5A6F6",
+    borderColor: "#000",
     backgroundColor: "transparent",
   },
   checkboxChecked: {},

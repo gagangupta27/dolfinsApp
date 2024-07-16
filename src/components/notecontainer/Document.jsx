@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const Document = ({ document }) => {
+import { Entypo } from "@expo/vector-icons";
+
+const Document = ({ document, onRemoveDoc = () => {}, showRemove = false }) => {
   return (
     <View style={styles.container}>
       <View>
@@ -16,7 +18,7 @@ const Document = ({ document }) => {
             borderTopRightRadius: 10,
             borderBottomLeftRadius: 2,
             borderBottomRightRadius: 2,
-            backgroundColor: "#7879F1",
+            backgroundColor: "#000",
           }}
         >
           <Text
@@ -31,11 +33,25 @@ const Document = ({ document }) => {
             PDF
           </Text>
         </View>
-        {/* <Svg width="24" height="34" viewBox="0 0 24 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <Path d="M0 2C0 0.89543 0.895431 0 2 0H14C19.5228 0 24 4.47715 24 10V32C24 33.1046 23.1046 34 22 34H2C0.89543 34 0 33.1046 0 32V2Z" fill="#7879F1"/>
-            </Svg> */}
       </View>
       <Text style={styles.text}>{document.documentName}</Text>
+      {showRemove && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 100,
+            alignItems: "center",
+            justifyContent: "center",
+            alignContent: "center",
+            position: "absolute",
+            top: -3,
+            right: -3,
+          }}
+          onPress={onRemoveDoc}
+        >
+          <Entypo name="cross" size={20} color="black" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -47,7 +63,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     flexWrap: "nowrap",
     padding: 5,
-    backgroundColor: "rgba(165, 166, 246, 0.48)",
+    backgroundColor: "rgba(255, 255, 255, 0.48)",
     width: "80%",
     borderRadius: 20,
     height: 61,

@@ -1,6 +1,7 @@
-import { Feather } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
 import { Animated, Button, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+
+import { Feather } from "@expo/vector-icons";
 
 const Recording = ({ onStopRecording }) => {
   const fadeAnim = useRef(new Animated.Value(1)).current; // Initial opacity: 1
@@ -77,7 +78,7 @@ const Recording = ({ onStopRecording }) => {
   return (
     <View style={styles.container}>
       <Animated.View style={{ ...styles.mic, opacity: fadeAnim }}>
-        <Feather name="mic" size={24} color="#7879F1" />
+        <Feather name="mic" size={24} color="#000" />
       </Animated.View>
       <Text style={styles.recordingtext}> Recording ... </Text>
       {/* <Waveform bars={bars}/> */}

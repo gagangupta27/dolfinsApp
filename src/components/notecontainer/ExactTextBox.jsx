@@ -15,21 +15,21 @@ const ExactTextBox = ({
       <View style={styles.shadowContainer}>
         {/* Top Shadow */}
         <LinearGradient
-          colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0)"]}
+          colors={["black", "rgba(0, 0, 0, 0)"]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.topShadow}
         />
         {/* Left Shadow */}
         <LinearGradient
-          colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0.17)"]}
+          colors={["black", "rgba(0, 0, 0, 0)"]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={styles.sideShadow}
         />
         {/* Right Shadow */}
         <LinearGradient
-          colors={["rgba(174,175,220, 1)", "rgba(165, 166, 246, 0.17)"]}
+          colors={["black", "rgba(0, 0, 0, 0)"]}
           start={{ x: 1, y: 0.5 }}
           end={{ x: 0, y: 0.5 }}
           style={[styles.rightShadow]}
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    backgroundColor: "rgba(165, 166, 246, 0.17)",
+    backgroundColor: "rgba(255, 255, 255, 0.17)",
     position: "absolute", // Position text input absolutely to overlap the SVG
     left: 0,
     right: 0,

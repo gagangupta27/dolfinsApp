@@ -3766,6 +3766,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/material-top-tabs@npm:^6.6.13":
+  version: 6.6.13
+  resolution: "@react-navigation/material-top-tabs@npm:6.6.13"
+  dependencies:
+    color: ^4.2.3
+    warn-once: ^0.1.0
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-pager-view: ">= 4.0.0"
+    react-native-tab-view: ">= 3.0.0"
+  checksum: a393645ee21d08487c94b11f3df79abd5b3302d15a6101c3f910f90abcfe40cdc68cbfb792bcdff0818e4ba898153c824d641c6121fdd373b0fe56973d11f16a
+  languageName: node
+  linkType: hard
+
 "@react-navigation/native@npm:^6.1.9":
   version: 6.1.17
   resolution: "@react-navigation/native@npm:6.1.17"
@@ -7061,6 +7077,7 @@ __metadata:
     "@react-native-google-signin/google-signin": ^11.0.0
     "@react-navigation/bottom-tabs": ^6.5.11
     "@react-navigation/drawer": ^6.6.6
+    "@react-navigation/material-top-tabs": ^6.6.13
     "@react-navigation/native": ^6.1.9
     "@react-navigation/stack": ^6.3.20
     "@realm/react": ^0.6.2
@@ -7109,7 +7126,7 @@ __metadata:
     react-native-markdown-view: ^1.1.4
     react-native-mixpanel: ^1.2.5
     react-native-modal: ^13.0.1
-    react-native-pager-view: ^6.2.3
+    react-native-pager-view: 6.2.3
     react-native-reanimated: ~3.6.2
     react-native-reanimated-carousel: ^3.5.1
     react-native-render-html: ^6.3.4
@@ -14556,13 +14573,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-pager-view@npm:^6.2.3":
-  version: 6.3.1
-  resolution: "react-native-pager-view@npm:6.3.1"
+"react-native-pager-view@npm:6.2.3":
+  version: 6.2.3
+  resolution: "react-native-pager-view@npm:6.2.3"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: ef83fb53350d7b4c262a8c4d4bf6fbee8f8941e56469135463a47d496ff8fd43f7efe52d02c3a583427800fc88c96a9bf8e601a45a6e671834d5fffe9541e3e4
+  checksum: e82a7a485045727c82b9d93d759118d5c1b12d11c3a0e3d644d638041a2bfb96e998472e245fa6e09806667ec188a8f1c7a951895ae88fc6ca614f80df939fc2
   languageName: node
   linkType: hard
 

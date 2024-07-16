@@ -1,4 +1,5 @@
 import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system";
 
 import {
   ActivityIndicator,
@@ -50,6 +51,8 @@ import CalendarEventNoteMap from "../../realm/models/CalendarEventNoteMap";
 import Contact from "../../realm/models/Contact";
 import ContactNoteMap from "../../realm/models/ContactNoteMap";
 import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
+import Document from "../../components/notecontainer/Document";
+import { Feather } from "@expo/vector-icons";
 import Note from "../../realm/models/Note";
 import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
 import Organisation from "../../realm/models/Organisation";
@@ -58,6 +61,7 @@ import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
 import { chatGptStream } from "../../utils/gpt";
+import useDocumentHandler from "../../hooks/DocumentHandler";
 import { useNavigation } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
@@ -91,6 +95,8 @@ const ChatComponent = ({ route }) => {
       ],
       mentionData
     );
+
+  const { document, onDocumentPress, setDocument } = useDocumentHandler();
 
   const submit = () => {
     track(EVENTS.INPUT_DONE.NAME, {
@@ -150,12 +156,6 @@ const ChatComponent = ({ route }) => {
         );
       });
 
-      console.log("mentionedContactsIds", mentionedContactsIds);
-      console.log("mentionedOrgsIds", mentionedOrgsIds);
-      console.log("orgContactsIds", orgContactsIds);
-      console.log("allContactNoteIds", allContactNoteIds);
-      console.log("allOrgNoteIds", allOrgNoteIds);
-
       return {
         contacts: allContacts.filtered(`_id IN $0`, [
           ...mentionedContactsIds,
@@ -195,11 +195,19 @@ const ChatComponent = ({ route }) => {
       });
       const start = Date.now();
 
+      let base64 = null;
+
+      try {
+        const dat64 = await FileSystem.readAsStringAsync(document.documentUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        base64 = dat64;
+      } catch (error) {
+        base64 = null;
+        console.error("Error reading file", error);
+      }
+
       const systemPrompt = await getSystemPrompt(mentionData);
-      console.log(
-        systemPrompt,
-        JSON.stringify(systemPrompt, getCircularReplacer())
-      );
       let updatedMessages = [
         ...allMessages.map((entry) => {
           if (entry.role == "system") {
@@ -209,6 +217,7 @@ const ChatComponent = ({ route }) => {
             };
           } else return entry;
         }),
+        // base64 ? { role: "user", pdfData: base64, content: "" } : {},
         { role: "user", content: question.trim() },
       ];
       let title = chat.title;
@@ -319,7 +328,7 @@ const ChatComponent = ({ route }) => {
         {item.role == "user" && (
           <Text
             style={{
-              backgroundColor: "#7879F1",
+              backgroundColor: "#000",
               paddingLeft: 31,
               paddingRight: 31,
               paddingTop: 15,
@@ -407,7 +416,7 @@ const ChatComponent = ({ route }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#7879F1" }}>
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
       <View style={{ flex: 1 }}>
         <FlatList
           ref={flatListRef}
@@ -463,6 +472,19 @@ const ChatComponent = ({ route }) => {
         setIsMentionFocused={() => {}}
         hasTextInput={false}
       />
+      {document && (
+        <View
+          style={{
+            paddingLeft: 10,
+          }}
+        >
+          <Document
+            showRemove={true}
+            onRemoveDoc={() => setDocument()}
+            document={document}
+          />
+        </View>
+      )}
       <View
         style={{
           flexDirection: "row",
@@ -505,6 +527,15 @@ const ChatComponent = ({ route }) => {
           selectionColor="white"
           autoCapitalize="none"
         ></TextInput>
+        <TouchableOpacity
+          onPress={onDocumentPress}
+          style={{
+            padding: 5,
+            color: "#000",
+          }}
+        >
+          <Feather name="file" size={24} color="white" />
+        </TouchableOpacity>
         <TouchableOpacity style={{ margin: 5 }} onPress={() => submit()}>
           <Svg
             xmlns="http://www.w3.org/2000/svg"
@@ -666,18 +697,18 @@ const CommonComponent = ({}) => {
     <View
       style={{
         flex: 1,
-        backgroundColor: "#7879F1",
+        backgroundColor: "#000",
         justifyContent: "space-between",
       }}
     >
       {chats.length > 0 && (
         <Drawer.Navigator
           drawerStyle={{
-            backgroundColor: "#7879F1",
+            backgroundColor: "#000",
             width: 240,
           }}
           drawerContentOptions={{
-            activeTintColor: "#7879F1",
+            activeTintColor: "#000",
             labelStyle: {
               color: "#d7879F1",
             },
@@ -694,7 +725,7 @@ const CommonComponent = ({}) => {
             <Drawer.Screen
               options={{
                 headerStyle: {
-                  backgroundColor: "#7879F1", // Change this to your desired color
+                  backgroundColor: "#000", // Change this to your desired color
                 },
                 headerTintColor: "#fff", // Change this to your desired color
                 headerTitleStyle: {

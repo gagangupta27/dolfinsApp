@@ -10,16 +10,16 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 
+import Animated from "react-native-reanimated";
+import Carousel from "react-native-reanimated-carousel";
 import { RootState } from "../../redux/store";
-import { Storage } from "../../utils/storage";
 import auth0 from "../../utils/auth";
 import { identify } from "../../utils/analytics";
 import { setAuthData } from "../../redux/reducer/app";
 import { useAuth0 } from "react-native-auth0";
 import { useTrackWithPageInfo } from "../../utils/analytics";
-import Carousel from "react-native-reanimated-carousel";
-import Animated from "react-native-reanimated";
 
 const width = Dimensions.get("window").width;
 
@@ -41,7 +41,7 @@ const DATA = [
   },
 ];
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
   const track = useTrackWithPageInfo();
 
   const { authorize } = useAuth0();
@@ -71,7 +71,6 @@ const LoginScreen = ({ navigation }) => {
 
         track("Login Success Using Refresh Token");
         dispatch(setAuthData(updatedAuthData));
-        await Storage.setItem("authData", JSON.stringify(updatedAuthData));
       } else {
         const newCredentials = await authorize({
           redirectUrl: redirectUri,
@@ -82,8 +81,7 @@ const LoginScreen = ({ navigation }) => {
         });
         identify(user.email, user);
         track("Login Success");
-        dispatch(setAuthData(newCredentials));
-        await Storage.setItem("authData", JSON.stringify(newCredentials));
+        dispatch(setAuthData({ ...newCredentials, ...user }));
       }
     } catch (e) {
       handleLoginFailure(e);
@@ -102,19 +100,18 @@ const LoginScreen = ({ navigation }) => {
     _carouselRef.current.next({ count: 1, animated: true });
   };
 
-  const screenWidth = Dimensions.get("window").width;
-
   const LoginPage = () => (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Image
-        source={require("../../assets/Dolfins.png")}
-        style={{
-          marginVertical: 10,
-          width: screenWidth * 0.8,
-          height: screenWidth * 0.8,
-        }}
-        resizeMode="contain"
-      />
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "white",
+      }}
+    >
+      <Text style={{ fontWeight: "bold", fontSize: 60, marginBottom: 100 }}>
+        dolfins.ai
+      </Text>
       <View
         style={{
           width: "80%",
@@ -138,19 +135,25 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity
         onPress={onPress}
         style={{
-          width: "80%",
           borderRadius: 12,
           justifyContent: "center",
           alignItems: "center",
-          marginVertical: 50,
-          backgroundColor: "#7879F1",
+          backgroundColor: "#000",
           padding: 16,
+          flexDirection: "row",
+          marginTop: 50,
         }}
       >
+        <AntDesign name="apple1" size={24} color="white" />
         <Text
-          style={{ fontFamily: "Urbanist-Bold", color: "white", fontSize: 16 }}
+          style={{
+            fontFamily: "Urbanist-Bold",
+            color: "white",
+            fontSize: 16,
+            paddingLeft: 16,
+          }}
         >
-          Sign In/Sign Up
+          Apple Sign In
         </Text>
       </TouchableOpacity>
     </View>
