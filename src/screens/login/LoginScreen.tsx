@@ -1,5 +1,10 @@
 import * as AuthSession from "expo-auth-session";
 
+import { AntDesign, Entypo } from "@expo/vector-icons";
+import {
+  AppleButton,
+  appleAuth,
+} from "@invertase/react-native-apple-authentication";
 import {
   Dimensions,
   Image,
@@ -10,7 +15,6 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AntDesign, Entypo } from "@expo/vector-icons";
 
 import Animated from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
@@ -100,6 +104,26 @@ const LoginScreen = () => {
     _carouselRef.current.next({ count: 1, animated: true });
   };
 
+  async function onAppleButtonPress() {
+    // performs login request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      // Note: it appears putting FULL_NAME first is important, see issue #293
+      requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+    });
+
+    // get current authentication state for user
+    // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
+    const credentialState = await appleAuth.getCredentialStateForUser(
+      appleAuthRequestResponse.user
+    );
+
+    // use credentialState response to ensure the user is authenticated
+    if (credentialState === appleAuth.State.AUTHORIZED) {
+      // user is authenticated
+    }
+  }
+
   const LoginPage = () => (
     <View
       style={{
@@ -132,6 +156,17 @@ const LoginScreen = () => {
         </Text>
       </View>
 
+      <AppleButton
+        buttonStyle={AppleButton.Style.BLACK}
+        buttonType={AppleButton.Type.SIGN_IN}
+        style={{
+          width: 160, // You must specify a width
+          height: 45, // You must specify a height
+          marginTop: 50,
+        }}
+        onPress={onAppleButtonPress}
+      />
+
       <TouchableOpacity
         onPress={onPress}
         style={{
@@ -153,7 +188,7 @@ const LoginScreen = () => {
             paddingLeft: 16,
           }}
         >
-          Apple Sign In
+          Sign In with Apple
         </Text>
       </TouchableOpacity>
     </View>

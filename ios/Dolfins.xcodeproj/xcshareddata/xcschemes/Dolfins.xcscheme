@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "DopeV3.app"
-               BlueprintName = "DopeV3"
-               ReferencedContainer = "container:DopeV3.xcodeproj">
+               BuildableName = "Dolfins.app"
+               BlueprintName = "Dolfins"
+               ReferencedContainer = "container:Dolfins.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "DopeV3Tests.xctest"
-               BlueprintName = "DopeV3Tests"
-               ReferencedContainer = "container:DopeV3.xcodeproj">
+               BuildableName = "DolfinsTests.xctest"
+               BlueprintName = "DolfinsTests"
+               ReferencedContainer = "container:Dolfins.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "DopeV3.app"
-            BlueprintName = "DopeV3"
-            ReferencedContainer = "container:DopeV3.xcodeproj">
+            BuildableName = "Dolfins.app"
+            BlueprintName = "Dolfins"
+            ReferencedContainer = "container:Dolfins.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "DopeV3.app"
-            BlueprintName = "DopeV3"
-            ReferencedContainer = "container:DopeV3.xcodeproj">
+            BuildableName = "Dolfins.app"
+            BlueprintName = "Dolfins"
+            ReferencedContainer = "container:Dolfins.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

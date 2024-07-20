@@ -29,8 +29,8 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>dope</string>
-				<string>ai.getdope.dope</string>
+				<string>dolfins</string>
+				<string>com.dolfinsBeta.ai</string>
 			</array>
 		</dict>
 		<dict>
@@ -44,7 +44,7 @@
 			<string>auth0</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>ai.getdope.dope.auth0</string>
+				<string>com.dolfinsBeta.ai.auth0</string>
 			</array>
 		</dict>
 	</array>

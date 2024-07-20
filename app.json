@@ -15,7 +15,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ai.getdope.dope",
+      "bundleIdentifier": "com.dolfinsBeta.ai",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
         "LSApplicationQueriesSchemes": ["mailto"],
@@ -28,7 +28,7 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ai.getdope.dope",
+      "package": "com.dolfinsBeta.ai",
       "permissions": [
         "android.permission.READ_CONTACTS",
         "android.permission.WRITE_CONTACTS",
