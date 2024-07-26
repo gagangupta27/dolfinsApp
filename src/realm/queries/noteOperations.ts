@@ -75,6 +75,7 @@ function addNoteToCalendar(
     type: string;
     imageUri: string | null;
     audioUri: string | null;
+    audioText: string | null;
     volumeLevels: number[];
     documentUri: string | null;
     documentName: string | null;
@@ -102,6 +103,7 @@ function addNoteToCalendar(
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
+      audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
       documentUri: noteDetails.documentUri,
       documentName: noteDetails.documentName,
@@ -130,6 +132,7 @@ async function createNoteAndAddToContact(
     type: string;
     imageUri: string | null;
     audioUri: string | null;
+    audioText: string | null;
     volumeLevels: number[];
     documentUri: string | null;
     documentName: string | null;
@@ -156,6 +159,7 @@ async function createNoteAndAddToContact(
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
+      audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
       documentUri: noteDetails.documentUri,
       documentName: noteDetails.documentName,
@@ -184,6 +188,7 @@ async function createNoteAndAddToOrganisation(
     type: string;
     imageUri: string | null;
     audioUri: string | null;
+    audioText: string | null;
     volumeLevels: number[];
     documentUri: string | null;
     documentName: string | null;
@@ -210,6 +215,7 @@ async function createNoteAndAddToOrganisation(
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
       audioUri: noteDetails.audioUri,
+      audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
       documentUri: noteDetails.documentUri,
       documentName: noteDetails.documentName,
@@ -280,6 +286,7 @@ async function updateNote(
     type: string;
     imageUri: string | null;
     audioUri: string | null;
+    audioText: string | null;
     volumeLevels: number[];
     documentUri: string | null;
     documentName: string | null;
@@ -307,6 +314,7 @@ async function updateNote(
       note.type = noteDetails.type;
       note.imageUri = noteDetails.imageUri;
       note.audioUri = noteDetails.audioUri;
+      note.audioText = noteDetails?.audioText || "";
       note.volumeLevels = noteDetails.volumeLevels;
       note.documentUri = noteDetails.documentUri;
       note.documentName = noteDetails.documentName;

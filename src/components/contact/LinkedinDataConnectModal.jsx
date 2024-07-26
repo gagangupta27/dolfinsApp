@@ -45,7 +45,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
 
   const [visible, setVisible] = useState(false);
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
-    contact.linkedinProfileUrl || ""
+    contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
   );
   const [linkedinProfileData, setLinkedProfileData] = useState(
     contact.linkedinProfileData ? JSON.parse(contact.linkedinProfileData) : null
@@ -95,14 +95,10 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     return { linkedinId, linkedinProfileUrlLower };
   };
 
-  const fetchLinkedinData = async (linkedinId) => {
+  const fetchLinkedinData = async () => {
     return new Promise((resolve, reject) => {
       Api.post("/api/1.0/user/linkedin-details", {
-        profile_id: linkedinId,
-        profile_type: "personal",
-        contact_info: false,
-        recommendations: false,
-        related_profiles: false,
+        profile_url: linkedinProfileUrl,
       })
         .then((response) => {
           const data = response.data;
@@ -167,13 +163,6 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     setFetchingDataError(null);
     setIsSettingTabEnabled(true);
     setFetchingData(true);
-    const { linkedinId, linkedinProfileUrlLower } =
-      fetchLinkedinUrl(linkedinProfileUrl);
-    if (!linkedinId) {
-      setFetchingData(false);
-      return;
-    }
-    setLinkedinProfileUrl(linkedinProfileUrlLower);
     const data = await fetchLinkedinData(linkedinId);
     if (!data || !data.object_urn) {
       setFetchingData(false);

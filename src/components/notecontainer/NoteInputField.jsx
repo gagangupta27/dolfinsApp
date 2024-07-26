@@ -24,8 +24,10 @@ import AudioPlayer from "../audio/AudioPlayerV2";
 import Document from "./Document";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import Loader from "../common/Loader";
 import Recording from "../audio/Recording";
 import SendButtonIcon from "../icons/SendButtonIcon";
+import { useSelector } from "react-redux";
 
 const NoteInputField = forwardRef(
   (
@@ -50,26 +52,68 @@ const NoteInputField = forwardRef(
     const textInputRef = useRef(null);
 
     const [selection, setSelection] = useState({ start: 0, end: 0 });
+    const [loading, setLoading] = useState(false);
 
-    const buttonClicked = () => {
+    const authData = useSelector((state) => state.app.authData);
+
+    const buttonClicked = async () => {
       if (content || imageUri || audioUri || document) {
         track(EVENTS.INPUT_DONE.NAME, {
           [EVENTS.INPUT_START.KEYS.INPUT_NAME]: INPUT_NAME.ADD_TEXT,
         });
+        let audioText = "";
+        if (audioUri) {
+          setLoading(true);
+          const formData = new FormData();
+          formData.append("audio", {
+            uri: audioUri,
+            type: "audio/m4a",
+            name: "audio.m4a",
+          });
+
+          audioText = await fetch(
+            "https://dolfins-server-development.up.railway.app/api/1.0/user/transcribe_audio",
+            {
+              method: "POST",
+              body: formData,
+              headers: {
+                "Content-Type": "multipart/form-data",
+                authorization: "Bearer " + authData?.idToken,
+              },
+            }
+          )
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              return data?.transcript || "";
+            })
+            .catch((error) => {
+              console.error("Error transcribing audio:", error);
+              setLoading(false);
+              return "";
+            });
+          setLoading(false);
+        }
+
         addNote(
-          content,
+          content + " " + audioText,
           mentions,
           imageUri,
           audioUri,
+          audioText,
           volumeLevels ? volumeLevels : [],
           document
         );
         track(EVENTS.BUTTON_TAPPED.NAME, {
           [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.CONNECT_INTEL,
         });
+
+        setContent("");
+        clear();
+
+        console.log("audioText", audioText);
       }
-      setContent("");
-      clear();
     };
 
     useImperativeHandle(
@@ -235,6 +279,7 @@ const NoteInputField = forwardRef(
             </View>
           </View>
         </View>
+        <Loader loading={loading} />
       </View>
     );
   }

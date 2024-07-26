@@ -1,8 +1,9 @@
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import { Audio } from "expo-av";
+import Slider from "@react-native-community/slider";
 
 const AudioPlayer = ({ audioUri, volumeLevels }) => {
   const BAR_WIDTH = 4;

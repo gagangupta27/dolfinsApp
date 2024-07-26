@@ -47,18 +47,31 @@ const CodePushUpdater = ({ header = "Downloading" }) => {
 
   useEffect(() => {
     codePush.notifyAppReady();
-    codePush.checkForUpdate().then((update) => {
-      if (update) {
-        setIsUpdate(true);
-        codePush.sync(
-          { installMode: codePush.InstallMode.IMMEDIATE },
-          syncStatusChangedCallback,
-          downloadProgressCallback
-        );
-      } else {
+    codePush
+      .checkForUpdate()
+      .then((update) => {
+        if (update) {
+          if (update?.isMandatory) {
+            setIsUpdate(true);
+            codePush.sync(
+              { installMode: codePush.InstallMode.IMMEDIATE },
+              syncStatusChangedCallback,
+              downloadProgressCallback
+            );
+          } else {
+            codePush.sync(
+              { installMode: codePush.InstallMode.ON_NEXT_RESTART },
+              syncStatusChangedCallback,
+              downloadProgressCallback
+            );
+          }
+        } else {
+          setIsUpdate(false);
+        }
+      })
+      .catch((err) => {
         setIsUpdate(false);
-      }
-    });
+      });
   }, []);
 
   return (

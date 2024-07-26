@@ -8,27 +8,25 @@ import {
   deleteNote,
   updateNote,
 } from "../../realm/queries/noteOperations";
+import { getEducationList, getWorkHistoryList } from "../../utils/linkedin";
 import { useEffect, useRef, useState } from "react";
-import { useQuery, useRealm } from "@realm/react";
+import { useObject, useQuery, useRealm } from "@realm/react";
 
 import { BSON } from "realm";
 import ContactNoteMap from "../../realm/models/ContactNoteMap";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import LinkedinDataConnectModal from "../../components/contact/LinkedinDataConnectModal";
 import NavigationBarForContact from "../../components/contact/NavigationBarForContact";
 import NewContactModal from "../../components/contact/NewContactModal";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
-import { getEducationList, getWorkHistoryList } from "../../utils/linkedin";
 import { useContact } from "../../realm/queries/contactOperations";
-import { useTrackWithPageInfo } from "../../utils/analytics";
-import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
-import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
-import Contact from "../../realm/models/Contact";
 import { useFocusEffect } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
+import { useTrackWithPageInfo } from "../../utils/analytics";
 
-// import
 const ContactScreen = ({ route }) => {
   const track = useTrackWithPageInfo();
   const realm = useRealm();
@@ -40,7 +38,7 @@ const ContactScreen = ({ route }) => {
 
   const contact =
     params.contactId != String(quickNoteRef._id)
-      ? useContact(realm, new BSON.ObjectId(params.contactId))
+      ? useObject("Contact", new BSON.ObjectId(params.contactId))
       : quickNoteRef;
 
   const contactOrgMap = useQuery(
@@ -57,6 +55,7 @@ const ContactScreen = ({ route }) => {
   const noteIdS = useQuery(ContactNoteMap)
     .filtered("contactId == $0", contact._id)
     .map((o) => o?.noteId);
+
   const storedNotes = useQuery(Note)
     .filtered("_id IN $0", noteIdS || [])
     .sorted([["isPinned", true]]);
@@ -129,6 +128,10 @@ const ContactScreen = ({ route }) => {
     if (contact) {
       setupContactInfoNote(contact);
     }
+    updateNotes();
+  }, [update, contactOrgMap]);
+
+  useEffect(() => {
     if (contact && contact.linkedinSummary) {
       setUpLinkedinSummary(contact.linkedinSummary);
     }
@@ -137,7 +140,7 @@ const ContactScreen = ({ route }) => {
       setupEducation(JSON.parse(contact.linkedinProfileData));
     }
     updateNotes();
-  }, [update, contactOrgMap]);
+  }, [contact?.linkedinSummary, contact?.linkedinProfileData]);
 
   const updateNotes = () => {
     const qNotes = [];
@@ -220,6 +223,7 @@ const ContactScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -266,6 +270,7 @@ const ContactScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || null,
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,
@@ -285,6 +290,7 @@ const ContactScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -313,6 +319,7 @@ const ContactScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || null,
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,

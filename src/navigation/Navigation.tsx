@@ -87,7 +87,9 @@ export default function Navigation() {
         dispatch(setAuthData(JSON.parse(authData as string)));
       }
       await loadFonts();
-      await SplashScreen.hideAsync();
+      setTimeout(async () => {
+        await SplashScreen.hideAsync();
+      }, 1000);
       setFontsLoaded(true);
     })();
   }, []);

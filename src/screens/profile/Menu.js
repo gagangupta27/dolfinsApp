@@ -11,23 +11,34 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-
-import Header from "../../components/common/Header";
 import { useDispatch, useSelector } from "react-redux";
-import { setAuthData } from "../../redux/reducer/app";
+
+import FeedBackModal from "../../components/Profile/FeedBackModal";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Header from "../../components/common/Header";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ProfileModal from "../../components/ProfileModal";
 import WebViewV2 from "../webview/WebViewV2";
+import { setAuthData } from "../../redux/reducer/app";
 
 const Menu = ({ route }) => {
   const authData = useSelector((state) => state.app.authData);
 
+  console.log("authData", authData);
+
   const dispatch = useDispatch();
   const _webViewRef = useRef();
+  const _profileRef = useRef();
+  const _feedBackRef = useRef();
 
   const menuData = [
     {
       icon: () => <AntDesign name="user" size={24} color="black" />,
       manuName: "My Profile",
       route: "ProfileSetup",
+      onPress: () => {
+        _profileRef?.current?.show();
+      },
     },
     {
       icon: () => <Entypo name="text-document" size={24} color="black" />,
@@ -46,6 +57,22 @@ const Menu = ({ route }) => {
       },
     },
     {
+      icon: () => <FontAwesome6 name="discord" size={24} color="black" />,
+      manuName: "Contact Us",
+      route: "PrivacyPolicy",
+      onPress: () => {
+        _webViewRef?.current?.show("https://dolfins.ai/privacy.html");
+      },
+    },
+    {
+      icon: () => <MaterialIcons name="feedback" size={24} color="black" />,
+      manuName: "FeedBack",
+      route: "PrivacyPolicy",
+      onPress: () => {
+        _feedBackRef?.current?.show();
+      },
+    },
+    {
       icon: () => <AntDesign name="logout" size={24} color="black" />,
       manuName: "Logout",
       onPress: () => {
@@ -57,8 +84,6 @@ const Menu = ({ route }) => {
       manuName: "Delete Account",
     },
   ];
-
-  console.log("authData", authData);
 
   return (
     <KeyboardAvoidingView
@@ -90,7 +115,11 @@ const Menu = ({ route }) => {
             }}
           />
           <View>
-            {authData?.name && <Text>{`${authData?.name}`}</Text>}
+            {(authData?.name || authData?.fullName?.givenName) && (
+              <Text>{`${
+                authData?.name || authData?.fullName?.givenName
+              }`}</Text>
+            )}
             {authData?.email && <Text>{authData?.email || ""}</Text>}
             {authData?.phone && <Text>{authData?.phone}</Text>}
           </View>
@@ -126,6 +155,8 @@ const Menu = ({ route }) => {
         </View>
       </View>
       <WebViewV2 ref={_webViewRef} />
+      <ProfileModal ref={_profileRef} />
+      <FeedBackModal ref={_feedBackRef} />
     </KeyboardAvoidingView>
   );
 };

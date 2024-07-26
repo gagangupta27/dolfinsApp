@@ -63,6 +63,7 @@ const CalendarEventScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -78,6 +79,7 @@ const CalendarEventScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || "",
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,
@@ -93,6 +95,7 @@ const CalendarEventScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -108,6 +111,7 @@ const CalendarEventScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || null,
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,

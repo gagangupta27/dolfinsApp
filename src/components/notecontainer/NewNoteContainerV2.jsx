@@ -140,6 +140,7 @@ const NewNoteContainerV2 = forwardRef(
       mentions,
       imageUri,
       audioUri,
+      audioText,
       volumeLevels,
       document
     ) => {
@@ -150,11 +151,20 @@ const NewNoteContainerV2 = forwardRef(
           mentions,
           imageUri,
           audioUri,
+          audioText,
           volumeLevels,
           document
         );
       } else {
-        addNote(content, mentions, imageUri, audioUri, volumeLevels, document);
+        addNote(
+          content,
+          mentions,
+          imageUri,
+          audioUri,
+          audioText,
+          volumeLevels,
+          document
+        );
       }
     };
 

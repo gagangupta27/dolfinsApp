@@ -1,8 +1,9 @@
-import { AntDesign } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+
+import { AntDesign } from "@expo/vector-icons";
+import { Audio } from "expo-av";
+import Slider from "@react-native-community/slider";
 
 const AudioPlayer = ({ audioUri }) => {
   const [sound, setSound] = useState(null);
@@ -21,6 +22,7 @@ const AudioPlayer = ({ audioUri }) => {
   }, [sound]);
 
   useEffect(() => {
+    console.log("1");
     const fn = async () => {
       if (runComplete) {
         await sound.setPositionAsync(0);

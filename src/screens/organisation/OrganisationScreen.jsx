@@ -62,6 +62,7 @@ const OrganisationScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -100,6 +101,7 @@ const OrganisationScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || null,
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,
@@ -122,6 +124,7 @@ const OrganisationScreen = ({ route }) => {
     mentions,
     imageUri,
     audioUri,
+    audioText,
     volumeLevels,
     document
   ) => {
@@ -150,6 +153,7 @@ const OrganisationScreen = ({ route }) => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || null,
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,

@@ -1,16 +1,16 @@
-import React from "react";
-import { RealmProvider } from "@realm/react";
-import CalendarEvent from "../realm/models/CalendarEvent";
-import Note from "../realm/models/Note";
-import CalendarEventNoteMap from "../realm/models/CalendarEventNoteMap";
-import ContactNoteMap from "../realm/models/ContactNoteMap";
-import Contact from "../realm/models/Contact";
-import Chat from "../realm/models/Chat";
 import Address from "../realm/models/ContactAddress";
-import Organisation from "../realm/models/Organisation";
-import NoteOrganisationMap from "../realm/models/NoteOrganisationMap";
+import CalendarEvent from "../realm/models/CalendarEvent";
+import CalendarEventNoteMap from "../realm/models/CalendarEventNoteMap";
+import Chat from "../realm/models/Chat";
+import Contact from "../realm/models/Contact";
+import ContactNoteMap from "../realm/models/ContactNoteMap";
 import ContactOrganisationMap from "../realm/models/ContactOrganisationMap";
 import Mentions from "../realm/models/Mentions";
+import Note from "../realm/models/Note";
+import NoteOrganisationMap from "../realm/models/NoteOrganisationMap";
+import Organisation from "../realm/models/Organisation";
+import React from "react";
+import { RealmProvider } from "@realm/react";
 
 const RealmWrapper = ({ children }) => {
   const migration = (oldRealm, newRealm) => {
@@ -40,7 +40,7 @@ const RealmWrapper = ({ children }) => {
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={14} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={15} onMigration={migration}>
       {children}
     </RealmProvider>
   );

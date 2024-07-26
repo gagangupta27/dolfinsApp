@@ -1,4 +1,5 @@
 import Realm, { BSON, ObjectSchema } from "realm";
+
 import Mentions from "./Mentions";
 
 export default class Note extends Realm.Object {
@@ -8,6 +9,7 @@ export default class Note extends Realm.Object {
   type!: string;
   imageUri!: string | null;
   audioUri!: string | null;
+  audioText: string | null;
   volumeLevels!: number[];
   isPinned: boolean;
   documentUri!: string | null;
@@ -24,6 +26,7 @@ export default class Note extends Realm.Object {
       type: "string",
       imageUri: "string?",
       audioUri: "string?",
+      audioText: "string?",
       volumeLevels: "double[]",
       isPinned: "bool",
       documentUri: "string?",

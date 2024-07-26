@@ -189,6 +189,7 @@ const CommonComponent = () => {
     mentions,
     imageUri,
     audioUri,
+    audioText = "",
     volumeLevels,
     document
   ) => {
@@ -216,6 +217,7 @@ const CommonComponent = () => {
         : "text",
       imageUri: imageUri || null,
       audioUri: audioUri || null,
+      audioText: audioText || "",
       volumeLevels: volumeLevels || [],
       documentUri: document ? document.documentUri : null,
       documentName: document ? document.documentName : null,

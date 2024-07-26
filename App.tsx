@@ -7,9 +7,11 @@ import { Auth0Provider } from "react-native-auth0";
 import CalendarEvent from "./src/realm/models/CalendarEvent";
 import CalendarEventNoteMap from "./src/realm/models/CalendarEventNoteMap";
 import Chat from "./src/realm/models/Chat";
+import CodePushUpdater from "./src/components/common/CodePushUpdater";
 import Contact from "./src/realm/models/Contact";
 import ContactNoteMap from "./src/realm/models/ContactNoteMap";
 import ContactOrganisationMap from "./src/realm/models/ContactOrganisationMap";
+import InitialWrapper from "./src/components/InitialWrapper";
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import Navigation from "./src/navigation/Navigation";
 import Note from "./src/realm/models/Note";
@@ -22,8 +24,6 @@ import { SafeAreaView } from "react-native";
 import { StyleSheet } from "react-native";
 import Toast from "react-native-toast-message";
 import { store } from "./src/redux/store";
-import CodePushUpdater from "./src/components/common/CodePushUpdater";
-import InitialWrapper from "./src/components/InitialWrapper";
 
 const App = () => {
   return (
@@ -34,7 +34,6 @@ const App = () => {
             <Navigation />
             <Toast />
           </InitialWrapper>
-
           <CodePushUpdater />
         </Provider>
       </Auth0Provider>

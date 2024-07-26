@@ -198,10 +198,17 @@ const ChatComponent = ({ route }) => {
       let base64 = null;
 
       try {
-        const dat64 = await FileSystem.readAsStringAsync(document.documentUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        base64 = dat64;
+        if (document && document?.documentUri) {
+          const dat64 = await FileSystem.readAsStringAsync(
+            document.documentUri,
+            {
+              encoding: FileSystem.EncodingType.Base64,
+            }
+          );
+          base64 = dat64;
+        } else {
+          base64 = null;
+        }
       } catch (error) {
         base64 = null;
         console.error("Error reading file", error);
