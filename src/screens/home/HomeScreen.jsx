@@ -535,7 +535,7 @@ const CommonComponent = () => {
                         activeTab === "organisation" ? "underline" : "none",
                     }}
                   >
-                    Organisation
+                    Organization
                   </Text>
                 </TouchableOpacity>
               </View>

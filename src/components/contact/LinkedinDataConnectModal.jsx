@@ -24,11 +24,14 @@ import {
   useImperativeHandle,
   useState,
 } from "react";
-import { getQuickSummary, getWorkHistoryList } from "../../utils/linkedin";
+import {
+  getEducationList,
+  getQuickSummary,
+  getWorkHistoryList,
+} from "../../utils/linkedin";
 import {
   updateLinkedinProfile,
   updateLinkedinSummary,
-  updateLinkedinUrl,
 } from "../../realm/queries/contactOperations";
 import { useObject, useRealm } from "@realm/react";
 
@@ -44,66 +47,68 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   const contact = contacId ? useObject("Contact", contacId) : {};
 
   const [visible, setVisible] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
+  const [fetchingDataError, setFetchingDataError] = useState(null);
+  const [notes, setNotes] = useState([]);
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
     contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
   );
   const [linkedinProfileData, setLinkedProfileData] = useState(
     contact.linkedinProfileData ? JSON.parse(contact.linkedinProfileData) : null
   );
-  const [linkedinSummary, setLinkedinSummary] = useState(
-    contact.linkedinSummary
-  );
-
-  const [isSettingTabEnabled, setIsSettingTabEnabled] = useState(
-    !(
-      contact.linkedinProfileUrl &&
-      contact.linkedinProfileData &&
-      contact.linkedinSummary
-    )
-  );
 
   useImperativeHandle(ref, () => ({
     show: () => {
       setVisible(true);
+      track(EVENTS.LANDED_ON_MODAL.NAME, {
+        [GLOBAL_KEYS.MODAL_NAME]: MODAL_NAME.CONNECT_DATA,
+        [GLOBAL_KEYS.MODAL_IDENTIFIER]: MODAL_IDENTIFIER_NAME.LINKEDIN,
+      });
     },
   }));
 
-  const [fetchingData, setFetchingData] = useState(false);
-
-  const [fetchingDataError, setFetchingDataError] = useState(null);
-
-  const [notes, setNotes] = useState([]);
-  const [workHistoryNote, setWorkHistoryNote] = useState(null);
-  const [linkedinSummaryNote, setLinkedinSummaryNote] = useState(null);
-
-  const fetchLinkedinUrl = () => {
-    const linkedinProfileUrlLower = linkedinProfileUrl.toLowerCase();
-
-    const linkedinIdRegex =
-      /[Hh]ttps:\/\/(.*\.)?linkedin\.com\/in\/([a-zA-Z0-9-]+)/;
-    const match = linkedinProfileUrlLower.match(linkedinIdRegex);
-
-    if (!match) {
-      console.error("Invalid LinkedIn URL");
-      return;
+  useEffect(() => {
+    if (linkedinProfileData) {
+      const newNotes = [];
+      const workHistoryContent = getWorkHistoryList(linkedinProfileData);
+      const educationContent = getEducationList(linkedinProfileData);
+      if (workHistoryContent) {
+        newNotes.push({
+          _id: "Work_history",
+          contactId: contact.id,
+          content: "*Work history* \n\n \n\n" + workHistoryContent,
+          mentions: [],
+          type: "text",
+          nonEditable: true,
+          readOnly: true,
+        });
+      }
+      if (educationContent) {
+        newNotes.push({
+          _id: "education",
+          contactId: contact.id,
+          content: "*Education* \n\n \n\n" + educationContent,
+          mentions: [],
+          type: "text",
+          nonEditable: true,
+          readOnly: true,
+        });
+      }
+      setNotes(newNotes);
+    } else {
+      setNotes([]);
     }
-
-    const linkedinId = match[2];
-
-    updateLinkedinUrl(realm, contact._id, linkedinProfileUrlLower);
-
-    return { linkedinId, linkedinProfileUrlLower };
-  };
+  }, [linkedinProfileData]);
 
   const fetchLinkedinData = async () => {
     return new Promise((resolve, reject) => {
       Api.post("/api/1.0/user/linkedin-details", {
         profile_url: linkedinProfileUrl,
       })
-        .then((response) => {
-          const data = response.data;
-          if (data.object_urn) {
-            updateLinkedinProfile(realm, contact._id, data);
+        .then((res) => {
+          const data = res?.data;
+          if (data && data?.response) {
+            updateLinkedinProfile(realm, contact._id, data.response);
           } else {
             setFetchingDataError(
               "Having trouble connecting to linkedin at the moment.\n Could you check if the linkedin profile url is correct?"
@@ -124,35 +129,6 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     return quickSummary;
   };
 
-  const setUpLinkedinSummary = async (linkedinSummary) => {
-    if (linkedinSummary) {
-      setLinkedinSummaryNote({
-        _id: "quick_summary",
-        contactId: contact.id,
-        content: "*Quick Summary* \n\n \n\n" + linkedinSummary,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-      });
-    }
-  };
-
-  const setupWorkHistory = async (data) => {
-    const finalList = getWorkHistoryList(data);
-
-    if (finalList) {
-      setWorkHistoryNote({
-        _id: "final_list",
-        contactId: contact.id,
-        content: "*Work history* \n\n \n\n" + finalList,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-        readOnly: true,
-      });
-    }
-  };
-
   const scrape = async () => {
     track(EVENTS.BUTTON_TAPPED.NAME, {
       [GLOBAL_KEYS.MODAL_NAME]: MODAL_NAME.CONNECT_DATA,
@@ -161,10 +137,9 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_IDENTIFIER]: linkedinProfileUrl,
     });
     setFetchingDataError(null);
-    setIsSettingTabEnabled(true);
     setFetchingData(true);
-    const data = await fetchLinkedinData(linkedinId);
-    if (!data || !data.object_urn) {
+    const data = await fetchLinkedinData();
+    if (!data) {
       setFetchingData(false);
       return;
     }
@@ -174,45 +149,8 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     if (!quickSummary) {
       return;
     }
-    setLinkedinSummary(quickSummary);
-    setIsSettingTabEnabled(false);
     setFetchingData(false);
   };
-
-  useEffect(() => {
-    if (linkedinProfileData) {
-      setupWorkHistory(linkedinProfileData);
-    }
-    if (linkedinSummary) {
-      setUpLinkedinSummary(linkedinSummary);
-    }
-  }, [linkedinProfileData, linkedinSummary]);
-
-  useEffect(() => {
-    const newNotes = [];
-    if (linkedinSummaryNote) {
-      newNotes.push(linkedinSummaryNote);
-    }
-    if (workHistoryNote) {
-      newNotes.push(workHistoryNote);
-    }
-    setNotes(newNotes);
-  }, [workHistoryNote, linkedinSummaryNote]);
-
-  useEffect(() => {
-    if (fetchingData) {
-      setIsSettingTabEnabled(false);
-    }
-  }, [fetchingData]);
-
-  useEffect(() => {
-    if (visible) {
-      track(EVENTS.LANDED_ON_MODAL.NAME, {
-        [GLOBAL_KEYS.MODAL_NAME]: MODAL_NAME.CONNECT_DATA,
-        [GLOBAL_KEYS.MODAL_IDENTIFIER]: MODAL_IDENTIFIER_NAME.LINKEDIN,
-      });
-    }
-  }, [visible]);
 
   return (
     <Modal
@@ -243,29 +181,71 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
               <Entypo name="circle-with-cross" size={24} color="black" />
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: "row", marginVertical: 5 }}>
-            <TouchableOpacity onPress={() => setIsSettingTabEnabled(true)}>
-              <Text
-                style={{
-                  marginHorizontal: 5,
-                  fontFamily: "WorkSans-Bold",
-                  color: isSettingTabEnabled ? "#000" : "#000000",
-                }}
-              >
-                Add URL
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setIsSettingTabEnabled(false)}>
-              <Text
-                style={{
-                  marginHorizontal: 5,
-                  fontFamily: "WorkSans-Bold",
-                  color: !isSettingTabEnabled ? "#000" : "#000000",
-                }}
-              >
-                LinkedIn Data
-              </Text>
-            </TouchableOpacity>
+          <View
+            style={{
+              marginVertical: 2,
+              borderWidth: 1,
+              borderColor: "#D9D9D9",
+            }}
+          ></View>
+          <View style={{}}>
+            <View style={[styles.textinputview]}>
+              <View style={styles.shadowContainer}>
+                {/* Top Shadow */}
+                <LinearGradient
+                  colors={["black", "rgba(0, 0, 0, 0)"]}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                  style={styles.topShadow}
+                />
+                {/* Left Shadow */}
+                <LinearGradient
+                  colors={["black", "rgba(0, 0, 0, 0)"]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={styles.sideShadow}
+                />
+                {/* Right Shadow */}
+                <LinearGradient
+                  colors={["black", "rgba(0, 0, 0, 0)"]}
+                  start={{ x: 1, y: 0.5 }}
+                  end={{ x: 0, y: 0.5 }}
+                  style={[styles.rightShadow]}
+                />
+              </View>
+              <View style={styles.textcontainer}>
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    backgroundColor: "rgba(255, 255, 255, 0.17)",
+                  }}
+                >
+                  <View style={{ flex: 1, flexDirection: "column" }}>
+                    <TextInput
+                      style={[styles.textinput]}
+                      value={linkedinProfileUrl}
+                      onChangeText={setLinkedinProfileUrl}
+                      placeholder="Linkedin Url - https://linkedin.com/in/username"
+                      placeholderTextColor="#858585" // This is to give the placeholder the subtle color
+                      keyboardType="default"
+                      returnKeyType="done"
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+            <Button
+              style={{
+                margin: 20,
+                padding: 10,
+                justifyContent: "flex-start",
+                backgroundColor: "#F178B6",
+                borderRadius: 5,
+              }}
+              onPress={scrape}
+              title={fetchingData ? "Fetching" : "Connect Linkedin"}
+            ></Button>
             <TouchableOpacity
               style={{
                 alignItems: "center",
@@ -291,81 +271,43 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
               </Svg>
             </TouchableOpacity>
           </View>
-          <View
-            style={{
-              marginVertical: 2,
-              borderWidth: 1,
-              borderColor: "#D9D9D9",
-            }}
-          ></View>
-          {isSettingTabEnabled && (
-            <View style={{ flex: 1 }}>
-              <View style={[styles.textinputview]}>
-                <View style={styles.shadowContainer}>
-                  {/* Top Shadow */}
-                  <LinearGradient
-                    colors={["black", "rgba(0, 0, 0, 0)"]}
-                    start={{ x: 0.5, y: 0 }}
-                    end={{ x: 0.5, y: 1 }}
-                    style={styles.topShadow}
-                  />
-                  {/* Left Shadow */}
-                  <LinearGradient
-                    colors={["black", "rgba(0, 0, 0, 0)"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.sideShadow}
-                  />
-                  {/* Right Shadow */}
-                  <LinearGradient
-                    colors={["black", "rgba(0, 0, 0, 0)"]}
-                    start={{ x: 1, y: 0.5 }}
-                    end={{ x: 0, y: 0.5 }}
-                    style={[styles.rightShadow]}
-                  />
-                </View>
-                <View style={styles.textcontainer}>
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      backgroundColor: "rgba(255, 255, 255, 0.17)",
-                    }}
-                  >
-                    <View style={{ flex: 1, flexDirection: "column" }}>
-                      <TextInput
-                        style={[styles.textinput]}
-                        value={linkedinProfileUrl}
-                        onChangeText={setLinkedinProfileUrl}
-                        placeholder="Linkedin Url - https://linkedin.com/in/username"
-                        placeholderTextColor="#858585" // This is to give the placeholder the subtle color
-                        keyboardType="default"
-                        returnKeyType="done"
-                      />
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <Button
+          {fetchingDataError ? (
+            <View
+              style={{
+                alignItems: "center",
+                padding: 30,
+                flexDirection: "row",
+              }}
+            >
+              <Text
                 style={{
-                  margin: 20,
-                  padding: 10,
-                  justifyContent: "flex-start",
-                  backgroundColor: "#F178B6",
-                  borderRadius: 5,
+                  fontFamily: "WorkSans-Bold",
+                  fontSize: 16,
+                  letterSpacing: -0.32,
+                  color: "red",
                 }}
-                onPress={scrape}
-                title={fetchingData ? "Fetching" : "Connect Linkedin"}
-              ></Button>
+              >
+                {fetchingDataError}
+              </Text>
             </View>
-          )}
-          {!isSettingTabEnabled &&
-            (fetchingDataError ? (
+          ) : fetchingData ? (
+            <View
+              style={{
+                alignItems: "center",
+                padding: 30,
+                flexDirection: "row",
+              }}
+            >
+              <ActivityIndicator
+                style={{ padding: 15 }}
+                size="small"
+                color="#0000ff"
+              />
               <View
                 style={{
+                  flexDirection: "column",
                   alignItems: "center",
-                  padding: 30,
-                  flexDirection: "row",
+                  justifyContent: "center",
                 }}
               >
                 <Text
@@ -373,60 +315,42 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                     fontFamily: "WorkSans-Bold",
                     fontSize: 16,
                     letterSpacing: -0.32,
-                    color: "red",
                   }}
                 >
-                  {fetchingDataError}
+                  We're working our magic
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "WorkSans-Regular",
+                    fontSize: 16,
+                    letterSpacing: -0.32,
+                  }}
+                >
+                  This may take 60 seconds
                 </Text>
               </View>
-            ) : fetchingData ? (
-              <View
-                style={{
-                  alignItems: "center",
-                  padding: 30,
-                  flexDirection: "row",
-                }}
-              >
-                <ActivityIndicator
-                  style={{ padding: 15 }}
-                  size="small"
-                  color="#0000ff"
-                />
-                <View
-                  style={{
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "WorkSans-Bold",
-                      fontSize: 16,
-                      letterSpacing: -0.32,
-                    }}
-                  >
-                    We're working our magic
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: "WorkSans-Regular",
-                      fontSize: 16,
-                      letterSpacing: -0.32,
-                    }}
-                  >
-                    This may take 60 seconds
-                  </Text>
-                </View>
-              </View>
-            ) : (
-              <NotesList
-                notes={notes}
-                setEditMode={(x) => {}}
-                contact={contact}
-                onDelete={(x) => {}}
-              />
-            ))}
+            </View>
+          ) : (
+            <NotesList
+              notes={[
+                contact?.linkedinSummary
+                  ? {
+                      _id: "quick_summary",
+                      contactId: contact.id,
+                      content:
+                        "*Quick Summary* \n\n \n\n" + contact?.linkedinSummary,
+                      mentions: [],
+                      type: "text",
+                      nonEditable: true,
+                    }
+                  : null,
+                ...notes,
+              ]}
+              setEditMode={(x) => {}}
+              contact={contact}
+              onDelete={(x) => {}}
+            />
+          )}
         </View>
       </View>
     </Modal>
@@ -444,41 +368,22 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     borderColor: "#A5A6F6",
     borderWidth: 1,
-
     padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  createtext: {
-    fontSize: 20,
-    fontFamily: "WorkSans-Bold",
-    color: "#000000",
   },
   done: {
     fontSize: 20,
     fontFamily: "WorkSans-Bold",
     color: "#000",
   },
-  form: {
-    flex: 1,
-    justifyContent: "flex-start",
-  },
   textinputview: {
     marginTop: 20,
     backgroundColor: "#FFFFFF",
     height: 50,
-    // flex:1,
     borderRadius: 15,
     backgroundColor: "rgba(255, 255, 255, 0.17)",
-
     flexDirection: "row",
     justifyContent: "space-between", // This will position the children at either end
     alignItems: "center",
-
     marginHorizontal: 10,
     overflow: "hidden",
   },
@@ -497,12 +402,8 @@ const styles = StyleSheet.create({
   },
   textinput: {
     flex: 1,
-    // paddingTop: 10,
     paddingHorizontal: 10,
     textAlignVertical: "top", // Add this line
-  },
-  feather: {
-    margin: 5,
   },
   shadowContainer: {
     position: "absolute",

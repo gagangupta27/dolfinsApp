@@ -306,7 +306,7 @@ const NewContactModal = ({
                     _dropDownRef?.current?.onRefresh();
                   }}
                   ref={_dropDownRef}
-                  placeholder="Organisation"
+                  placeholder="Organization"
                 />
               </View>
               <View style={{ height: 50, marginVertical: 10 }}>

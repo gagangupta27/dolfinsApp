@@ -18,7 +18,8 @@ import ExactTextBox from "../notecontainer/ExactTextBox";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default React.forwardRef((props, ref) => {
-  const [name, setName] = useState("");
+  const [feedBack, setFeedBack] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const authData = useSelector((state) => state.app.authData);
@@ -36,19 +37,34 @@ export default React.forwardRef((props, ref) => {
     []
   );
 
+  useEffect(() => {
+    if (authData?.email) {
+      setEmail(authData?.email);
+    }
+  }, [authData]);
+
   const show = () => {
     _bottomSheetRef?.current?.show();
   };
 
   const onSave = async () => {
+    if (feedBack?.length < 5) {
+      Alert.alert("Error", "Please Enter More Details!");
+      return;
+    }
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+      Alert.alert("Error", "Invalid Email Address!");
+      return;
+    }
+
     setLoading(true);
     Api.post("/api/1.0/user/save_feedback", {
-      email: "test@example.com",
-      feedback: "amazing app",
+      email: email,
+      feedback: feedBack,
     })
       .then((res) => {
+        setFeedBack("");
         setLoading(false);
-        console.log("res", res);
         _bottomSheetRef?.current?.hide();
       })
       .catch((error) => {
@@ -120,8 +136,34 @@ export default React.forwardRef((props, ref) => {
                 FeedBack
               </Text>
               <ExactTextBox
-                content={name}
-                setContent={setName}
+                content={email}
+                setContent={setEmail}
+                placeholder="Enter FeedBack"
+                textAlignVertical="top"
+                multiline={true}
+                containerStyle={{
+                  paddingTop: 10,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                paddingBottom: 16,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 15,
+                  lineHeight: 20,
+                  fontWeight: "500",
+                  paddingBottom: 8,
+                }}
+              >
+                FeedBack
+              </Text>
+              <ExactTextBox
+                content={feedBack}
+                setContent={setFeedBack}
                 placeholder="Enter FeedBack"
                 textAlignVertical="top"
                 multiline={true}

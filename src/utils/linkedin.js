@@ -11,25 +11,30 @@ const getQuickSummary = async (entireLinkedinDump) => {
 };
 
 const getWorkHistory = (profileExp) => {
-  const title = profileExp?.title || "";
-  const companyName = profileExp?.companyName || "";
-  const location = profileExp?.location || "";
-  const startYear = profileExp?.startYear || "";
-  const endYear = profileExp?.endYear || "";
+  if (profileExp) {
+    const title = profileExp?.title || "";
+    const companyName = profileExp?.companyName || "";
+    const location = profileExp?.location || "";
+    const startYear = profileExp?.startYear || "";
+    const endYear = profileExp?.endYear || "";
 
-  const line1 = title + (companyName ? " @ " + companyName : "") + "\n";
-  var line2 = location ? location + "\n" : "";
-  var line3 = startYear
-    ? startYear + (endYear ? " - " + endYear : " - Present") + "\n"
-    : "";
-  const quickSummary = line1 + line2 + line3;
-  return quickSummary;
+    const line1 = title + (companyName ? " @ " + companyName : "") + "\n";
+    const line2 = location ? location + "\n" : "";
+    const line3 = startYear
+      ? startYear + (endYear ? " - " + endYear : " - Present") + "\n"
+      : "";
+    const quickSummary = line1 + line2 + line3;
+    return quickSummary;
+  } else {
+    return "";
+  }
 };
 
 const getWorkHistoryList = (data) => {
-  if (!data || !data?.position_groups) return "";
+  if (!data || !data?.work_experience || !Array.isArray(data?.work_experience))
+    return "";
 
-  const firstProfileExperiences = data?.position_groups
+  const firstProfileExperiences = data?.work_experience
     .filter(
       (group) =>
         group?.profile_positions && group?.profile_positions?.length > 0
@@ -63,16 +68,16 @@ const getWorkHistoryList = (data) => {
 
 const getEducationList = (data) => {
   if (data?.education && Array.isArray(data?.education)) {
-    return data?.education
-      ?.map((edu) => {
+    return data.education
+      .map((edu) => {
         const schoolName = edu?.school?.name || "";
-        const degree = edu?.degree_name || "";
-        const fieldOfStudy = edu?.field_of_study || "";
+        const degree = edu?.degree_name ? `${edu.degree_name} ` : "";
+        const fieldOfStudy = edu?.field_of_study.join(" ") || "";
         const startYear = edu?.date?.start?.year || "";
         const endYear = edu?.date?.end?.year || "";
 
-        return `${schoolName}\n${
-          degree ? `${degree}${fieldOfStudy}\n` : ""
+        return `${schoolName}\n${degree}${
+          fieldOfStudy ? `${fieldOfStudy}\n` : ""
         }${startYear} - ${endYear}\n`;
       })
       .join("\n\n");

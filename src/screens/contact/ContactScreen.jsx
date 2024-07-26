@@ -22,7 +22,6 @@ import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
-import { useContact } from "../../realm/queries/contactOperations";
 import { useFocusEffect } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useTrackWithPageInfo } from "../../utils/analytics";
@@ -51,6 +50,8 @@ const ContactScreen = ({ route }) => {
 
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [update, forceUpdate] = useState(0);
 
   const noteIdS = useQuery(ContactNoteMap)
     .filtered("contactId == $0", contact._id)
@@ -60,15 +61,6 @@ const ContactScreen = ({ route }) => {
     .filtered("_id IN $0", noteIdS || [])
     .sorted([["isPinned", true]]);
 
-  const [notes, setNotes] = useState([]);
-  const [update, forceUpdate] = useState(0);
-
-  const db = useRef(null);
-
-  const contactNote = useRef(null);
-  const linkedinSummaryNote = useRef(null);
-  const workHistoryNote = useRef(null);
-  const educationNote = useRef(null);
   const _linkedInRef = useRef();
 
   useFocusEffect(
@@ -76,6 +68,69 @@ const ContactScreen = ({ route }) => {
       forceUpdate(new Date().valueOf());
     }, [])
   );
+
+  useEffect(() => {
+    let notes = [];
+    if (contact) {
+      notes.push({
+        _id: -7, //"NOTE THINGY"
+        contactId: contact._id,
+        content: getContactInfo(contact),
+        mentions: [],
+        type: "text",
+        nonEditable: true,
+        readOnly: true,
+      });
+    }
+    if (contact?.linkedinSummary) {
+      notes.push({
+        _id: "quick_summary",
+        contactId: contact._id,
+        content: "*Quick Summary* \n\n \n\n" + contact?.linkedinSummary,
+        mentions: [],
+        type: "text",
+        nonEditable: true,
+        readOnly: true,
+      });
+    }
+    if (contact?.linkedinProfileData) {
+      const dat = JSON.parse(contact?.linkedinProfileData);
+      const workHistoryContent = getWorkHistoryList(dat);
+      const educationContent = getEducationList(dat);
+      console.log("wertyui");
+      if (workHistoryContent) {
+        notes.push(
+          contact.linkedinProfileData
+            ? {
+                _id: "final_list",
+                contactId: contact._id,
+                content: "*Work history* \n\n \n\n" + workHistoryContent,
+                mentions: [],
+                type: "text",
+                nonEditable: true,
+                readOnly: true,
+              }
+            : null
+        );
+      }
+      if (educationContent) {
+        notes.push({
+          _id: "education",
+          contactId: contact._id,
+          content: "*Education* \n\n \n\n" + educationContent,
+          mentions: [],
+          type: "text",
+          nonEditable: true,
+          readOnly: true,
+        });
+      }
+    }
+    setNotes(notes);
+  }, [
+    contact?.linkedinProfileData,
+    contact?.linkedinSummary,
+    JSON.stringify(contact),
+  ]);
 
   const getContactInfo = useCallback(
     (ct) => {
@@ -123,100 +178,6 @@ const ContactScreen = ({ route }) => {
     },
     [update]
   );
-
-  useEffect(() => {
-    if (contact) {
-      setupContactInfoNote(contact);
-    }
-    updateNotes();
-  }, [update, contactOrgMap]);
-
-  useEffect(() => {
-    if (contact && contact.linkedinSummary) {
-      setUpLinkedinSummary(contact.linkedinSummary);
-    }
-    if (contact && contact.linkedinProfileData) {
-      setupWorkHistory(JSON.parse(contact.linkedinProfileData));
-      setupEducation(JSON.parse(contact.linkedinProfileData));
-    }
-    updateNotes();
-  }, [contact?.linkedinSummary, contact?.linkedinProfileData]);
-
-  const updateNotes = () => {
-    const qNotes = [];
-    if (contactNote.current) {
-      qNotes.push(contactNote.current);
-    }
-    if (linkedinSummaryNote.current) {
-      qNotes.push(linkedinSummaryNote.current);
-    }
-    if (workHistoryNote.current) {
-      qNotes.push(workHistoryNote.current);
-    }
-    if (educationNote.current) {
-      qNotes.push(educationNote.current);
-    }
-    setNotes(qNotes);
-  };
-
-  const setupContactInfoNote = (contact) => {
-    const contactInfo = getContactInfo(contact);
-    if (contactInfo) {
-      contactNote.current = {
-        _id: -7, //"NOTE THINGY"
-        contactId: contact._id,
-        content: contactInfo,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-        readOnly: true,
-      };
-    }
-  };
-
-  const setUpLinkedinSummary = (linkedinSummary) => {
-    if (linkedinSummary) {
-      linkedinSummaryNote.current = {
-        _id: "quick_summary",
-        contactId: contact._id,
-        content: "*Quick Summary* \n\n \n\n" + linkedinSummary,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-        readOnly: true,
-      };
-    }
-  };
-
-  const setupWorkHistory = (data) => {
-    const finalList = getWorkHistoryList(data);
-    if (finalList) {
-      workHistoryNote.current = {
-        _id: "final_list",
-        contactId: contact._id,
-        content: "*Work history* \n\n \n\n" + finalList,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-        readOnly: true,
-      };
-    }
-  };
-
-  const setupEducation = (data) => {
-    const finalList = getEducationList(data);
-    if (finalList) {
-      educationNote.current = {
-        _id: "education",
-        contactId: contact._id,
-        content: "*Education* \n\n \n\n" + finalList,
-        mentions: [],
-        type: "text",
-        nonEditable: true,
-        readOnly: true,
-      };
-    }
-  };
 
   const addNoteV2 = async (
     content,
@@ -382,8 +343,6 @@ const ContactScreen = ({ route }) => {
       type: "success",
       text1: "Copied",
     });
-    // toast message
-    // copied to clipboard
   };
 
   return (
