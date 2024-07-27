@@ -71,10 +71,11 @@ const ContactScreen = ({ route }) => {
 
   useEffect(() => {
     let notes = [];
-    if (contact) {
+    console.log("qwerty");
+    if (contact?._id) {
       notes.push({
         _id: -7, //"NOTE THINGY"
-        contactId: contact._id,
+        contactId: contact?._id,
         content: getContactInfo(contact),
         mentions: [],
         type: "text",
@@ -82,10 +83,10 @@ const ContactScreen = ({ route }) => {
         readOnly: true,
       });
     }
-    if (contact?.linkedinSummary) {
+    if (contact && contact?.linkedinSummary) {
       notes.push({
         _id: "quick_summary",
-        contactId: contact._id,
+        contactId: contact?._id,
         content: "*Quick Summary* \n\n \n\n" + contact?.linkedinSummary,
         mentions: [],
         type: "text",
@@ -93,17 +94,16 @@ const ContactScreen = ({ route }) => {
         readOnly: true,
       });
     }
-    if (contact?.linkedinProfileData) {
+    if (contact && contact?.linkedinProfileData) {
       const dat = JSON.parse(contact?.linkedinProfileData);
       const workHistoryContent = getWorkHistoryList(dat);
       const educationContent = getEducationList(dat);
-      console.log("wertyui");
       if (workHistoryContent) {
         notes.push(
           contact.linkedinProfileData
             ? {
                 _id: "final_list",
-                contactId: contact._id,
+                contactId: contact?._id,
                 content: "*Work history* \n\n \n\n" + workHistoryContent,
                 mentions: [],
                 type: "text",
@@ -116,7 +116,7 @@ const ContactScreen = ({ route }) => {
       if (educationContent) {
         notes.push({
           _id: "education",
-          contactId: contact._id,
+          contactId: contact?._id,
           content: "*Education* \n\n \n\n" + educationContent,
           mentions: [],
           type: "text",
@@ -129,7 +129,7 @@ const ContactScreen = ({ route }) => {
   }, [
     contact?.linkedinProfileData,
     contact?.linkedinSummary,
-    JSON.stringify(contact),
+    JSON.stringify(contact?._id),
   ]);
 
   const getContactInfo = useCallback(

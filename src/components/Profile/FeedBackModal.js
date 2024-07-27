@@ -133,12 +133,12 @@ export default React.forwardRef((props, ref) => {
                   paddingBottom: 8,
                 }}
               >
-                FeedBack
+                Email
               </Text>
               <ExactTextBox
                 content={email}
                 setContent={setEmail}
-                placeholder="Enter FeedBack"
+                placeholder="Email"
                 textAlignVertical="top"
                 multiline={true}
                 containerStyle={{

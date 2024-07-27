@@ -12,13 +12,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dolfinsBeta.ai",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
-        "LSApplicationQueriesSchemes": ["mailto"],
+        "LSApplicationQueriesSchemes": [
+          "mailto"
+        ],
         "ITSAppUsesNonExemptEncryption": "NO"
       },
       "buildNumber": "1"
@@ -55,6 +59,14 @@
         "react-native-auth0",
         {
           "domain": "{AUTH0_DOMAIN}"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "dolfins"
         }
       ]
     ],

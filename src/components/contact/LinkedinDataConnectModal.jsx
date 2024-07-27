@@ -53,9 +53,6 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
     contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
   );
-  const [linkedinProfileData, setLinkedProfileData] = useState(
-    contact.linkedinProfileData ? JSON.parse(contact.linkedinProfileData) : null
-  );
 
   useImperativeHandle(ref, () => ({
     show: () => {
@@ -68,14 +65,15 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   }));
 
   useEffect(() => {
-    if (linkedinProfileData) {
+    if (contact && contact?.linkedinProfileData) {
       const newNotes = [];
-      const workHistoryContent = getWorkHistoryList(linkedinProfileData);
-      const educationContent = getEducationList(linkedinProfileData);
+      const Dat = JSON.parse(contact?.linkedinProfileData);
+      const workHistoryContent = getWorkHistoryList(Dat);
+      const educationContent = getEducationList(Dat);
       if (workHistoryContent) {
         newNotes.push({
           _id: "Work_history",
-          contactId: contact.id,
+          contactId: contact?.id,
           content: "*Work history* \n\n \n\n" + workHistoryContent,
           mentions: [],
           type: "text",
@@ -86,7 +84,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
       if (educationContent) {
         newNotes.push({
           _id: "education",
-          contactId: contact.id,
+          contactId: contact?.id,
           content: "*Education* \n\n \n\n" + educationContent,
           mentions: [],
           type: "text",
@@ -98,7 +96,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
     } else {
       setNotes([]);
     }
-  }, [linkedinProfileData]);
+  }, [contact?.linkedinProfileData, JSON.stringify(contact?._id)]);
 
   const fetchLinkedinData = async () => {
     return new Promise((resolve, reject) => {
@@ -108,13 +106,14 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
         .then((res) => {
           const data = res?.data;
           if (data && data?.response) {
+            resolve(data?.response);
             updateLinkedinProfile(realm, contact._id, data.response);
           } else {
+            resolve(null);
             setFetchingDataError(
               "Having trouble connecting to linkedin at the moment.\n Could you check if the linkedin profile url is correct?"
             );
           }
-          resolve(data);
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -143,7 +142,6 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
       setFetchingData(false);
       return;
     }
-    setLinkedProfileData(data);
 
     const quickSummary = await fetchLinkedinSummary(data);
     if (!quickSummary) {
@@ -235,17 +233,20 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
                 </View>
               </View>
             </View>
-            <Button
-              style={{
-                margin: 20,
-                padding: 10,
-                justifyContent: "flex-start",
-                backgroundColor: "#F178B6",
-                borderRadius: 5,
-              }}
-              onPress={scrape}
-              title={fetchingData ? "Fetching" : "Connect Linkedin"}
-            ></Button>
+            {!contact?.linkedinProfileData && fetchingData && (
+              <Button
+                style={{
+                  margin: 20,
+                  padding: 10,
+                  justifyContent: "flex-start",
+                  backgroundColor: "#F178B6",
+                  borderRadius: 5,
+                }}
+                onPress={scrape}
+                title={fetchingData ? "Fetching" : "Connect Linkedin"}
+              ></Button>
+            )}
+
             <TouchableOpacity
               style={{
                 alignItems: "center",
@@ -333,10 +334,10 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
           ) : (
             <NotesList
               notes={[
-                contact?.linkedinSummary
+                contact && contact?.linkedinSummary
                   ? {
                       _id: "quick_summary",
-                      contactId: contact.id,
+                      contactId: contact?.id,
                       content:
                         "*Quick Summary* \n\n \n\n" + contact?.linkedinSummary,
                       mentions: [],

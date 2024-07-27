@@ -37,7 +37,10 @@ const getWorkHistoryList = (data) => {
   const firstProfileExperiences = data?.work_experience
     .filter(
       (group) =>
-        group?.profile_positions && group?.profile_positions?.length > 0
+        group &&
+        group?.profile_positions &&
+        Array.isArray(group?.profile_positions) &&
+        group?.profile_positions?.length > 0
     )
     .map((group) => {
       const firstPosition = group?.profile_positions?.[0];
@@ -55,7 +58,7 @@ const getWorkHistoryList = (data) => {
         title: firstPosition?.title || "",
         companyName: firstPosition?.company || "",
         location: firstPosition?.location || "",
-        startYear: allFirstYears?.length > 0 ? allFirstYears?.[0] : null,
+        startYear: allFirstYears?.length > 0 ? allFirstYears?.[0] || "" : null,
         endYear:
           allLastYears?.length > 0
             ? allLastYears?.[allLastYears?.length - 1]
@@ -68,11 +71,11 @@ const getWorkHistoryList = (data) => {
 
 const getEducationList = (data) => {
   if (data?.education && Array.isArray(data?.education)) {
-    return data.education
-      .map((edu) => {
+    return data?.education
+      ?.map((edu) => {
         const schoolName = edu?.school?.name || "";
         const degree = edu?.degree_name ? `${edu.degree_name} ` : "";
-        const fieldOfStudy = edu?.field_of_study.join(" ") || "";
+        const fieldOfStudy = edu?.field_of_study?.join(" ") || "";
         const startYear = edu?.date?.start?.year || "";
         const endYear = edu?.date?.end?.year || "";
 

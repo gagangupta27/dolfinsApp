@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   KeyboardAvoidingView,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Fontisto from "@expo/vector-icons/Fontisto";
 
 import FeedBackModal from "../../components/Profile/FeedBackModal";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -20,16 +22,25 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ProfileModal from "../../components/ProfileModal";
 import WebViewV2 from "../webview/WebViewV2";
 import { setAuthData } from "../../redux/reducer/app";
+import * as CloudStore from "react-native-cloud-store";
 
 const Menu = ({ route }) => {
   const authData = useSelector((state) => state.app.authData);
-
-  console.log("authData", authData);
 
   const dispatch = useDispatch();
   const _webViewRef = useRef();
   const _profileRef = useRef();
   const _feedBackRef = useRef();
+
+  useEffect(() => {
+    (async () => {
+      const available = await CloudStore.isICloudAvailable();
+      console.log("available", available);
+      /*       await CloudStore.writeFile(filePathForWrite, fileContentForWrite, {
+        override: true,
+      }); */
+    })();
+  }, []);
 
   const menuData = [
     {
@@ -57,11 +68,23 @@ const Menu = ({ route }) => {
       },
     },
     {
+      icon: () => <Fontisto name="export" size={24} color="black" />,
+      manuName: "Export Data",
+      route: "PrivacyPolicy",
+      onPress: () => {},
+    },
+    {
+      icon: () => <Fontisto name="import" size={24} color="black" />,
+      manuName: "Import Data",
+      route: "PrivacyPolicy",
+      onPress: () => {},
+    },
+    {
       icon: () => <FontAwesome6 name="discord" size={24} color="black" />,
       manuName: "Contact Us",
       route: "PrivacyPolicy",
       onPress: () => {
-        _webViewRef?.current?.show("https://dolfins.ai/privacy.html");
+        Linking.openURL("https://discord.com/channels/@me/1266497641089335348");
       },
     },
     {
