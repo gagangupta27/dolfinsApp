@@ -136,17 +136,17 @@ const ContactScreen = ({ route }) => {
     (ct) => {
       var data = "";
       if (ct) {
-        if (ct.phoneNumbers && ct.phoneNumbers.length > 0) {
+        if (ct?.phoneNumbers && ct?.phoneNumbers?.length > 0) {
           data += "Phones: ";
-          ct.phoneNumbers.forEach((phone, index) => {
+          ct?.phoneNumbers?.forEach((phone, index) => {
             data += `<${phone}>${
-              index < ct.phoneNumbers.length - 1 ? ", " : ""
+              index < ct?.phoneNumbers?.length - 1 ? ", " : ""
             }`;
           });
           data += "\n";
         }
-        if (ct.emails && ct.emails.length > 0 && ct.emails[0]) {
-          data = data + "Email: <" + ct.emails[0] + ">\n";
+        if (ct?.emails && ct?.emails?.length > 0 && ct?.emails?.[0]) {
+          data = data + "Email: <" + ct.emails?.[0] + ">\n";
         }
         if (
           ct?.addresses &&
@@ -161,11 +161,11 @@ const ContactScreen = ({ route }) => {
         if (ct?.note) {
           data = data + "note: " + ct?.note + "\n";
         }
-        if (contactOrgMap && contactOrgMap.length > 0) {
+        if (contactOrgMap && contactOrgMap?.length > 0) {
           data += "Company: ";
-          contactOrgMap.forEach((org, index) => {
-            data += `${org.organisation.name}${
-              index < contactOrgMap.length - 1 ? ", " : ""
+          contactOrgMap?.forEach((org, index) => {
+            data += `${org?.organisation?.name}${
+              index < contactOrgMap?.length - 1 ? ", " : ""
             }`;
           });
           data += "\n";
