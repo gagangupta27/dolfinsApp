@@ -33,11 +33,6 @@ export default class Note extends Realm.Object {
       documentName: "string?",
       createdAt: "date",
       updatedAt: "date",
-      notes: {
-        type: "linkingObjects",
-        objectType: "NoteOrganisationMap",
-        property: "note",
-      },
     },
     primaryKey: "_id",
   };

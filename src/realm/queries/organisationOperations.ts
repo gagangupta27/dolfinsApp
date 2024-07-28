@@ -7,9 +7,10 @@ async function addOrganisation(
     name: string;
     linkedinUrl: string;
     linkedinProfile: string;
-    summary: string;
+    linkedinProfileData: string;
     createdAt: Date;
     updatedAt: Date;
+    summary: string;
   }
 ) {
   let createdOrganisation;
@@ -35,16 +36,14 @@ function deleteOrganisation(
       organisationId2
     );
     if (organisation) {
-      // Delete all related ContactOrganisationMap entries
       const contactOrgMaps = realm
         .objects("ContactOrganisationMap")
-        .filtered("organisation._id == $0", organisationId2);
+        .filtered("organisationId == $0", organisationId2);
       realm.delete(contactOrgMaps);
 
-      // Delete all related NoteOrganisationMap entries
       const noteOrgMaps = realm
         .objects("NoteOrganisationMap")
-        .filtered("organisation._id == $0", organisationId2);
+        .filtered("organisationId == $0", organisationId2);
       realm.delete(noteOrgMaps);
 
       // Finally, delete the organisation
@@ -72,6 +71,7 @@ async function OrgContactLink(
         name: companyName,
         linkedinUrl: "",
         linkedinProfile: "",
+        linkedinProfileData: "",
         summary: "",
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -88,23 +88,17 @@ async function OrgContactLink(
     const existingLink = realm
       .objects("ContactOrganisationMap")
       .filtered(
-        "contact._id == $0 AND organisation._id == $1",
+        "contactId == $0 AND organisationId == $1",
         contactId2,
         organisationId2
       );
 
     if (existingLink.length === 0 && contactId2 && organisationId2) {
-      const tempContact = realm.objectForPrimaryKey("Contact", contactId2);
-      const tempOrg = realm.objectForPrimaryKey(
-        "Organisation",
-        organisationId2
-      );
-
       // Create a new mapping if it does not exist
       realm.create("ContactOrganisationMap", {
         _id: new BSON.ObjectId(),
-        contact: tempContact,
-        organisation: tempOrg,
+        contactId: contactId2,
+        organisationId: organisationId2,
       });
     }
   });
@@ -118,16 +112,46 @@ async function updateContactOrg(
   realm.write(() => {
     const contactOrgMap = realm
       .objects("ContactOrganisationMap")
-      .filtered("contact._id == $0", contactId);
+      .filtered("contactId == $0", contactId);
     realm.delete(contactOrgMap);
     organisations.map((org) => {
       realm.create("ContactOrganisationMap", {
         _id: new BSON.ObjectId(),
-        contact: realm.objectForPrimaryKey("Contact", contactId),
-        organisation: realm.objectForPrimaryKey("Organisation", org._id),
+        contactId: new BSON.ObjectId(contactId),
+        organisationId: new BSON.ObjectId(org?._id),
       });
     });
   });
+}
+
+async function getRawOrg(realm: Realm) {
+  let orgJSON = [];
+  realm.write(() => {
+    const orgs = realm.objects("Organisation");
+    orgJSON = [...orgs];
+  });
+
+  return orgJSON;
+}
+
+async function getRawNoteOrganisationMap(realm: Realm) {
+  let orgJSON = [];
+  realm.write(() => {
+    const orgs = realm.objects("NoteOrganisationMap");
+    orgJSON = [...orgs];
+  });
+
+  return orgJSON;
+}
+
+async function getRawContactOrganisationMap(realm: Realm) {
+  let orgJSON = [];
+  realm.write(() => {
+    const orgs = realm.objects("ContactOrganisationMap");
+    orgJSON = [...orgs];
+  });
+
+  return orgJSON;
 }
 
 export {
@@ -135,4 +159,7 @@ export {
   addOrganisation,
   OrgContactLink,
   updateContactOrg,
+  getRawOrg,
+  getRawNoteOrganisationMap,
+  getRawContactOrganisationMap,
 };

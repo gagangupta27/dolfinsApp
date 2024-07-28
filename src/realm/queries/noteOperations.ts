@@ -226,8 +226,8 @@ async function createNoteAndAddToOrganisation(
 
     const NoteOrganisationMap = realm.create("NoteOrganisationMap", {
       _id: new BSON.ObjectId(),
-      organisation: realm.objectForPrimaryKey("Organisation", organisationId),
-      note: newNote,
+      organisationId: organisationId,
+      noteId: newNote._id,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -328,7 +328,7 @@ async function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
   await realm.write(async () => {
     const organisationNoteMap = realm
       .objects("NoteOrganisationMap")
-      .filtered("note._id == $0", noteId);
+      .filtered("noteId == $0", noteId);
     realm.delete(organisationNoteMap); // Delete the mapping first
 
     const calendarEventNoteMap = realm
@@ -348,6 +348,25 @@ async function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
   });
 }
 
+async function getQuickNotesRaw(realm: Realm) {
+  let quickNotesJSON = [];
+  realm.write(() => {
+    const quickNotesIds = realm
+      .objects(ContactNoteMap)
+      .filtered(
+        "contactId == $0",
+        new BSON.ObjectId("000000000000000000000000")
+      )
+      .map((o) => o?.noteId);
+    const allQuichNotes = realm
+      .objects(Note)
+      .filtered(`_id IN $0`, quickNotesIds);
+    quickNotesJSON = [...allQuichNotes];
+  });
+
+  return quickNotesJSON;
+}
+
 export {
   addNoteToCalendar,
   addNoteToContact,
@@ -360,4 +379,5 @@ export {
   useCalendarNotes,
   useContactNotes,
   createNoteAndAddToOrganisation,
+  getQuickNotesRaw,
 };

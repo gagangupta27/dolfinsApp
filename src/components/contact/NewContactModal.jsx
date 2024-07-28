@@ -58,11 +58,14 @@ const NewContactModal = ({
   const existingContact = existingId ? useObject(Contact, existingId) : null;
   const orgs = useQuery(Organisation);
 
+  const contactOrgIds = existingContact
+    ? useQuery(ContactOrganisationMap)
+        .filtered(`contactId == $0`, existingContact._id)
+        .map((o) => o?.organisationId)
+    : [];
+
   const contactOrgs = existingContact
-    ? useQuery(ContactOrganisationMap).filtered(
-        `contact._id == $0`,
-        existingContact._id
-      )
+    ? useQuery(Organisation).filtered(`_id IN $0`, contactOrgIds)
     : [];
 
   const _dropDownRef = useRef();
@@ -78,8 +81,8 @@ const NewContactModal = ({
   }, [existingContact]);
 
   useEffect(() => {
-    if (contactOrgs) {
-      setOrganisation(contactOrgs?.map((o) => o.organisation));
+    if (contactOrgs && contactOrgs?.length > 0 && contactOrgs?.[0]) {
+      setOrganisation(contactOrgs);
     }
   }, [contactOrgs?.length]);
 
@@ -259,7 +262,9 @@ const NewContactModal = ({
                     paddingBottom: 10,
                   }}
                 >
-                  {Array.isArray(organisation) &&
+                  {organisation &&
+                    organisation?.length > 0 &&
+                    organisation?.[0] &&
                     organisation?.map((o) => (
                       <View
                         key={o._id}
@@ -273,7 +278,7 @@ const NewContactModal = ({
                           borderWidth: 0.7,
                         }}
                       >
-                        <Text>{o.name}</Text>
+                        <Text>{o?.name}</Text>
                         <TouchableOpacity
                           onPress={() => {
                             setOrganisation((prev) =>

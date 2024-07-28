@@ -24,8 +24,6 @@ export default React.forwardRef((props, ref) => {
 
   const authData = useSelector((state) => state.app.authData);
 
-  const { imageUri, onImagePress, setImageUri } = {};
-
   const dispatch = useDispatch();
   const _bottomSheetRef = useRef();
 

@@ -22,9 +22,9 @@ import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
 import Toast from "react-native-toast-message";
-import { useFocusEffect } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useTrackWithPageInfo } from "../../utils/analytics";
+import Organisation from "../../realm/models/Organisation";
 
 const ContactScreen = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -40,18 +40,18 @@ const ContactScreen = ({ route }) => {
       ? useObject("Contact", new BSON.ObjectId(params.contactId))
       : quickNoteRef;
 
-  const contactOrgMap = useQuery(
-    ContactOrganisationMap,
-    (tasks) => {
-      return tasks.filtered("contact._id == $0", contact._id);
-    },
-    [update]
+  const contactOrgIds = useQuery(ContactOrganisationMap)
+    .filtered("contactId == $0", contact._id)
+    .map((o) => o?.organisationId);
+
+  const contactOrgs = useQuery(Organisation).filtered(
+    "_id IN $0",
+    contactOrgIds
   );
 
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
   const [contactEditVisible, setContactEditVisible] = useState(false);
   const [notes, setNotes] = useState([]);
-  const [update, forceUpdate] = useState(0);
 
   const noteIdS = useQuery(ContactNoteMap)
     .filtered("contactId == $0", contact._id)
@@ -63,16 +63,11 @@ const ContactScreen = ({ route }) => {
 
   const _linkedInRef = useRef();
 
-  useFocusEffect(
-    useCallback(() => {
-      forceUpdate(new Date().valueOf());
-    }, [])
-  );
+  console.log("reload");
 
   useEffect(() => {
     let notes = [];
-    console.log("qwerty");
-    if (contact?._id) {
+    if (contact?._id && contact?.id != quickNoteRef?._id) {
       notes.push({
         _id: -7, //"NOTE THINGY"
         contactId: contact?._id,
@@ -130,54 +125,54 @@ const ContactScreen = ({ route }) => {
     contact?.linkedinProfileData,
     contact?.linkedinSummary,
     JSON.stringify(contact?._id),
+    JSON.stringify(contact?.phoneNumbers),
+    JSON.stringify(contact?.emails),
+    JSON.stringify(contact?.addresses),
+    JSON.stringify(contact?.note),
+    JSON.stringify(contactOrgs),
   ]);
 
-  const getContactInfo = useCallback(
-    (ct) => {
-      var data = "";
-      if (ct) {
-        if (ct?.phoneNumbers && ct?.phoneNumbers?.length > 0) {
-          data += "Phones: ";
-          ct?.phoneNumbers?.forEach((phone, index) => {
-            data += `<${phone}>${
-              index < ct?.phoneNumbers?.length - 1 ? ", " : ""
-            }`;
-          });
-          data += "\n";
-        }
-        if (ct?.emails && ct?.emails?.length > 0 && ct?.emails?.[0]) {
-          data = data + "Email: <" + ct.emails?.[0] + ">\n";
-        }
-        if (
-          ct?.addresses &&
-          Array.isArray(JSON.parse(JSON.stringify(ct?.addresses))) &&
-          ct?.addresses?.length > 0
-        ) {
-          const address = JSON.parse(JSON.stringify(ct?.addresses))?.[0];
-          data =
-            data +
-            `Address: ${address?.street} ${address?.city} ${address?.region} ${address?.country} ${address?.postalCode}  \n`;
-        }
-        if (ct?.note) {
-          data = data + "note: " + ct?.note + "\n";
-        }
-        if (contactOrgMap && contactOrgMap?.length > 0) {
-          data += "Company: ";
-          contactOrgMap?.forEach((org, index) => {
-            data += `${org?.organisation?.name}${
-              index < contactOrgMap?.length - 1 ? ", " : ""
-            }`;
-          });
-          data += "\n";
-        }
+  const getContactInfo = (ct) => {
+    var data = "";
+    if (ct) {
+      if (ct?.phoneNumbers && ct?.phoneNumbers?.length > 0) {
+        data += "Phones: ";
+        ct?.phoneNumbers?.forEach((phone, index) => {
+          data += `<${phone}>${
+            index < ct?.phoneNumbers?.length - 1 ? ", " : ""
+          }`;
+        });
+        data += "\n";
       }
-      if (data) {
-        data = "*Contact Info*\n\n \n" + data;
+      if (ct?.emails && ct?.emails?.length > 0 && ct?.emails?.[0]) {
+        data = data + "Email: <" + ct.emails?.[0] + ">\n";
       }
-      return data;
-    },
-    [update]
-  );
+      if (
+        ct?.addresses &&
+        Array.isArray(JSON.parse(JSON.stringify(ct?.addresses))) &&
+        ct?.addresses?.length > 0
+      ) {
+        const address = JSON.parse(JSON.stringify(ct?.addresses))?.[0];
+        data =
+          data +
+          `Address: ${address?.street} ${address?.city} ${address?.region} ${address?.country} ${address?.postalCode}  \n`;
+      }
+      if (ct?.note) {
+        data = data + "note: " + ct?.note + "\n";
+      }
+      if (contactOrgs && contactOrgs?.length > 0) {
+        data += "Company: ";
+        contactOrgs?.forEach((org, index) => {
+          data += `${org?.name}${index < contactOrgs?.length - 1 ? ", " : ""}`;
+        });
+        data += "\n";
+      }
+    }
+    if (data) {
+      data = "*Contact Info*\n\n \n" + data;
+    }
+    return data;
+  };
 
   const addNoteV2 = async (
     content,
@@ -241,8 +236,6 @@ const ContactScreen = ({ route }) => {
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
     }, 500);
-
-    forceUpdate(new Date().getTime());
   };
 
   const updateNoteV2 = async (
@@ -288,14 +281,12 @@ const ContactScreen = ({ route }) => {
     await updateNote(realm, noteId, updatedNote);
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
-      forceUpdate(new Date().valueOf());
     }, 500);
     setEditMode({ editMode: false, id: null });
   };
 
   const onDelete = async (noteId) => {
     deleteNote(realm, noteId);
-    forceUpdate(new Date().getTime());
     setTimeout(() => {
       notesListRef.current.scrollToEnd({ animated: true });
     }, 500);

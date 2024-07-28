@@ -158,6 +158,28 @@ function useContact(realm, contactId: string) {
   return contact;
 }
 
+async function getContactRaw(realm: Realm) {
+  let contactJSON = [];
+  realm.write(() => {
+    const contacts = realm
+      .objects("Contact")
+      .filtered("id != $0", "000000000000000000000000");
+    contactJSON = [...contacts];
+  });
+
+  return contactJSON;
+}
+
+async function getContactNoteMap(realm: Realm) {
+  let contactJSON = [];
+  realm.write(() => {
+    const contacts = realm.objects("ContactNoteMap");
+    contactJSON = [...contacts];
+  });
+
+  return contactJSON;
+}
+
 export {
   addContact,
   updateContactById,
@@ -167,4 +189,6 @@ export {
   useContact,
   useContacts,
   deleteContact,
+  getContactRaw,
+  getContactNoteMap,
 };

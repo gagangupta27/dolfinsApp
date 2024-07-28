@@ -21,6 +21,7 @@ import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import MultiInput from "../common/MultiInput";
 import Organisation from "../../realm/models/Organisation";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 
 const AddOrgModal = ({
   visible = false,
@@ -38,6 +39,15 @@ const AddOrgModal = ({
 
   const realm = useRealm();
   const existingOrg = existingId ? useObject(Organisation, existingId) : null;
+  const existingContactIds = existingOrg
+    ? useQuery(ContactOrganisationMap)
+        .filtered("organisationId == $0", existingOrg._id)
+        .map((o) => o?.contactId)
+    : [];
+
+  const existingContacts = existingOrg
+    ? useQuery(Contact).filtered("_id in $0", existingContactIds)
+    : [];
   const allContacts = useQuery(Contact);
 
   const _dropDownRef = useRef();
@@ -48,14 +58,15 @@ const AddOrgModal = ({
       setLinkedin(
         existingOrg?.linkedinUrl || "https://www.linkedin.com/company/google/"
       );
-      setContacts(
-        existingOrg?.contacts
-          ? existingOrg?.contacts?.map((o) => o?.contact)
-          : []
-      );
       setLinks(existingOrg?.links || []);
     }
   }, [existingOrg]);
+
+  useEffect(() => {
+    if (existingContacts && existingContacts?.length > 0) {
+      setContacts([...existingContacts]);
+    }
+  }, [JSON.stringify(existingContacts)]);
 
   const onCreate = async () => {
     if (existingId) {
@@ -72,12 +83,13 @@ const AddOrgModal = ({
         Alert.alert("Error", "Please Enter Organisation Name!");
         return;
       }
-      const summary = await fetchOrgSummary();
+      const linkedinProfileData = await fetchLinkedinData();
       const createdOrg = await addOrganisation(realm, {
         name: name,
         linkedinUrl: linkedin,
         linkedinProfile: "",
-        summary: summary,
+        linkedinProfileData: JSON.stringify(linkedinProfileData),
+        summary: "",
         createdAt: new Date(),
         updatedAt: new Date(),
         links: new Set([...links]),
@@ -93,32 +105,21 @@ const AddOrgModal = ({
     onClose();
   };
 
-  const fetchOrgSummary = async () => {
+  const fetchLinkedinData = async () => {
     if (linkedin) {
-      const data = await fetchLinkedinData();
-      return data?.summary || "";
-    } else {
-      return "";
-    }
-  };
-
-  const fetchLinkedinData = async (linkedinId = "google") => {
-    return new Promise((resolve, reject) => {
-      Api.post("/api/1.0/user/linkedin-details", {
-        profile_id: linkedinId,
-        profile_type: "personal",
-        contact_info: false,
-        recommendations: false,
-        related_profiles: false,
+      return Api.post("/api/1.0/user/linkedin-details", {
+        profile_url: linkedin,
       })
-        .then((response) => {
-          resolve(response.data);
+        .then((res) => {
+          return res?.data?.response || "";
         })
         .catch((error) => {
           console.error("Error:", error);
-          resolve(null);
+          return null;
         });
-    });
+    } else {
+      return "";
+    }
   };
 
   return (

@@ -11,16 +11,47 @@ import NoteOrganisationMap from "../realm/models/NoteOrganisationMap";
 import Organisation from "../realm/models/Organisation";
 import React from "react";
 import { RealmProvider } from "@realm/react";
+import { BSON } from "realm";
 
 const RealmWrapper = ({ children }) => {
   const migration = (oldRealm, newRealm) => {
     if (oldRealm.schemaVersion < newRealm.schemaVersion) {
-      const oldObjects = oldRealm.objects("Organisation");
-      const newObjects = newRealm.objects("Organisation");
+      const oldContactOrganisationMap = oldRealm.objects(
+        "ContactOrganisationMap"
+      );
+      const newContactOrganisationMap = newRealm.objects(
+        "ContactOrganisationMap"
+      );
 
-      for (let i = 0; i < oldObjects.length; i++) {
-        newObjects[i].createdAt = new Date();
-        newObjects[i].updatedAt = new Date();
+      const oldNoteOrganisationMap = oldRealm.objects("NoteOrganisationMap");
+      const newNoteOrganisationMap = newRealm.objects("NoteOrganisationMap");
+
+      for (let i = 0; i < oldContactOrganisationMap.length; i++) {
+        if (oldContactOrganisationMap?.[i]?.contact?._id) {
+          newContactOrganisationMap[i].contactId = new BSON.ObjectId(
+            oldContactOrganisationMap[i]?.contact?._id
+          );
+        }
+
+        if (oldContactOrganisationMap?.[i]?.organisation?._id) {
+          newContactOrganisationMap[i].organisationId = new BSON.ObjectId(
+            oldContactOrganisationMap[i]?.organisation?._id
+          );
+        }
+      }
+
+      for (let i = 0; i < oldNoteOrganisationMap.length; i++) {
+        if (oldNoteOrganisationMap?.[i]?.note?._id) {
+          newNoteOrganisationMap[i].noteId = new BSON.ObjectId(
+            oldNoteOrganisationMap[i]?.note?._id
+          );
+        }
+
+        if (oldNoteOrganisationMap?.[i]?.organisation?._id) {
+          newNoteOrganisationMap[i].organisationId = new BSON.ObjectId(
+            oldNoteOrganisationMap[i]?.organisation?._id
+          );
+        }
       }
     }
   };
@@ -40,7 +71,7 @@ const RealmWrapper = ({ children }) => {
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={15} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={18} onMigration={migration}>
       {children}
     </RealmProvider>
   );

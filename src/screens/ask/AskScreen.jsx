@@ -6,7 +6,6 @@ import {
   Alert,
   FlatList,
   KeyboardAvoidingView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -39,10 +38,6 @@ import {
   getCircularReplacer,
   getLastSubstringAfterAt,
 } from "../../utils/common";
-import {
-  useAllCalendarNotes,
-  useAllContactNotes,
-} from "../../realm/queries/noteOperations";
 import { useQuery, useRealm } from "@realm/react";
 
 import { BSON } from "realm";
@@ -56,7 +51,6 @@ import { Feather } from "@expo/vector-icons";
 import Note from "../../realm/models/Note";
 import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
 import Organisation from "../../realm/models/Organisation";
-import Realm from "realm";
 import Toast from "react-native-toast-message";
 import UserMentionDropdown from "../../components/notecontainer/UserMentionDropdown";
 import UserMentionOptionsDropdown from "../../components/notecontainer/UserMentionOptionsDropdown";
@@ -64,7 +58,6 @@ import { chatGptStream } from "../../utils/gpt";
 import useDocumentHandler from "../../hooks/DocumentHandler";
 import { useNavigation } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
-import { useRecentCalendarEvents } from "../../realm/queries/calendarEventOperations";
 import useSearchFilter from "../../hooks/SearchFilter";
 
 const ChatComponent = ({ route }) => {
@@ -121,8 +114,8 @@ const ChatComponent = ({ route }) => {
         ?.map((o) => o?.organisation?._id);
       const orgContactsIds = realm
         .objects(ContactOrganisationMap)
-        .filtered(`organisation._id IN $0`, mentionedOrgsIds)
-        .map((o) => o.contact?._id);
+        .filtered(`organisationId IN $0`, mentionedOrgsIds)
+        .map((o) => o?.contactId);
       const allContactNoteIds = realm
         .objects(ContactNoteMap)
         .filtered(`contactId IN $0`, [
@@ -132,7 +125,7 @@ const ChatComponent = ({ route }) => {
         .map((o) => o.noteId);
       const allOrgNoteIds = realm
         .objects(NoteOrganisationMap)
-        .filtered(`organisation._id IN $0`, mentionedOrgsIds)
+        .filtered(`organisationId IN $0`, mentionedOrgsIds)
         .map((o) => o.note._id);
       const allCalendarEventIds = realm
         .objects(CalendarEventNoteMap)

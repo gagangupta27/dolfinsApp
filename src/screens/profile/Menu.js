@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Fontisto from "@expo/vector-icons/Fontisto";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 import FeedBackModal from "../../components/Profile/FeedBackModal";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -23,6 +24,7 @@ import ProfileModal from "../../components/ProfileModal";
 import WebViewV2 from "../webview/WebViewV2";
 import { setAuthData } from "../../redux/reducer/app";
 import * as CloudStore from "react-native-cloud-store";
+import ExportImportModal from "./ExportImportModal";
 
 const Menu = ({ route }) => {
   const authData = useSelector((state) => state.app.authData);
@@ -31,6 +33,7 @@ const Menu = ({ route }) => {
   const _webViewRef = useRef();
   const _profileRef = useRef();
   const _feedBackRef = useRef();
+  const _exportImportRef = useRef();
 
   useEffect(() => {
     (async () => {
@@ -70,19 +73,23 @@ const Menu = ({ route }) => {
     {
       icon: () => <Fontisto name="export" size={24} color="black" />,
       manuName: "Export Data",
-      route: "PrivacyPolicy",
-      onPress: () => {},
+      onPress: () => {
+        _exportImportRef?.current?.exportData();
+      },
     },
     {
       icon: () => <Fontisto name="import" size={24} color="black" />,
       manuName: "Import Data",
-      route: "PrivacyPolicy",
+      onPress: () => {},
+    },
+    {
+      icon: () => <FontAwesome5 name="sync-alt" size={24} color="black" />,
+      manuName: "Sync iCould",
       onPress: () => {},
     },
     {
       icon: () => <FontAwesome6 name="discord" size={24} color="black" />,
       manuName: "Contact Us",
-      route: "PrivacyPolicy",
       onPress: () => {
         Linking.openURL("https://discord.com/channels/@me/1266497641089335348");
       },
@@ -90,7 +97,6 @@ const Menu = ({ route }) => {
     {
       icon: () => <MaterialIcons name="feedback" size={24} color="black" />,
       manuName: "FeedBack",
-      route: "PrivacyPolicy",
       onPress: () => {
         _feedBackRef?.current?.show();
       },
@@ -180,6 +186,7 @@ const Menu = ({ route }) => {
       <WebViewV2 ref={_webViewRef} />
       <ProfileModal ref={_profileRef} />
       <FeedBackModal ref={_feedBackRef} />
+      <ExportImportModal ref={_exportImportRef} />
     </KeyboardAvoidingView>
   );
 };

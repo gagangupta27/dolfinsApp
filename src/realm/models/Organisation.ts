@@ -1,7 +1,5 @@
 import Realm, { BSON, ObjectSchema } from "realm";
 
-import Contact from "./Contact";
-
 export default class Organisation extends Realm.Object {
   _id!: BSON.ObjectId;
   name: string;
@@ -12,6 +10,7 @@ export default class Organisation extends Realm.Object {
   createdAt!: Date;
   updatedAt!: Date;
   isPinned!: boolean;
+  linkedinProfileData!: string;
 
   static schema: ObjectSchema = {
     name: "Organisation",
@@ -21,20 +20,11 @@ export default class Organisation extends Realm.Object {
       links: "string[]",
       linkedinUrl: "string",
       linkedinProfile: "string",
+      linkedinProfileData: "string",
       summary: "string",
       createdAt: "date",
       updatedAt: "date",
       isPinned: "bool",
-      contacts: {
-        type: "linkingObjects",
-        objectType: "ContactOrganisationMap",
-        property: "organisation",
-      },
-      notes: {
-        type: "linkingObjects",
-        objectType: "NoteOrganisationMap",
-        property: "organisation",
-      },
     },
     primaryKey: "_id",
   };

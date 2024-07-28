@@ -39,11 +39,6 @@ export default class Contact extends Realm.Object {
       linkedinSummary: "string",
       createdAt: "date",
       updatedAt: "date",
-      organisations: {
-        type: "linkingObjects",
-        objectType: "ContactOrganisationMap",
-        property: "contact",
-      },
     },
     primaryKey: "_id",
   };

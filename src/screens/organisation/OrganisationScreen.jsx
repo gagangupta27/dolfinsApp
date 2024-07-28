@@ -22,6 +22,7 @@ import Contact from "../../realm/models/Contact";
 import NotesList from "../../components/notecontainer/NotesList";
 import { Path, Svg } from "react-native-svg";
 import AddOrgModal from "../../components/organisation/AddOrgModal";
+import Note from "../../realm/models/Note";
 
 const OrganisationScreen = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
@@ -34,14 +35,16 @@ const OrganisationScreen = ({ route }) => {
 
   const organisation = useObject(
     Organisation,
-    new BSON.ObjectID(route?.params?.organisationId)
+    new BSON.ObjectId(route?.params?.organisationId)
   );
 
-  const storedNotes = useQuery(NoteOrganisationMap)
-    .filtered("organisation._id == $0", organisation?._id)
-    .sorted([["note.isPinned", true]])
-    .filter((o) => o?.note)
-    .map((o) => o?.note);
+  const noteIds = useQuery(NoteOrganisationMap)
+    .filtered("organisationId == $0", organisation?._id)
+    .map((o) => o?.noteId);
+
+  const storedNotes = useQuery(Note)
+    .filtered("_id IN $0", noteIds)
+    .sorted([["isPinned", true]]);
 
   const summaryNote = organisation.summary
     ? [
@@ -260,7 +263,7 @@ const OrganisationScreen = ({ route }) => {
             <NotesList
               ref={notesListRef}
               notes={
-                Array.isArray(storedNotes)
+                storedNotes && storedNotes?.length > 0 && storedNotes?.[0]
                   ? [...storedNotes, ...summaryNote]
                   : [...summaryNote]
               }
