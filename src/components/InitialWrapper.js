@@ -1,10 +1,12 @@
-import { useRealm } from "@realm/react";
-import React, { memo, useEffect, useRef } from "react";
-import Contact from "../realm/models/Contact";
-import { BSON } from "realm";
-import { AppState } from "react-native";
 import * as Contacts from "expo-contacts";
+
+import React, { memo, useEffect, useRef } from "react";
+
+import { AppState } from "react-native";
+import { BSON } from "realm";
+import Contact from "../realm/models/Contact";
 import { OrgContactLink } from "../realm/queries/organisationOperations";
+import { useRealm } from "@realm/react";
 
 const InitialWrapper = ({ children }) => {
   const realm = useRealm();
@@ -48,6 +50,8 @@ const InitialWrapper = ({ children }) => {
           linkedinSummary: "",
           createdAt: new Date(),
           updatedAt: new Date(),
+          department: "",
+          jobTitle: "",
         });
       });
     }
@@ -65,21 +69,23 @@ const InitialWrapper = ({ children }) => {
         .filtered("id == $0", contact.id)[0];
       if (existingContact) {
         realm.write(async () => {
-          existingContact.name = `${contact.firstName || ""} ${
+          existingContact.name = `${contact?.firstName || ""} ${
             contact.middleName || ""
           } ${contact.lastName || ""}`;
-          existingContact.emails = contact.emails?.map((o) => o?.email) || [];
+          existingContact.emails = contact?.emails?.map((o) => o?.email) || [];
           existingContact.phoneNumbers =
             contact.phoneNumbers?.map((o) => o?.digits) || [];
-          existingContact.note = contact.note || "";
+          existingContact.note = contact?.note || "";
           existingContact.image = contact?.image || "";
           existingContact.imageAvailable = contact?.imageAvailable || false;
+          existingContact.jobTitle = contact?.jobTitle || "";
+          existingContact.department = contact?.department || "";
         });
-        if (contact.company) {
+        if (contact?.company) {
           await OrgContactLink(
             realm,
             "",
-            existingContact?._id,
+            String(existingContact?._id),
             contact.company
           );
         }

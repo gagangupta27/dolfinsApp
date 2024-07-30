@@ -75,7 +75,7 @@ const ContactSelectionModal = ({
 
   useEffect(() => {
     (async () => {
-      if (contacts.length != 0) {
+      if (contacts?.length != 0) {
         setLoadingContacts(false);
         return;
       }
@@ -120,11 +120,12 @@ const ContactSelectionModal = ({
 
   useEffect(() => {
     if (searchText) {
-      const textData = searchText?.toUpperCase();
-      const newData = contacts.filter((item) => {
-        const itemData = item.name ? item.name?.toUpperCase() : "";
-        const matchIndex = itemData.indexOf(textData);
-        return matchIndex > -1;
+      "".toLowerCase;
+      const newData = contacts?.filter((item) => {
+        return (
+          item?.name?.toLowerCase().includes(searchText?.toLowerCase()) ||
+          item?.company?.toLowerCase().includes(searchText?.toLowerCase())
+        );
       });
 
       if (newData.length != 0) {
@@ -309,6 +310,7 @@ const ContactSelectionModal = ({
             content={searchText}
             setContent={setSearchText}
             setIsFocused={() => {}}
+            multiline={false}
             placeholder="Search for a name"
           />
         </View>
@@ -375,6 +377,9 @@ const ContactSelectionModal = ({
           <VirtualizedList
             initialNumToRender={15}
             data={filteredContacts}
+            contentContainerStyle={{
+              paddingBottom: 500,
+            }}
             renderItem={({ item }) => renderItem({ item }, onChange)}
             keyExtractor={(item) => "cute_" + item.id.toString()}
             getItemCount={(x) => filteredContacts.length}
@@ -399,10 +404,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
     marginTop: 30,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderColor: "#000",
-    borderWidth: 1,
     padding: 20,
   },
   contactItem: {

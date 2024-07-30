@@ -16,12 +16,12 @@ import { useObject, useQuery, useRealm } from "@realm/react";
 
 import Api from "../../utils/Api";
 import Contact from "../../realm/models/Contact";
+import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 import Dropdown from "../common/DropDown";
 import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import MultiInput from "../common/MultiInput";
 import Organisation from "../../realm/models/Organisation";
-import ContactOrganisationMap from "../../realm/models/ContactOrganisationMap";
 
 const AddOrgModal = ({
   visible = false,
@@ -31,9 +31,7 @@ const AddOrgModal = ({
   title = "Create New",
 }) => {
   const [name, setName] = useState("");
-  const [linkedin, setLinkedin] = useState(
-    "https://www.linkedin.com/company/google/"
-  );
+  const [linkedin, setLinkedin] = useState("");
   const [contacts, setContacts] = useState([]);
   const [links, setLinks] = useState([]);
 
@@ -55,9 +53,7 @@ const AddOrgModal = ({
   useEffect(() => {
     if (existingOrg) {
       setName(existingOrg?.name);
-      setLinkedin(
-        existingOrg?.linkedinUrl || "https://www.linkedin.com/company/google/"
-      );
+      setLinkedin(existingOrg?.linkedinUrl || "");
       setLinks(existingOrg?.links || []);
     }
   }, [existingOrg]);

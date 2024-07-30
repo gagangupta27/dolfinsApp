@@ -1,6 +1,7 @@
 import Realm, { BSON } from "realm";
 
 import Contact from "../models/Contact";
+import { createNoteAndAddToContact } from "./noteOperations";
 
 async function addContact(
   realm: Realm,
@@ -12,6 +13,8 @@ async function addContact(
     imageAvailable: boolean;
     image: string;
     note: string;
+    jobTitle: string;
+    department: string;
     addresses: {
       city: string;
       country: string;
@@ -29,7 +32,7 @@ async function addContact(
     const contacts = realm
       .objects("Contact")
       .filtered("id == $0", contactData.id);
-    if (contacts.length > 0) {
+    if (contacts && contacts?.length > 0) {
       let contact = contacts[0];
       contact.name = contactData.name;
       contact.emails = contactData.emails;
@@ -48,10 +51,12 @@ async function addContact(
           : [],
         imageAvailable: contactData?.imageAvailable || false,
         image: contactData?.image || "",
-        note: contactData?.note || "",
+        note: "",
         addresses: contactData?.addresses || [],
         isFavourite: false,
         isPinned: false,
+        jobTitle: contactData?.jobTitle || "",
+        department: contactData?.department || "",
         linkedinProfileUrl: "",
         linkedinProfileData: "",
         linkedinSummary: "",
@@ -60,6 +65,20 @@ async function addContact(
       });
     }
   });
+
+  if (contactData?.note && contactData?.note?.length > 0) {
+    await createNoteAndAddToContact(realm, createdContact?._id, {
+      content: contactData?.note,
+      mentions: [],
+      type: "text",
+      imageUri: "",
+      audioUri: "",
+      audioText: "",
+      volumeLevels: [],
+      documentUri: "",
+      documentName: "",
+    });
+  }
 
   return createdContact;
 }

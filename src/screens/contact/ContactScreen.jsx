@@ -21,10 +21,10 @@ import NewContactModal from "../../components/contact/NewContactModal";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import Note from "../../realm/models/Note";
 import NotesList from "../../components/notecontainer/NotesList";
+import Organisation from "../../realm/models/Organisation";
 import Toast from "react-native-toast-message";
 import useQuickNote from "../../hooks/useQuickNote";
 import { useTrackWithPageInfo } from "../../utils/analytics";
-import Organisation from "../../realm/models/Organisation";
 
 const ContactScreen = ({ route }) => {
   const track = useTrackWithPageInfo();
@@ -165,6 +165,14 @@ const ContactScreen = ({ route }) => {
         contactOrgs?.forEach((org, index) => {
           data += `${org?.name}${index < contactOrgs?.length - 1 ? ", " : ""}`;
         });
+        data += "\n";
+      }
+      if (ct?.department) {
+        data += `Department: ${ct?.department} `;
+        data += "\n";
+      }
+      if (ct?.jobTitle) {
+        data += `Job Title: ${ct?.jobTitle} `;
         data += "\n";
       }
     }

@@ -1,4 +1,5 @@
 import Address from "../realm/models/ContactAddress";
+import { BSON } from "realm";
 import CalendarEvent from "../realm/models/CalendarEvent";
 import CalendarEventNoteMap from "../realm/models/CalendarEventNoteMap";
 import Chat from "../realm/models/Chat";
@@ -11,7 +12,6 @@ import NoteOrganisationMap from "../realm/models/NoteOrganisationMap";
 import Organisation from "../realm/models/Organisation";
 import React from "react";
 import { RealmProvider } from "@realm/react";
-import { BSON } from "realm";
 
 const RealmWrapper = ({ children }) => {
   const migration = (oldRealm, newRealm) => {
@@ -71,7 +71,7 @@ const RealmWrapper = ({ children }) => {
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={18} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={19} onMigration={migration}>
       {children}
     </RealmProvider>
   );

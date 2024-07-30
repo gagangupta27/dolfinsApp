@@ -14,6 +14,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "accessesContactNotes": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.dolfins.ai",
       "infoPlist": {

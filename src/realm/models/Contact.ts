@@ -19,6 +19,8 @@ export default class Contact extends Realm.Object {
   linkedinSummary!: string;
   createdAt!: Date;
   updatedAt!: Date;
+  department: string;
+  jobTitle: string;
 
   static schema: ObjectSchema = {
     name: "Contact",
@@ -37,6 +39,8 @@ export default class Contact extends Realm.Object {
       linkedinProfileUrl: "string",
       linkedinProfileData: "string",
       linkedinSummary: "string",
+      department: "string",
+      jobTitle: "string",
       createdAt: "date",
       updatedAt: "date",
     },

@@ -51,7 +51,7 @@ const LinkedinDataConnectModal = forwardRef(({ contacId = "" }, ref) => {
   const [fetchingDataError, setFetchingDataError] = useState(null);
   const [notes, setNotes] = useState([]);
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState(
-    contact.linkedinProfileUrl || "https://www.linkedin.com/in/gagan-gupta27/"
+    contact.linkedinProfileUrl || ""
   );
 
   useImperativeHandle(ref, () => ({
