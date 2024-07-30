@@ -176,19 +176,14 @@ const LoginScreen = () => {
         </Text>
       </View>
 
-      <AppleButton
-        buttonStyle={AppleButton.Style.BLACK}
-        buttonType={AppleButton.Type.SIGN_IN}
-        style={{
-          width: 160, // You must specify a width
-          height: 45, // You must specify a height
-          marginTop: 50,
-        }}
-        onPress={onAppleButtonPress}
-      />
-
       <TouchableOpacity
-        onPress={onPress}
+        onPress={() => {
+          if (__DEV__) {
+            onPress();
+          } else {
+            onAppleButtonPress();
+          }
+        }}
         style={{
           borderRadius: 12,
           justifyContent: "center",

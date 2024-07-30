@@ -12,17 +12,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dolfinsBeta.ai",
+      "bundleIdentifier": "com.dolfins.ai",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
-        "LSApplicationQueriesSchemes": [
-          "mailto"
-        ],
+        "LSApplicationQueriesSchemes": ["mailto"],
         "ITSAppUsesNonExemptEncryption": "NO"
       },
       "buildNumber": "1"
@@ -32,7 +28,7 @@
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dolfinsBeta.ai",
+      "package": "com.dolfins.ai",
       "permissions": [
         "android.permission.READ_CONTACTS",
         "android.permission.WRITE_CONTACTS",
