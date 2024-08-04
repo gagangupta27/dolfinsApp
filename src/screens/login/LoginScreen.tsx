@@ -51,7 +51,7 @@ const LoginScreen = () => {
   const track = useTrackWithPageInfo();
 
   const { authorize } = useAuth0();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(3);
   const authData = useSelector((state: RootState) => state.app.authData);
   const dispatch = useDispatch();
 
@@ -178,7 +178,7 @@ const LoginScreen = () => {
 
       <TouchableOpacity
         onPress={() => {
-          if (__DEV__) {
+          if (false) {
             onPress();
           } else {
             onAppleButtonPress();

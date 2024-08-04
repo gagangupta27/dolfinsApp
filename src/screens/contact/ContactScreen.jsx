@@ -186,6 +186,7 @@ const ContactScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -233,6 +234,7 @@ const ContactScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],
@@ -251,6 +253,7 @@ const ContactScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -280,6 +283,7 @@ const ContactScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],

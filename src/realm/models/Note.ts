@@ -8,6 +8,7 @@ export default class Note extends Realm.Object {
   mentions: Mentions[];
   type!: string;
   imageUri!: string | null;
+  imageText!: string | null;
   audioUri!: string | null;
   audioText: string | null;
   volumeLevels!: number[];
@@ -25,6 +26,7 @@ export default class Note extends Realm.Object {
       mentions: "Mentions[]",
       type: "string",
       imageUri: "string?",
+      imageText: "string?",
       audioUri: "string?",
       audioText: "string?",
       volumeLevels: "double[]",

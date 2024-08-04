@@ -50,7 +50,8 @@ const CodePushUpdater = ({ header = "Downloading" }) => {
     codePush
       .checkForUpdate()
       .then((update) => {
-        if (update) {
+        if (update && update.isPending) {
+          console.log(update);
           if (update?.isMandatory) {
             setIsUpdate(true);
             codePush.sync(
@@ -70,6 +71,7 @@ const CodePushUpdater = ({ header = "Downloading" }) => {
         }
       })
       .catch((err) => {
+        console.log("err", err);
         setIsUpdate(false);
       });
   }, []);

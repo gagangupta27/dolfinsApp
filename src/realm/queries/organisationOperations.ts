@@ -1,4 +1,5 @@
 import Realm, { BSON } from "realm";
+
 import Organisation from "../models/Organisation";
 
 async function addOrganisation(
@@ -22,6 +23,35 @@ async function addOrganisation(
     });
   });
   return createdOrganisation; // Return the newly created organisation
+}
+
+async function importOrgs(
+  realm: Realm,
+  organisations: {
+    _id: BSON.ObjectId;
+    name: string;
+    linkedinUrl: string;
+    linkedinProfile: string;
+    linkedinProfileData: string;
+    createdAt: Date;
+    updatedAt: Date;
+    summary: string;
+  }[]
+) {
+  realm.write(() => {
+    for (const org of organisations) {
+      try {
+        realm.create("Organisation", {
+          ...org,
+          _id: new BSON.ObjectId(org?._id),
+          isPinned: false,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+  return;
 }
 
 function deleteOrganisation(
@@ -126,32 +156,110 @@ async function updateContactOrg(
 
 async function getRawOrg(realm: Realm) {
   let orgJSON = [];
-  realm.write(() => {
-    const orgs = realm.objects("Organisation");
-    orgJSON = [...orgs];
-  });
+  try {
+    realm.write(() => {
+      const orgs = realm.objects("Organisation");
+      if (orgs && orgs?.length > 0) {
+        orgJSON = [...orgs];
+      } else {
+        orgJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getRawOrg", err);
+    orgJSON = [];
+  }
 
   return orgJSON;
 }
 
 async function getRawNoteOrganisationMap(realm: Realm) {
   let orgJSON = [];
-  realm.write(() => {
-    const orgs = realm.objects("NoteOrganisationMap");
-    orgJSON = [...orgs];
-  });
+  try {
+    realm.write(() => {
+      const orgs = realm.objects("NoteOrganisationMap");
+      if (orgs && orgs?.length > 0) {
+        orgJSON = [...orgs];
+      } else {
+        orgJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getRawNoteOrganisationMap", err);
+    orgJSON = [];
+  }
 
   return orgJSON;
 }
 
-async function getRawContactOrganisationMap(realm: Realm) {
-  let orgJSON = [];
+async function importNoteOrganisationMap(
+  realm: Realm,
+  maps: {
+    _id: BSON.ObjectId;
+    noteId: BSON.ObjectId;
+    organisationId: BSON.ObjectId;
+  }[]
+) {
+  console.log("importNoteOrganisationMap", maps?.length);
   realm.write(() => {
-    const orgs = realm.objects("ContactOrganisationMap");
-    orgJSON = [...orgs];
+    for (const NOMap of maps) {
+      try {
+        realm.create("NoteOrganisationMap", {
+          _id: new BSON.ObjectId(NOMap?._id),
+          organisationId: new BSON.ObjectId(NOMap.organisationId),
+          noteId: new BSON.ObjectId(NOMap.noteId),
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
   });
 
+  return;
+}
+
+async function getRawContactOrganisationMap(realm: Realm) {
+  let orgJSON = [];
+  try {
+    realm.write(() => {
+      const orgs = realm.objects("ContactOrganisationMap");
+      if (orgs && orgs?.length > 0) {
+        orgJSON = [...orgs];
+      } else {
+        orgJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getRawContactOrganisationMap", err);
+    orgJSON = [];
+  }
   return orgJSON;
+}
+
+async function importContactOrgMap(
+  realm: Realm,
+  maps: {
+    _id: BSON.ObjectId;
+    contactId: BSON.ObjectId;
+    organisationId: BSON.ObjectId;
+  }[]
+) {
+  console.log("importContactOrgMap", maps?.length);
+  realm.write(() => {
+    for (const COMap of maps) {
+      try {
+        realm.create("ContactOrganisationMap", {
+          _id: new BSON.ObjectId(COMap?._id),
+          organisationId: new BSON.ObjectId(COMap.organisationId),
+          contactId: new BSON.ObjectId(COMap.contactId),
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+
+  return;
 }
 
 export {
@@ -162,4 +270,7 @@ export {
   getRawOrg,
   getRawNoteOrganisationMap,
   getRawContactOrganisationMap,
+  importOrgs,
+  importNoteOrganisationMap,
+  importContactOrgMap,
 };

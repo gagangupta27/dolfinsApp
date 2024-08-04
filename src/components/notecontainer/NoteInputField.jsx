@@ -62,6 +62,7 @@ const NoteInputField = forwardRef(
           [EVENTS.INPUT_START.KEYS.INPUT_NAME]: INPUT_NAME.ADD_TEXT,
         });
         let audioText = "";
+        let imageText = "";
         if (audioUri) {
           setLoading(true);
           const formData = new FormData();
@@ -96,10 +97,49 @@ const NoteInputField = forwardRef(
           setLoading(false);
         }
 
+        if (imageUri) {
+          setLoading(true);
+          const formData = new FormData();
+          formData.append("image", {
+            uri: imageUri,
+            type: "png/jpeg",
+            name: "image.png",
+          });
+
+          imageText = await fetch(
+            "https://dolfins-server-development.up.railway.app/api/1.0/user/ocr/image",
+            {
+              method: "POST",
+              body: formData,
+              headers: {
+                "Content-Type": "multipart/form-data",
+                authorization: "Bearer " + authData?.idToken,
+              },
+            }
+          )
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              return data?.text || "";
+            })
+            .catch((error) => {
+              console.error("Error transcribing image:", error);
+              setLoading(false);
+              return "";
+            });
+          setLoading(false);
+        }
+
         addNote(
-          content + " " + audioText,
+          `${content}${
+            audioText?.length > 0 ? `\n\nTranscribed Audio: ${audioText}` : ""
+          }${
+            imageText?.length > 0 ? `\n\nImage Description :${imageText}` : ""
+          }`,
           mentions,
           imageUri,
+          imageText,
           audioUri,
           audioText,
           volumeLevels ? volumeLevels : [],
@@ -112,7 +152,7 @@ const NoteInputField = forwardRef(
         setContent("");
         clear();
 
-        console.log("audioText", audioText);
+        console.log("imageText", imageText);
       }
     };
 

@@ -217,7 +217,7 @@ const ChatComponent = ({ route }) => {
             };
           } else return entry;
         }),
-        // base64 ? { role: "user", pdfData: base64, content: "" } : {},
+        base64 ? { role: "user", pdfData: base64, content: "" } : null,
         { role: "user", content: question.trim() },
       ];
       let title = chat.title;

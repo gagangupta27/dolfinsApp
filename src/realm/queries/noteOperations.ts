@@ -1,12 +1,12 @@
 import Realm, { BSON } from "realm";
 
 import CalendarEventNoteMap from "../models/CalendarEventNoteMap";
-import ContactNoteMap from "../models/ContactNoteMap";
-import Note from "../models/Note";
-import { useQuery } from "@realm/react";
-import Mentions from "../models/Mentions";
 import Contact from "../models/Contact";
+import ContactNoteMap from "../models/ContactNoteMap";
+import Mentions from "../models/Mentions";
+import Note from "../models/Note";
 import Organisation from "../models/Organisation";
+import { useQuery } from "@realm/react";
 
 function useCalendarNotes(realm: Realm, calendarEventId: BSON.ObjectId) {
   const noteMaps = useQuery(CalendarEventNoteMap).filtered(
@@ -74,6 +74,7 @@ function addNoteToCalendar(
     mentions: Mentions[];
     type: string;
     imageUri: string | null;
+    imageText: string | null;
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -101,7 +102,8 @@ function addNoteToCalendar(
           }))
         : [],
       type: noteDetails.type,
-      imageUri: noteDetails.imageUri,
+      imageUri: noteDetails?.imageUri,
+      imageText: noteDetails?.imageText,
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -131,6 +133,7 @@ async function createNoteAndAddToContact(
     mentions: Mentions[];
     type: string;
     imageUri: string | null;
+    imageText: string | null;
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -158,6 +161,7 @@ async function createNoteAndAddToContact(
         : [],
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
+      imageText: noteDetails.imageText,
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -179,6 +183,76 @@ async function createNoteAndAddToContact(
   return noteId;
 }
 
+async function importNotes(
+  realm: Realm,
+  notes: {
+    _id: BSON.ObjectID;
+    content: string;
+    mentions: {
+      _id: BSON.ObjectId;
+      contactId: BSON.ObjectId;
+      organisationId: BSON.ObjectId;
+    }[];
+    type: string;
+    imageUri: string | null;
+    imageText: string | null;
+    audioUri: string | null;
+    audioText: string | null;
+    volumeLevels: number[];
+    documentUri: string | null;
+    documentName: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    isPinned: boolean;
+  }[]
+) {
+  console.log("in notes", notes);
+  realm.write(() => {
+    for (const note of notes) {
+      try {
+        console.log("note", note);
+        realm.create("Note", {
+          _id: new BSON.ObjectID(note?._id),
+          content: note?.content || "",
+          mentions: note?.mentions
+            ? note.mentions?.map((o) => ({
+                _id: new BSON.ObjectId(o?._id),
+                ...(o?.contactId
+                  ? {
+                      contact: realm.objectForPrimaryKey(
+                        Contact,
+                        new BSON.ObjectID(o?.contactId)
+                      ),
+                    }
+                  : {
+                      organisation: realm.objectForPrimaryKey(
+                        Organisation,
+                        new BSON.ObjectID(o?.organisationId)
+                      ),
+                    }),
+              }))
+            : [],
+          type: note.type,
+          imageUri: note.imageUri,
+          imageText: note.imageText,
+          audioUri: note.audioUri,
+          audioText: note?.audioText || "",
+          volumeLevels: note.volumeLevels,
+          documentUri: note.documentUri,
+          documentName: note.documentName,
+          createdAt: note.createdAt,
+          updatedAt: note.updatedAt,
+          isPinned: note.isPinned,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+
+  return;
+}
+
 async function createNoteAndAddToOrganisation(
   realm: Realm,
   organisationId: BSON.ObjectId,
@@ -187,6 +261,7 @@ async function createNoteAndAddToOrganisation(
     mentions: Mentions[];
     type: string;
     imageUri: string | null;
+    imageText: string | null;
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -214,6 +289,7 @@ async function createNoteAndAddToOrganisation(
         : [],
       type: noteDetails.type,
       imageUri: noteDetails.imageUri,
+      imageText: noteDetails.imageText,
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -285,6 +361,7 @@ async function updateNote(
     mentions: Mentions[];
     type: string;
     imageUri: string | null;
+    imageText: string | null;
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -313,6 +390,7 @@ async function updateNote(
         : [];
       note.type = noteDetails.type;
       note.imageUri = noteDetails.imageUri;
+      note.imageText = noteDetails.imageText;
       note.audioUri = noteDetails.audioUri;
       note.audioText = noteDetails?.audioText || "";
       note.volumeLevels = noteDetails.volumeLevels;
@@ -350,21 +428,59 @@ async function deleteNote(realm: Realm, noteId: BSON.ObjectId) {
 
 async function getQuickNotesRaw(realm: Realm) {
   let quickNotesJSON = [];
-  realm.write(() => {
-    const quickNotesIds = realm
-      .objects(ContactNoteMap)
-      .filtered(
-        "contactId == $0",
-        new BSON.ObjectId("000000000000000000000000")
-      )
-      .map((o) => o?.noteId);
-    const allQuichNotes = realm
-      .objects(Note)
-      .filtered(`_id IN $0`, quickNotesIds);
-    quickNotesJSON = [...allQuichNotes];
-  });
+  try {
+    realm.write(() => {
+      const quickNotesIds = realm
+        .objects(ContactNoteMap)
+        .filtered(
+          "contactId == $0",
+          new BSON.ObjectId("000000000000000000000000")
+        )
+        .map((o) => o?.noteId);
+      const allQuichNotes = realm
+        .objects(Note)
+        .filtered(`_id IN $0`, quickNotesIds);
+      if (allQuichNotes && allQuichNotes?.length > 0) {
+        quickNotesJSON = [...allQuichNotes];
+      } else {
+        quickNotesJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getQuickNotesRaw", err);
+    quickNotesJSON = [];
+  }
 
   return quickNotesJSON;
+}
+
+async function getNotesRaw(realm: Realm) {
+  let notesJSON = [];
+  try {
+    realm.write(() => {
+      const notesIds = realm.objects(ContactNoteMap).map((o) => o?.noteId);
+      const allNotes = realm.objects(Note).filtered(`_id IN $0`, notesIds);
+      if (allNotes && allNotes?.length > 0) {
+        notesJSON = [
+          ...allNotes.map((o) => ({
+            ...o,
+            mentions: o?.mentions?.map((m) => ({
+              _id: m?._id,
+              contactId: m?.contact?._id,
+              organisationId: m?.organisation?._id,
+            })),
+          })),
+        ];
+      } else {
+        notesJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getNotesRaw", err);
+    notesJSON = [];
+  }
+
+  return notesJSON;
 }
 
 export {
@@ -380,4 +496,6 @@ export {
   useContactNotes,
   createNoteAndAddToOrganisation,
   getQuickNotesRaw,
+  getNotesRaw,
+  importNotes,
 };

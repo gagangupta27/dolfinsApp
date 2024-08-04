@@ -1,26 +1,27 @@
-import React from "react";
-import { BSON } from "realm";
-import { View, Text } from "react-native";
-import Styles from "./CalendarEventScreenStyle";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { KeyboardAvoidingView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native";
-import { useRef, useState, useEffect } from "react";
-import NotesList from "../../components/notecontainer/NotesList";
+import { Text, View } from "react-native";
 import {
-  useCalendarNotes,
   addNoteToCalendar,
-  updateNote,
   deleteNote,
+  updateNote,
+  useCalendarNotes,
 } from "../../realm/queries/noteOperations";
-import { useCalendarEvent } from "../../realm/queries/calendarEventOperations";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useRealm } from "@realm/react";
-import RenderHtml from "react-native-render-html"; // Import RenderHtml
-import { Dimensions } from "react-native";
-import { ScrollView } from "react-native";
+
+import { BSON } from "realm";
 import Contact from "../../realm/models/Contact";
+import { Dimensions } from "react-native";
+import { KeyboardAvoidingView } from "react-native";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
+import NotesList from "../../components/notecontainer/NotesList";
+import React from "react";
+import RenderHtml from "react-native-render-html"; // Import RenderHtml
+import { ScrollView } from "react-native";
+import Styles from "./CalendarEventScreenStyle";
+import { TouchableOpacity } from "react-native";
+import { useCalendarEvent } from "../../realm/queries/calendarEventOperations";
+import { useNavigation } from "@react-navigation/native";
 
 const contact = { id: -5, name: "Calendar" };
 
@@ -62,6 +63,7 @@ const CalendarEventScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -78,6 +80,7 @@ const CalendarEventScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || "",
       volumeLevels: volumeLevels || [],
@@ -94,6 +97,7 @@ const CalendarEventScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -110,6 +114,7 @@ const CalendarEventScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],

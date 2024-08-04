@@ -1,28 +1,28 @@
 import * as Clipboard from "expo-clipboard";
 
 import { KeyboardAvoidingView, Linking, TouchableOpacity } from "react-native";
-import React from "react";
+import { Path, Svg } from "react-native-svg";
 import { TouchableWithoutFeedback, View } from "react-native";
 import {
   createNoteAndAddToOrganisation,
   deleteNote,
   updateNote,
 } from "../../realm/queries/noteOperations";
-import { useRef, useState } from "react";
 import { useObject, useQuery, useRealm } from "@realm/react";
+import { useRef, useState } from "react";
 
+import AddOrgModal from "../../components/organisation/AddOrgModal";
+import { BSON } from "realm";
+import Contact from "../../realm/models/Contact";
+import Header from "../../components/common/Header";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
+import Note from "../../realm/models/Note";
+import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
+import NotesList from "../../components/notecontainer/NotesList";
+import Organisation from "../../realm/models/Organisation";
+import React from "react";
 import Toast from "react-native-toast-message";
 import { useTrackWithPageInfo } from "../../utils/analytics";
-import Organisation from "../../realm/models/Organisation";
-import NoteOrganisationMap from "../../realm/models/NoteOrganisationMap";
-import Header from "../../components/common/Header";
-import { BSON } from "realm";
-import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
-import Contact from "../../realm/models/Contact";
-import NotesList from "../../components/notecontainer/NotesList";
-import { Path, Svg } from "react-native-svg";
-import AddOrgModal from "../../components/organisation/AddOrgModal";
-import Note from "../../realm/models/Note";
 
 const OrganisationScreen = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
@@ -64,6 +64,7 @@ const OrganisationScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -103,6 +104,7 @@ const OrganisationScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],
@@ -126,6 +128,7 @@ const OrganisationScreen = ({ route }) => {
     content,
     mentions,
     imageUri,
+    imageText,
     audioUri,
     audioText,
     volumeLevels,
@@ -155,6 +158,7 @@ const OrganisationScreen = ({ route }) => {
         ? "document"
         : "text",
       imageUri: imageUri || null,
+      imageText: imageText || "",
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],

@@ -72,6 +72,7 @@ async function addContact(
       mentions: [],
       type: "text",
       imageUri: "",
+      imageText: "",
       audioUri: "",
       audioText: "",
       volumeLevels: [],
@@ -81,6 +82,98 @@ async function addContact(
   }
 
   return createdContact;
+}
+
+async function importContacts(
+  realm: Realm,
+  contacts: {
+    _id: BSON.ObjectId;
+    id: string;
+    name: string;
+    emails: { email: string }[];
+    phoneNumbers: { number: string }[];
+    imageAvailable: boolean;
+    image: string;
+    note: string;
+    jobTitle: string;
+    department: string;
+    addresses: {
+      city: string;
+      country: string;
+      id: string;
+      isoCountryCode: string;
+      label: string;
+      postalCode: string;
+      region: string;
+      street: string;
+    }[];
+  }[]
+) {
+  realm.write(() => {
+    for (const contact of contacts) {
+      try {
+        realm.create("Contact", {
+          _id: new BSON.ObjectId(contact?._id),
+          id: contact?.id,
+          name: contact.name,
+          emails: contact.emails || [],
+          phoneNumbers: contact.phoneNumbers || [],
+          imageAvailable: contact?.imageAvailable || false,
+          image: contact?.image || "",
+          note: "",
+          addresses: contact?.addresses || [],
+          isFavourite: false,
+          isPinned: false,
+          jobTitle: contact?.jobTitle || "",
+          department: contact?.department || "",
+          linkedinProfileUrl: "",
+          linkedinProfileData: "",
+          linkedinSummary: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+
+  return;
+}
+
+async function importMentions(
+  realm: Realm,
+  mentions: {
+    _id: string;
+    contactId?: string | null;
+    organisationId?: string | null;
+  }[]
+) {
+  realm.write(() => {
+    for (const mention of mentions) {
+      try {
+        realm.create("Mentions", {
+          _id: new BSON.ObjectId(mention?._id),
+          contact: mention?.contactId
+            ? realm.objectForPrimaryKey(
+                "Contact",
+                new BSON.ObjectID(mention?.contactId)
+              )
+            : null,
+          organisation: mention?.organisationId
+            ? realm.objectForPrimaryKey(
+                "Organisation",
+                new BSON.ObjectID(mention?.organisationId)
+              )
+            : null,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+
+  return;
 }
 
 function deleteContact(
@@ -179,24 +272,91 @@ function useContact(realm, contactId: string) {
 
 async function getContactRaw(realm: Realm) {
   let contactJSON = [];
-  realm.write(() => {
-    const contacts = realm
-      .objects("Contact")
-      .filtered("id != $0", "000000000000000000000000");
-    contactJSON = [...contacts];
-  });
-
+  try {
+    realm.write(() => {
+      const contacts = realm
+        .objects("Contact")
+        .filtered("id != $0", "000000000000000000000000");
+      if (contacts && contacts?.length > 0) {
+        contactJSON = [...contacts];
+      } else {
+        contactJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getContactRaw", err);
+    contactJSON = [];
+  }
   return contactJSON;
 }
 
 async function getContactNoteMap(realm: Realm) {
   let contactJSON = [];
+  try {
+    realm.write(() => {
+      const contacts = realm.objects("ContactNoteMap");
+      if (contacts && contacts?.length > 0) {
+        contactJSON = [...contacts];
+      } else {
+        contactJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getContactNoteMap", err);
+    contactJSON = [];
+  }
+  return contactJSON;
+}
+
+async function importContactNoteMap(
+  realm: Realm,
+  maps: {
+    _id: BSON.ObjectId;
+    contactId: BSON.ObjectId;
+    noteId: BSON.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+  }[]
+) {
   realm.write(() => {
-    const contacts = realm.objects("ContactNoteMap");
-    contactJSON = [...contacts];
+    for (const CNMap of maps) {
+      try {
+        realm.create("ContactNoteMap", {
+          _id: new BSON.ObjectId(CNMap?._id),
+          contactId: new BSON.ObjectId(CNMap.contactId),
+          noteId: new BSON.ObjectId(CNMap.noteId),
+          createdAt: CNMap.createdAt,
+          updatedAt: CNMap.updatedAt,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
   });
 
-  return contactJSON;
+  return;
+}
+
+async function getRawMentions(realm: Realm) {
+  let mentionsJSON = [];
+  try {
+    realm.write(() => {
+      const mentions = realm.objects("Mentions");
+      if (mentions && mentions?.length > 0) {
+        mentionsJSON = mentions.map((o) => ({
+          _id: o?._id,
+          contactId: o?.contact?._id,
+          organisationId: o?.organisation?._id,
+        }));
+      } else {
+        mentionsJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getRawMentions", err);
+    mentionsJSON = [];
+  }
+  return mentionsJSON;
 }
 
 export {
@@ -210,4 +370,8 @@ export {
   deleteContact,
   getContactRaw,
   getContactNoteMap,
+  getRawMentions,
+  importContacts,
+  importMentions,
+  importContactNoteMap,
 };

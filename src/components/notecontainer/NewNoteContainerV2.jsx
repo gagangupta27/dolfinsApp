@@ -7,9 +7,12 @@ import React, {
   useState,
 } from "react";
 
+import { BSON } from "realm";
+import Contact from "../../realm/models/Contact";
 import ExactTextBox from "./ExactTextBox";
 import MultiModalOptions from "./MultiModalOptions";
 import NoteInputField from "./NoteInputField";
+import Organisation from "../../realm/models/Organisation";
 import TextFormattingToolbar from "./TextFormattingToolbar";
 import UserMentionDropdown from "./UserMentionDropdown";
 import UserMentionOptionsDropdown from "./UserMentionOptionsDropdown";
@@ -17,12 +20,9 @@ import { getLastSubstringAfterAt } from "../../utils/common";
 import useAudioRecording from "../../hooks/AudioRecording";
 import useDocumentHandler from "../../hooks/DocumentHandler";
 import useImageHandler from "../../hooks/ImageHandler";
-import useSearchFilter from "../../hooks/SearchFilter";
-import { BSON } from "realm";
 import { useQuery } from "@realm/react";
-import Contact from "../../realm/models/Contact";
-import Organisation from "../../realm/models/Organisation";
 import useQuickNote from "../../hooks/useQuickNote";
+import useSearchFilter from "../../hooks/SearchFilter";
 
 const NewNoteContainerV2 = forwardRef(
   ({ addNote, note, updateNote, mentionHasInput = false }, ref) => {
@@ -139,6 +139,7 @@ const NewNoteContainerV2 = forwardRef(
       content,
       mentions,
       imageUri,
+      imageText,
       audioUri,
       audioText,
       volumeLevels,
@@ -150,6 +151,7 @@ const NewNoteContainerV2 = forwardRef(
           content,
           mentions,
           imageUri,
+          imageText,
           audioUri,
           audioText,
           volumeLevels,
@@ -160,6 +162,7 @@ const NewNoteContainerV2 = forwardRef(
           content,
           mentions,
           imageUri,
+          imageText,
           audioUri,
           audioText,
           volumeLevels,

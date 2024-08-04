@@ -65,6 +65,29 @@
           "project": "react-native",
           "organization": "dolfins"
         }
+      ],
+      [
+        "react-native-cloud-store",
+        {
+          "iCloud": {
+            "kv": {
+              "enabled": true
+            },
+            "documents": [
+              {
+                "containerId": "iCloud.com.dolfins.ai",
+                "enabled": true,
+                "visible": true,
+                "visibleName": "myDisplayName"
+              },
+              {
+                "containerId": "iCloud.com.dolfins.ai",
+                "enabled": true,
+                "visible": false
+              }
+            ]
+          }
+        }
       ]
     ],
     "extra": {

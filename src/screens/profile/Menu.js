@@ -1,5 +1,5 @@
-import { AntDesign, Entypo } from "@expo/vector-icons";
 import {
+  Alert,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -11,23 +11,30 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Fontisto from "@expo/vector-icons/Fontisto";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
+import ExportImportModal from "./ExportImportModal";
 import FeedBackModal from "../../components/Profile/FeedBackModal";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Fontisto from "@expo/vector-icons/Fontisto";
 import Header from "../../components/common/Header";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ProfileModal from "../../components/ProfileModal";
 import WebViewV2 from "../webview/WebViewV2";
 import { setAuthData } from "../../redux/reducer/app";
-import * as CloudStore from "react-native-cloud-store";
-import ExportImportModal from "./ExportImportModal";
+import useDocumentHandler from "../../hooks/DocumentHandler";
+import { useRealm } from "@realm/react";
+import CodePush from "react-native-code-push";
 
 const Menu = ({ route }) => {
   const authData = useSelector((state) => state.app.authData);
+
+  const { document, onDocumentPress, setDocument } = useDocumentHandler();
+
+  const realm = useRealm();
 
   const dispatch = useDispatch();
   const _webViewRef = useRef();
@@ -36,14 +43,22 @@ const Menu = ({ route }) => {
   const _exportImportRef = useRef();
 
   useEffect(() => {
-    (async () => {
-      const available = await CloudStore.isICloudAvailable();
-      console.log("available", available);
-      /*       await CloudStore.writeFile(filePathForWrite, fileContentForWrite, {
-        override: true,
-      }); */
-    })();
-  }, []);
+    if (document && document?.documentUri) {
+      console.log(
+        "document",
+        document?.documentName,
+        document?.documentName?.includes("dolfins")
+      );
+      if (document?.documentName?.includes("dolfins")) {
+        _exportImportRef?.current?.importData(document?.documentUri);
+      } else {
+        Alert.alert("Error", "Invalid JSON file");
+        setDocument();
+      }
+    } else {
+      setDocument();
+    }
+  }, [document]);
 
   const menuData = [
     {
@@ -80,12 +95,16 @@ const Menu = ({ route }) => {
     {
       icon: () => <Fontisto name="import" size={24} color="black" />,
       manuName: "Import Data",
-      onPress: () => {},
+      onPress: () => {
+        onDocumentPress();
+      },
     },
     {
       icon: () => <FontAwesome5 name="sync-alt" size={24} color="black" />,
       manuName: "Sync iCould",
-      onPress: () => {},
+      onPress: () => {
+        _exportImportRef?.current?.syncICloud();
+      },
     },
     {
       icon: () => <FontAwesome6 name="discord" size={24} color="black" />,
@@ -110,6 +129,30 @@ const Menu = ({ route }) => {
     },
     {
       icon: () => <AntDesign name="delete" size={24} color="black" />,
+      onPress: () => {
+        Alert.alert(
+          "Delete Account",
+          "Are you sure you want to delete ypur account?",
+          [
+            {
+              text: "Cancel",
+              onPress: () => {},
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              onPress: () => {
+                dispatch(setAuthData());
+                realm.write(() => {
+                  realm.deleteAll();
+                });
+                CodePush.restartApp();
+              },
+              style: "destructive",
+            },
+          ]
+        );
+      },
       manuName: "Delete Account",
     },
   ];
