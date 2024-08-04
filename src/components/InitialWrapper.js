@@ -76,7 +76,7 @@ const InitialWrapper = ({ children }) => {
           existingContact.phoneNumbers =
             contact.phoneNumbers?.map((o) => o?.digits) || [];
           existingContact.note = contact?.note || "";
-          existingContact.image = contact?.image || "";
+          existingContact.image = contact?.image?.uri || "";
           existingContact.imageAvailable = contact?.imageAvailable || false;
           existingContact.jobTitle = contact?.jobTitle || "";
           existingContact.department = contact?.department || "";
