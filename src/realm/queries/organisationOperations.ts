@@ -44,7 +44,6 @@ async function importOrgs(
         realm.create("Organisation", {
           ...org,
           _id: new BSON.ObjectId(org?._id),
-          isPinned: false,
         });
       } catch (err) {
         console.log("err", err);
@@ -200,7 +199,6 @@ async function importNoteOrganisationMap(
     organisationId: BSON.ObjectId;
   }[]
 ) {
-  console.log("importNoteOrganisationMap", maps?.length);
   realm.write(() => {
     for (const NOMap of maps) {
       try {
@@ -244,7 +242,6 @@ async function importContactOrgMap(
     organisationId: BSON.ObjectId;
   }[]
 ) {
-  console.log("importContactOrgMap", maps?.length);
   realm.write(() => {
     for (const COMap of maps) {
       try {

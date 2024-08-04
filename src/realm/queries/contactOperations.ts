@@ -95,8 +95,15 @@ async function importContacts(
     imageAvailable: boolean;
     image: string;
     note: string;
+    linkedinProfileUrl: string;
+    linkedinProfileData: string;
+    linkedinSummary: string;
     jobTitle: string;
     department: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isFavourite: boolean;
+    isPinned: boolean;
     addresses: {
       city: string;
       country: string;
@@ -122,15 +129,15 @@ async function importContacts(
           image: contact?.image || "",
           note: "",
           addresses: contact?.addresses || [],
-          isFavourite: false,
-          isPinned: false,
+          isFavourite: contact?.isFavourite || false,
+          isPinned: contact?.isPinned || false,
           jobTitle: contact?.jobTitle || "",
           department: contact?.department || "",
-          linkedinProfileUrl: "",
-          linkedinProfileData: "",
-          linkedinSummary: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          linkedinProfileUrl: contact?.linkedinProfileUrl || "",
+          linkedinProfileData: contact?.linkedinProfileData || "",
+          linkedinSummary: contact?.linkedinSummary || "",
+          createdAt: contact?.createdAt,
+          updatedAt: contact?.updatedAt,
         });
       } catch (err) {
         console.log("err", err);

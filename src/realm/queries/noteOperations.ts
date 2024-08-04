@@ -206,11 +206,9 @@ async function importNotes(
     isPinned: boolean;
   }[]
 ) {
-  console.log("in notes", notes);
   realm.write(() => {
     for (const note of notes) {
       try {
-        console.log("note", note);
         realm.create("Note", {
           _id: new BSON.ObjectID(note?._id),
           content: note?.content || "",
@@ -458,8 +456,7 @@ async function getNotesRaw(realm: Realm) {
   let notesJSON = [];
   try {
     realm.write(() => {
-      const notesIds = realm.objects(ContactNoteMap).map((o) => o?.noteId);
-      const allNotes = realm.objects(Note).filtered(`_id IN $0`, notesIds);
+      const allNotes = realm.objects(Note);
       if (allNotes && allNotes?.length > 0) {
         notesJSON = [
           ...allNotes.map((o) => ({

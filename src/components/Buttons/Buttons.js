@@ -17,11 +17,11 @@ const Buttons = ({
   disabled = false,
   textColor = "",
   loading = false,
-  imageIcon = null,
+  imageIcon = () => {},
   containerStyle = {},
   marginBottom = 0,
   iconStyle = {},
-  textTransform = "capitalize",
+  textTransform = "none",
   textStyle = {},
 }) => {
   return (
@@ -38,6 +38,7 @@ const Buttons = ({
         <ActivityIndicator />
       ) : (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={iconStyle}>{imageIcon()}</View>
           <Text
             style={[
               styles.buttontext(isInverse, textColor, textTransform, fontSize),

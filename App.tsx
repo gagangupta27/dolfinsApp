@@ -19,12 +19,8 @@ import { store } from "./src/redux/store";
 if (!__DEV__) {
   Sentry.init({
     dsn: "https://51d64533c48bc61279988123bfa89475@o4507658136715264.ingest.us.sentry.io/4507658138353664",
-    // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
-    // We recommend adjusting this value in production.
     tracesSampleRate: 1.0,
     _experiments: {
-      // profilesSampleRate is relative to tracesSampleRate.
-      // Here, we'll capture profiles for 100% of transactions.
       profilesSampleRate: 1.0,
     },
   });

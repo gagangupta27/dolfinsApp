@@ -63,14 +63,14 @@ import useSearchFilter from "../../hooks/SearchFilter";
 const ChatComponent = ({ route }) => {
   const track = useTrackWithPageInfo();
   const realm = useRealm();
-  const { id } = route.params;
+  const { id } = route?.params;
 
   const textInputRef = useRef(null);
   const flatListRef = useRef();
   const quickNoteRef = useQuickNote();
   const chat = useChat(realm, new BSON.ObjectId(id));
   const [allMessages, setAllMessages] = useState([
-    ...JSON.parse(chat.messages),
+    ...JSON.parse(chat?.messages || []),
   ]);
 
   const [fetchingAnswer, setFetchingAnswer] = useState(false);
@@ -83,8 +83,8 @@ const ChatComponent = ({ route }) => {
   const { searchText, setSearchText, searchFilter, filteredContacts } =
     useSearchFilter(
       [
-        ...allContacts.map((o) => ({ contact: o })),
-        ...allOrgs.map((o) => ({ organisation: o })),
+        ...allContacts?.map((o) => ({ contact: o })),
+        ...allOrgs?.map((o) => ({ organisation: o })),
       ],
       mentionData
     );
@@ -178,7 +178,6 @@ const ChatComponent = ({ route }) => {
     }
   };
 
-  // <-- add this line
   const handleNewQuestion = async (question) => {
     try {
       setError();
@@ -209,8 +208,8 @@ const ChatComponent = ({ route }) => {
 
       const systemPrompt = await getSystemPrompt(mentionData);
       let updatedMessages = [
-        ...allMessages.map((entry) => {
-          if (entry.role == "system") {
+        ...allMessages?.map((entry) => {
+          if (entry && entry?.role == "system") {
             return {
               role: "system",
               content: JSON.stringify(systemPrompt, getCircularReplacer()),
@@ -219,7 +218,7 @@ const ChatComponent = ({ route }) => {
         }),
         base64 ? { role: "user", pdfData: base64, content: "" } : null,
         { role: "user", content: question.trim() },
-      ];
+      ].filter(Boolean);
       let title = chat.title;
       if (!title) {
         title = question.trim().slice(0, 25);
@@ -325,7 +324,7 @@ const ChatComponent = ({ route }) => {
   const renderItem = ({ item }) => {
     return (
       <View>
-        {item.role == "user" && (
+        {item && item?.role == "user" && (
           <Text
             style={{
               backgroundColor: "#000",
@@ -348,7 +347,7 @@ const ChatComponent = ({ route }) => {
             </Text>
           </Text>
         )}
-        {item.role == "assistant" && (
+        {item && item?.role == "assistant" && (
           <View
             style={{
               backgroundColor: "#5D5EB8",
@@ -701,7 +700,7 @@ const CommonComponent = ({}) => {
         justifyContent: "space-between",
       }}
     >
-      {chats.length > 0 && (
+      {chats?.length > 0 && (
         <Drawer.Navigator
           drawerStyle={{
             backgroundColor: "#000",

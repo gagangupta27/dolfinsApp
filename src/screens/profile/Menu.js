@@ -14,6 +14,7 @@ import {
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import * as CloudStore from "react-native-cloud-store";
 
 import ExportImportModal from "./ExportImportModal";
 import FeedBackModal from "../../components/Profile/FeedBackModal";
@@ -28,6 +29,7 @@ import { setAuthData } from "../../redux/reducer/app";
 import useDocumentHandler from "../../hooks/DocumentHandler";
 import { useRealm } from "@realm/react";
 import CodePush from "react-native-code-push";
+import CloudJSONModal from "./CloudJSONModal";
 
 const Menu = ({ route }) => {
   const authData = useSelector((state) => state.app.authData);
@@ -41,16 +43,16 @@ const Menu = ({ route }) => {
   const _profileRef = useRef();
   const _feedBackRef = useRef();
   const _exportImportRef = useRef();
+  const _cloudJSONRef = useRef();
 
   useEffect(() => {
     if (document && document?.documentUri) {
-      console.log(
-        "document",
-        document?.documentName,
-        document?.documentName?.includes("dolfins")
-      );
       if (document?.documentName?.includes("dolfins")) {
-        _exportImportRef?.current?.importData(document?.documentUri);
+        _cloudJSONRef?.current?.hide();
+        setTimeout(() => {
+          _exportImportRef?.current?.importData(document?.documentUri);
+        }, 500);
+        setDocument();
       } else {
         Alert.alert("Error", "Invalid JSON file");
         setDocument();
@@ -96,14 +98,19 @@ const Menu = ({ route }) => {
       icon: () => <Fontisto name="import" size={24} color="black" />,
       manuName: "Import Data",
       onPress: () => {
-        onDocumentPress();
-      },
-    },
-    {
-      icon: () => <FontAwesome5 name="sync-alt" size={24} color="black" />,
-      manuName: "Sync iCould",
-      onPress: () => {
-        _exportImportRef?.current?.syncICloud();
+        _cloudJSONRef?.current?.show(
+          async () => {
+            let isAvailable = await CloudStore.isICloudAvailable();
+            if (!isAvailable) {
+              Alert.alert("Error", "iCould not available");
+              return;
+            }
+            _exportImportRef?.current?.importICloud();
+          },
+          async () => {
+            onDocumentPress();
+          }
+        );
       },
     },
     {
@@ -230,6 +237,7 @@ const Menu = ({ route }) => {
       <ProfileModal ref={_profileRef} />
       <FeedBackModal ref={_feedBackRef} />
       <ExportImportModal ref={_exportImportRef} />
+      <CloudJSONModal ref={_cloudJSONRef} />
     </KeyboardAvoidingView>
   );
 };

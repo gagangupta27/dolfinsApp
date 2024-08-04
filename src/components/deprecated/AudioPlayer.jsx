@@ -22,7 +22,6 @@ const AudioPlayer = ({ audioUri }) => {
   }, [sound]);
 
   useEffect(() => {
-    console.log("1");
     const fn = async () => {
       if (runComplete) {
         await sound.setPositionAsync(0);

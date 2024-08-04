@@ -151,8 +151,6 @@ const NoteInputField = forwardRef(
 
         setContent("");
         clear();
-
-        console.log("imageText", imageText);
       }
     };
 

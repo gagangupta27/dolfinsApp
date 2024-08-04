@@ -5,14 +5,12 @@ import {
   PathUtils,
   defaultICloudContainerPath,
 } from "react-native-cloud-store";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   getContactNoteMap,
   getContactRaw,
-  getRawMentions,
   importContactNoteMap,
   importContacts,
-  importMentions,
 } from "../../realm/queries/contactOperations";
 import {
   getRawContactOrganisationMap,
@@ -30,12 +28,9 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import Toast from "react-native-toast-message";
-import {
-  getNotesRaw,
-  getQuickNotesRaw,
-  importNotes,
-} from "../../realm/queries/noteOperations";
+import { getNotesRaw, importNotes } from "../../realm/queries/noteOperations";
 import { useRealm } from "@realm/react";
+import CloudJSONModal from "./CloudJSONModal";
 
 export default React.forwardRef((props, ref) => {
   const [title, setTitle] = useState();
@@ -48,13 +43,14 @@ export default React.forwardRef((props, ref) => {
 
   const dispatch = useDispatch();
   const _bottomSheetRef = useRef();
+  const _cloudJSONRef = useRef();
 
   React.useImperativeHandle(
     ref,
     () => ({
       exportData,
       importData,
-      syncICloud,
+      importICloud,
       hide,
     }),
     []
@@ -68,47 +64,87 @@ export default React.forwardRef((props, ref) => {
     setPercentage(0);
     let json = await prepareJSON();
     const path = RNFS.CachesDirectoryPath + "/dolfins.json";
-    RNFS.writeFile(path, JSON.stringify(json), "utf8")
-      .then(async (success) => {
-        setPercentage(100);
-        console.log("FILE WRITTEN!");
+    _cloudJSONRef?.current?.show(
+      async () => {
+        setLoadingText("Syncing Data\n To iCloud");
+        let isAvailable = await CloudStore.isICloudAvailable();
+        if (!isAvailable) {
+          Alert.alert("Error", "iCould not available");
+          return;
+        }
         try {
-          const shareOptions = {
-            title: "Share JSON File",
-            url: path,
-            type: "application/json",
-          };
-          await Share.open(shareOptions)
-            .then(() => {
-              hide();
+          await CloudStore.writeFile(
+            PathUtils.join(defaultICloudContainerPath, "Documents/backup.json"),
+            JSON.stringify(json),
+            {
+              override: true,
+            }
+          )
+            .then(async (res) => {
+              setTimeout(() => {
+                hide();
+                Alert.alert("Success", "Data Successfully Exported to iCloud!");
+              }, 1000);
             })
             .catch((err) => {
-              hide();
+              Alert.alert("Error", "Error Syncing to iCloud");
+              console.log("err", err);
             });
-        } catch (error) {
-          console.error("Error sharing file:", error);
+        } catch (err) {
+          Alert.alert("Error", "Error Syncing to iCloud");
         }
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+      },
+      async () => {
+        RNFS.writeFile(path, JSON.stringify(json), "utf8")
+          .then(async (success) => {
+            setPercentage(100);
+            try {
+              const shareOptions = {
+                title: "Share JSON File",
+                url: path,
+                type: "application/json",
+              };
+              await Share.open(shareOptions)
+                .then(() => {
+                  _cloudJSONRef?.current?.hide();
+                  setTimeout(() => {
+                    hide();
+                  }, 500);
+                })
+                .catch((err) => {
+                  _cloudJSONRef?.current?.hide();
+                  setTimeout(() => {
+                    hide();
+                  }, 500);
+                });
+            } catch (error) {
+              console.error("Error sharing file:", error);
+            }
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+      }
+    );
   };
 
-  const importData = async (fileUrl) => {
+  const importData = async (fileUrl = null, data = null) => {
     setPercentage(0);
-    setTitle("Imprting you Data");
+    setTitle("Importing you Data");
     setLoading(true);
     setLoadingText("Preparing Data\n Can take a few minutes...");
     _bottomSheetRef?.current?.show();
-    const fileContents = await RNFS.readFile(fileUrl, "utf8");
-    const jsonData = JSON.parse(fileContents);
-    console.log("jsonData", Object.keys(jsonData));
+    let jsonData = {};
+    if (fileUrl) {
+      const fileContents = await RNFS.readFile(fileUrl, "utf8");
+      jsonData = JSON.parse(fileContents);
+    } else {
+      jsonData = JSON.parse(data);
+    }
     setPercentage(10);
     await importContacts(realm, jsonData?.contacts || []);
     setPercentage(20);
     await importOrgs(realm, jsonData?.organisations || []);
-    setPercentage(30);
-    // await importMentions(realm, jsonData?.mentions || []);
     setPercentage(40);
     await importNotes(realm, jsonData?.notes || []);
     setPercentage(50);
@@ -117,10 +153,13 @@ export default React.forwardRef((props, ref) => {
     await importNoteOrganisationMap(realm, jsonData?.noteOrganisationMap || []);
     setPercentage(70);
     await importContactOrgMap(realm, jsonData?.contactOrganisationMap || []);
-    setPercentage(80);
+    setPercentage(100);
+    await new Promise((r) => setTimeout(r, 1000));
+    hide();
+    Alert.alert("Success", "Data Imported SuccessFully!");
   };
 
-  const syncICloud = async () => {
+  const importICloud = async () => {
     let isAvailable = await CloudStore.isICloudAvailable();
     if (!isAvailable) {
       Alert.alert("Error", "iCould not available");
@@ -128,24 +167,17 @@ export default React.forwardRef((props, ref) => {
     }
     setTitle("Sync Data to iCloud");
     setLoading(true);
-    setLoadingText("Preparing Data\n Can take a few minutes...");
-    _bottomSheetRef?.current?.show();
-    setPercentage(0);
-    let json = await prepareJSON();
     setLoadingText("Syncing Data\n Can take a few minutes...");
+    await new Promise((r) => setTimeout(r, 1000));
     try {
-      await CloudStore.writeFile(
-        PathUtils.join(defaultICloudContainerPath, "Documents/backup.json"),
-        JSON.stringify(json),
-        {
-          override: true,
-        }
+      await CloudStore.readFile(
+        PathUtils.join(defaultICloudContainerPath, "Documents/backup.json")
       )
         .then((res) => {
-          console.log("res", res);
+          importData(null, res);
         })
         .catch((err) => {
-          Alert.alert("Error", "Error Syncing to iCloud");
+          Alert.alert("Error", "Error Fetching from iCloud");
           console.log("err", err);
         });
     } catch (err) {
@@ -162,10 +194,8 @@ export default React.forwardRef((props, ref) => {
     setPercentage(0);
     const rawConatcs = await getContactRaw(realm);
     setPercentage(10);
-    // const rawQuickNotes = await getQuickNotesRaw(realm);
     setPercentage(20);
     const rawNotes = await getNotesRaw(realm);
-    console.log("rawNotes", rawNotes);
     setPercentage(20);
     const rawOrg = await getRawOrg(realm);
     setPercentage(30);
@@ -175,16 +205,13 @@ export default React.forwardRef((props, ref) => {
     setPercentage(50);
     const rawContactOrganisationMap = await getRawContactOrganisationMap(realm);
     setPercentage(60);
-    const rawMentions = await getRawMentions(realm);
     setPercentage(70);
     return {
       contacts: rawConatcs,
-      // quickNotes: rawQuickNotes,
       organisations: rawOrg,
       contactNoteMap: rawContactNoteMap,
       noteOrganisationMap: rawNoteOrganisationMap,
       contactOrganisationMap: rawContactOrganisationMap,
-      mentions: rawMentions,
       notes: rawNotes,
     };
   };
@@ -242,6 +269,7 @@ export default React.forwardRef((props, ref) => {
             onPress={hide}
           />
         </View>
+        <CloudJSONModal ref={_cloudJSONRef} />
       </KeyboardAwareScrollView>
     </BottomSheetModal>
   );

@@ -63,8 +63,6 @@ const ContactScreen = ({ route }) => {
 
   const _linkedInRef = useRef();
 
-  console.log("reload");
-
   useEffect(() => {
     let notes = [];
     if (contact?._id && contact?.id != quickNoteRef?._id) {

@@ -37,7 +37,6 @@ export default React.forwardRef((props, ref) => {
   );
 
   useEffect(() => {
-    console.log("1");
     if (authData) {
       if (authData?.name || authData?.fullName?.givenName) {
         setName(authData?.name || authData?.fullName?.givenName);
