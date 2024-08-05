@@ -95,6 +95,13 @@ const Menu = ({ route }) => {
       },
     },
     {
+      icon: () => <Fontisto name="export" size={24} color="black" />,
+      manuName: "Export CSV",
+      onPress: () => {
+        _exportImportRef?.current?.exportCSV();
+      },
+    },
+    {
       icon: () => <Fontisto name="import" size={24} color="black" />,
       manuName: "Import Data",
       onPress: () => {

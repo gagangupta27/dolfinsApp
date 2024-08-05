@@ -14,6 +14,7 @@ import React, {
   useState,
 } from "react";
 
+import Accordion from "./Accordian";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@realm/react";
 
@@ -43,7 +44,7 @@ const Dropdown = forwardRef(
     };
 
     const onOptionPress = (option) => {
-      setSearchText(option?.name);
+      setSearchText("");
       onOptionSelected(option);
       setShowOptions(false);
       Keyboard.dismiss();
@@ -51,29 +52,6 @@ const Dropdown = forwardRef(
 
     return (
       <View style={styles.textinputview1}>
-        <View style={styles.shadowContainer}>
-          {/* Top Shadow */}
-          <LinearGradient
-            colors={["black", "rgba(0, 0, 0, 0)"]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={styles.topShadow}
-          />
-          {/* Left Shadow */}
-          <LinearGradient
-            colors={["black", "rgba(0, 0, 0, 0)"]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.sideShadow}
-          />
-          {/* Right Shadow */}
-          <LinearGradient
-            colors={["black", "rgba(0, 0, 0, 0)"]}
-            start={{ x: 1, y: 0.5 }}
-            end={{ x: 0, y: 0.5 }}
-            style={[styles.rightShadow]}
-          />
-        </View>
         <View style={styles.container}>
           <TextInput
             value={searchText}
@@ -83,49 +61,35 @@ const Dropdown = forwardRef(
             style={styles.textinput1}
             placeholderTextColor="#858585" // This is to give the placeholder the subtle color
           />
-          {showOptions && (
-            <View
-              style={{
-                position: "absolute",
-                top: 50,
-                height: 200,
+          <Accordion
+            viewKey="dropdown"
+            isExpanded={showOptions}
+            enterFrom="top"
+          >
+            <FlatList
+              data={filteredOptions}
+              contentContainerStyle={{
                 backgroundColor: "white",
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                elevation: 20,
-                shadowColor: "black",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-                borderRadius: 10,
-                overflow: "hidden",
-                padding: 10,
-                borderWidth: 0.4,
-                borderColor: "gray",
               }}
-            >
-              <FlatList
-                data={filteredOptions}
-                contentContainerStyle={{
-                  backgroundColor: "white",
-                }}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => onOptionPress(item)}
-                    style={{
-                      paddingVertical: 10,
-                      borderBottomWidth: 0.5,
-                      borderColor: "gray",
-                    }}
-                  >
-                    <Text>{item?.name}</Text>
-                  </TouchableOpacity>
-                )}
-                keyExtractor={(item) => item?._id}
-              />
-            </View>
-          )}
+              style={{
+                maxHeight: 300,
+              }}
+              nestedScrollEnabled={true}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => onOptionPress(item)}
+                  style={{
+                    paddingVertical: 10,
+                    borderBottomWidth: 0.5,
+                    borderColor: "gray",
+                  }}
+                >
+                  <Text>{item?.name}</Text>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item?._id}
+            />
+          </Accordion>
         </View>
       </View>
     );
@@ -136,13 +100,11 @@ export default Dropdown;
 
 const styles = StyleSheet.create({
   textinputview1: {
-    height: 50,
+    minHeight: 50,
     flex: 1,
-    borderRadius: 15,
+    borderRadius: 8,
     backgroundColor: "rgba(255, 255, 255, 0.17)",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    borderWidth: 1,
   },
   container: {
     flex: 1,
@@ -151,55 +113,15 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     backgroundColor: "#fff",
-    position: "absolute", // Position text input absolutely to overlap the SVG
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
   },
   textinput1: {
     flex: 1,
     paddingVertical: 5,
+    minHeight: 50,
     paddingHorizontal: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     backgroundColor: "rgba(255, 255, 255, 0.17)", // Make sure TextInput has a transparent background
     textAlignVertical: "top", // Add this line
-  },
-  shadowContainer: {
-    position: "absolute",
-    borderRadius: 15,
-    top: 0, // Adjust this to control the vertical position of the shadow
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: "100%", // Adjust this to control the fade out distance
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "flex-start", // Align gradient to the top,
-  },
-  topShadow: {
-    position: "absolute",
-    top: 0,
-    height: 15, // Adjust the height to control the fade length of the shadow
-    width: "100%",
-    borderRadius: 15,
-    overflow: "hidden",
-  },
-  sideShadow: {
-    position: "absolute",
-    left: 0,
-    width: 5, // Adjust the width to control the fade width of the shadow
-    height: "100%",
-    borderRadius: 15,
-    overflow: "hidden",
-  },
-  rightShadow: {
-    position: "absolute",
-    right: 0,
-    width: 5,
-    height: "100%",
-    borderRadius: 15,
-    overflow: "hidden",
   },
 });

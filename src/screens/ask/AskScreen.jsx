@@ -516,7 +516,6 @@ const ChatComponent = ({ route }) => {
               setSearchText("");
             }
           }}
-          multiline
           maxHeight={100}
           minHeight={35}
           placeholder="Ask any question about your contacts"

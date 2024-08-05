@@ -1,79 +1,101 @@
-import { useQuery } from "@realm/react";
 import Realm, { BSON } from "realm";
-import CalendarEvent from "../models/CalendarEvent";
 
-function addCalendarEvent(
+import CalendarEvent from "../models/CalendarEvent";
+import Contact from "../models/Contact";
+import Mentions from "../models/Mentions";
+import Organisation from "../models/Organisation";
+import { useQuery } from "@realm/react";
+
+async function addCalendarEvent(
   realm: Realm,
   eventData: {
-    id: number;
     calendarId: number;
     calendarProviderEventId: string;
     title: string;
     eventStartTime: Date;
     eventEndTime: Date;
     description: string;
-    attendees: string[];
-    organizer: string;
+    attendees: Mentions[];
+    organizer: Mentions;
+    location: string;
+    meetLinkUrl: string;
+    eventDate: Date;
   }
 ) {
+  let createdEvent;
   realm.write(() => {
-    const existingEvents = realm
-      .objects("CalendarEvent")
-      .filtered("id == $0", eventData.id);
-    if (existingEvents.length == 0) {
-      realm.create("CalendarEvent", {
-        _id: new BSON.ObjectId(),
-        id: eventData.id,
-        calendarId: eventData.calendarId,
-        calendarProviderEventId: eventData.calendarProviderEventId,
-        title: eventData.title,
-        eventStartTime: eventData.eventStartTime,
-        eventEndTime: eventData.eventEndTime,
-        description: eventData.description,
-        attendees: eventData.attendees,
-        organizer: eventData.organizer,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    } else {
-      if (existingEvents[0].title != eventData.title)
-        existingEvents[0].title = eventData.title;
-      if (existingEvents[0].eventStartTime != eventData.eventStartTime)
-        existingEvents[0].eventStartTime = eventData.eventStartTime;
-      if (existingEvents[0].eventEndTime != eventData.eventEndTime)
-        existingEvents[0].eventEndTime = eventData.eventEndTime;
-      if (existingEvents[0].description != eventData.description)
-        existingEvents[0].description = eventData.description;
-      if (existingEvents[0].attendees != eventData.attendees)
-        existingEvents[0].attendees = eventData.attendees;
-      if (existingEvents[0].organizer != eventData.organizer)
-        existingEvents[0].organizer = eventData.organizer;
-      existingEvents[0].updatedAt = new Date();
-    }
+    createdEvent = realm.create("CalendarEvent", {
+      _id: new BSON.ObjectId(),
+      calendarId: eventData.calendarId,
+      calendarProviderEventId: eventData.calendarProviderEventId,
+      title: eventData.title,
+      eventStartTime: eventData.eventStartTime,
+      eventEndTime: eventData.eventEndTime,
+      description: eventData.description,
+      attendees: eventData?.attendees
+        ? eventData.attendees?.map((o) => ({
+            _id: new BSON.ObjectId(),
+            ...(o?.contact
+              ? { contact: realm.objectForPrimaryKey(Contact, o?.contact?._id) }
+              : {
+                  organisation: realm.objectForPrimaryKey(
+                    Organisation,
+                    o?.organisation?._id
+                  ),
+                }),
+          }))
+        : [],
+      organizer: eventData?.organizer
+        ? {
+            _id: new BSON.ObjectId(),
+            ...(eventData.organizer?.contact
+              ? {
+                  contact: realm.objectForPrimaryKey(
+                    Contact,
+                    eventData.organizer?.contact?._id
+                  ),
+                }
+              : {
+                  organisation: realm.objectForPrimaryKey(
+                    Organisation,
+                    eventData.organizer?.organisation?._id
+                  ),
+                }),
+          }
+        : [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      eventDate: eventData?.eventDate,
+      location: eventData?.location,
+      meetLinkUrl: eventData?.meetLinkUrl || "",
+    });
   });
+  return createdEvent;
 }
 
 function updateCalendarEvent(
   realm: Realm,
   eventId: BSON.ObjectId,
   updates: Partial<{
-    calendarId: string;
+    calendarId: number;
     calendarProviderEventId: string;
     title: string;
     eventStartTime: Date;
     eventEndTime: Date;
     description: string;
-    attendees: string[];
-    organizer: string;
+    attendees: Mentions[];
+    organizer: Mentions;
     createdAt: Date;
     updatedAt: Date;
+    location: string;
+    meetLinkUrl: string;
+    eventDate: Date;
   }>
 ) {
   realm.write(() => {
     let event = realm.objectForPrimaryKey("CalendarEvent", eventId);
     if (event) {
-      // event.
-      // To be updated
+      // gagan work here
       event.updatedAt = new Date();
     }
   });
@@ -124,7 +146,9 @@ const useCalendarEvent = (event_id) => {
 export {
   addCalendarEvent,
   updateCalendarEvent,
-  useAllCalendarEvents, useCalendarEvent, useFutureCalendarEvents,
-  usePastCalendarEvents, useRecentCalendarEvents
+  useAllCalendarEvents,
+  useCalendarEvent,
+  useFutureCalendarEvents,
+  usePastCalendarEvents,
+  useRecentCalendarEvents,
 };
-

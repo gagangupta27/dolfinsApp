@@ -31,6 +31,9 @@ import Toast from "react-native-toast-message";
 import { getNotesRaw, importNotes } from "../../realm/queries/noteOperations";
 import { useRealm } from "@realm/react";
 import CloudJSONModal from "./CloudJSONModal";
+import ContactNoteMap from "../../realm/models/ContactNoteMap";
+import Contact from "../../realm/models/Contact";
+import Note from "../../realm/models/Note";
 
 export default React.forwardRef((props, ref) => {
   const [title, setTitle] = useState();
@@ -49,6 +52,7 @@ export default React.forwardRef((props, ref) => {
     ref,
     () => ({
       exportData,
+      exportCSV,
       importData,
       importICloud,
       hide,
@@ -126,6 +130,82 @@ export default React.forwardRef((props, ref) => {
           });
       }
     );
+  };
+
+  const exportCSV = async () => {
+    setTitle("Export you Data");
+    setLoading(true);
+    setLoadingText("Preparing Data\n Can take a few minutes...");
+    _bottomSheetRef?.current?.show();
+    setPercentage(0);
+    let contactJSON = [];
+    realm.write(() => {
+      const contacts = realm
+        .objects(Contact)
+        .filtered("id != $0", "000000000000000000000000");
+      contactJSON.push([...Object.keys(contacts[0]), "notes"]);
+      for (const contact of contacts) {
+        try {
+          const allContactNoteIds = realm
+            .objects(ContactNoteMap)
+            .filtered(`contactId == $0`, contact?._id)
+            .map((o) => o.noteId);
+
+          const allNotes = realm
+            .objects(Note)
+            .filtered(`_id IN $0`, allContactNoteIds);
+
+          contactJSON.push([
+            ...Object.values({
+              ...contact,
+              emails: contact.emails.join(", "),
+              phoneNumbers: contact.phoneNumbers.join(", "),
+              addresses:
+                contact.addresses
+                  .map(
+                    (addr) =>
+                      `${addr.street}, ${addr.city}, ${addr.region}, ${addr.country}, ${addr.postalCode}`
+                  )
+                  .join("; ") || "", // Convert addresses to a single string
+              notes: allNotes.map((n) => n.content).join(", "),
+            }),
+          ]);
+        } catch (err) {
+          console.log("err", err);
+        }
+      }
+    });
+    const path = RNFS.CachesDirectoryPath + "/dolfinsCSV.csv";
+
+    const csvContent = contactJSON.map((e) => e.join(",")).join("\n");
+
+    RNFS.writeFile(path, csvContent, "utf8")
+      .then(async (success) => {
+        setPercentage(100);
+        try {
+          const shareOptions = {
+            title: "Share JSON File",
+            url: path,
+            type: "application/json",
+          };
+          await Share.open(shareOptions)
+            .then(() => {
+              setTimeout(() => {
+                hide();
+              }, 500);
+            })
+            .catch((err) => {
+              setTimeout(() => {
+                hide();
+              }, 500);
+            });
+        } catch (error) {
+          console.error("Error sharing file:", error);
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
   };
 
   const importData = async (fileUrl = null, data = null) => {

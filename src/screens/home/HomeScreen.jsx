@@ -15,8 +15,8 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { NativeModules, TouchableWithoutFeedback, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { TouchableWithoutFeedback, View } from "react-native";
 import {
   addContact,
   deleteContact,
@@ -26,8 +26,10 @@ import {
   useAllCalendarNotes,
   useAllContactNotes,
 } from "../../realm/queries/noteOperations";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useQuery, useRealm } from "@realm/react";
 
+import AddEventModal from "../calendar/AddEventModal";
 import AddOrgModal from "../../components/organisation/AddOrgModal";
 import { BSON } from "realm";
 import CalendarItem from "../../components/calendar/CalendarItem";
@@ -48,7 +50,6 @@ import SearchResultItem from "../../components/search/SearchResultItem";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { getWorkHistoryList } from "../../utils/linkedin";
 import { useAllCalendarEvents } from "../../realm/queries/calendarEventOperations";
-import { useNavigation } from "@react-navigation/native";
 import useQuickNote from "../../hooks/useQuickNote";
 
 const Tab = createMaterialTopTabNavigator();
@@ -103,6 +104,26 @@ const CommonComponent = () => {
   const [currentNoteAdded, setCurrentNoteAdded] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [addOrgModalVisible, setAddOrgModalVisible] = useState(false);
+  const [addEventModalVisible, setAddEventModalVisible] = useState(false);
+
+  const { ShareModule } = NativeModules;
+
+  async function getSharedData() {
+    try {
+      const { sharedURL, sharedText } = await ShareModule.getSharedData();
+      console.log("Shared URL:", sharedURL);
+      console.log("Shared Text:", sharedText);
+      // Handle shared data
+    } catch (error) {
+      console.log("Error fetching shared data:", error);
+    }
+  }
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getSharedData();
+    }, [])
+  );
 
   const contacts = useQuery(
     Contact,
@@ -237,6 +258,10 @@ const CommonComponent = () => {
       setAddOrgModalVisible(true);
       return;
     }
+    if (activeTab == "calendar") {
+      setAddEventModalVisible(true);
+      return;
+    }
     setModalVisible(true);
     track(EVENTS.BUTTON_TAPPED.NAME, {
       [EVENTS.BUTTON_TAPPED.KEYS.BUTTON_NAME]: BUTTON_NAME.ADD_NEW_CONTACT,
@@ -338,18 +363,18 @@ const CommonComponent = () => {
               .toLowerCase()
               .includes(text.toLowerCase());
         }
-        if (calendarEvent.attendees) {
-          exists =
-            exists ||
-            calendarEvent.attendees.filter((attendee) =>
-              attendee.toLowerCase().includes(text.toLowerCase)
-            ).length > 0;
-        }
-        if (calendarEvent.organizer) {
-          exists =
-            exists ||
-            calendarEvent.organizer.toLowerCase().includes(text.toLowerCase());
-        }
+        // if (calendarEvent.attendees) {
+        //   exists =
+        //     exists ||
+        //     calendarEvent.attendees.filter((attendee) =>
+        //       attendee.toLowerCase().includes(text.toLowerCase)
+        //     ).length > 0;
+        // }
+        // if (calendarEvent.organizer) {
+        //   exists =
+        //     exists ||
+        //     calendarEvent.organizer.toLowerCase().includes(text.toLowerCase());
+        // }
         return exists;
       });
 
@@ -619,7 +644,7 @@ const CommonComponent = () => {
                           >
                             <SearchResultItem
                               searchterm={text}
-                              name={item.calendarEvent.title}
+                              name={item?.calendarEvent?.title}
                               note={item.note}
                               onPress={() => {
                                 navigation.navigate("CalendarEventScreen", {
@@ -752,6 +777,11 @@ const CommonComponent = () => {
       <AddOrgModal
         visible={addOrgModalVisible}
         onClose={() => setAddOrgModalVisible(false)}
+        onSubmit={() => {}}
+      />
+      <AddEventModal
+        visible={addEventModalVisible}
+        onClose={() => setAddEventModalVisible(false)}
         onSubmit={() => {}}
       />
     </View>

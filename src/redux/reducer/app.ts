@@ -1,14 +1,8 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Credentials } from "react-native-auth0";
 import Api, { setToken } from "../../utils/Api";
-import { Storage } from "../../utils/storage";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-const shouldFetchCalendarEvents = (lastSynced: number | null): boolean => {
-  if (!lastSynced) return true;
-  const now = Date.now();
-  const twoMinutesAgo = now - 2 * 60 * 1000;
-  return lastSynced < twoMinutesAgo;
-};
+import { Credentials } from "react-native-auth0";
+import { Storage } from "../../utils/storage";
 
 export const fetchCalendarEvents = createAsyncThunk(
   "/api/1.0/user/calendar_event/list",

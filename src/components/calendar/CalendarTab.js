@@ -6,14 +6,32 @@ import {
 } from "react-native-calendars";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { Component, useState } from "react";
+import { useQuery, useRealm } from "@realm/react";
 
-import { useRealm } from "@realm/react";
+import CalendarEvent from "../../realm/models/CalendarEvent";
+import moment from "moment";
 
 const CalendarTab = () => {
+  const AllEvents = useQuery(CalendarEvent).sorted("eventDate");
   const [items, setItems] = useState({});
 
+  const realm = useRealm();
+
   const loadItems = (day) => {
+    console.log("day", day);
     const items = {};
+
+    const events = realm
+      .objects(CalendarEvent)
+      .filtered(
+        "eventDate >= $0 AND eventDate <= $1",
+        new Date(moment(day?.timestamp).subtract(15, "days").valueOf()),
+        new Date(moment(day?.timestamp).add(85, "days").valueOf())
+      );
+
+    if (events && events?.length > 0) {
+      console.log("events", events);
+    }
 
     setTimeout(() => {
       for (let i = -15; i < 85; i++) {
@@ -84,7 +102,7 @@ const CalendarTab = () => {
     <Agenda
       items={items}
       loadItemsForMonth={loadItems}
-      selected={"2017-05-16"}
+      selected={"2017-02-1"}
       renderItem={renderItem}
       renderEmptyDate={renderEmptyDate}
       rowHasChanged={rowHasChanged}
