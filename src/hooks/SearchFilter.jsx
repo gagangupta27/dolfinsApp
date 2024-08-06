@@ -13,7 +13,11 @@ const useSearchFilter = (contacts, mentionData = []) => {
     const textData = text.toUpperCase();
     const newData = contacts
       .map((item) => {
-        const name = item?.contact?.name || item?.organisation?.name || "";
+        const name =
+          item?.contact?.name ||
+          item?.organisation?.name ||
+          item?.event?.title ||
+          "";
         const itemData = name ? name.toUpperCase() : "";
         const matchIndex = itemData.indexOf(textData);
         return {
@@ -26,8 +30,9 @@ const useSearchFilter = (contacts, mentionData = []) => {
         return (
           mentionData?.filter(
             (m) =>
-              String(m?.contact?._id || m?.organisation?._id) ==
-              String(item?._id)
+              String(
+                m?.contact?._id || m?.organisation?._id || m?.event?._id
+              ) == String(item?._id)
           ).length == 0
         );
       })

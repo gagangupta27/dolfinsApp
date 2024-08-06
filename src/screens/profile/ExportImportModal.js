@@ -13,6 +13,13 @@ import {
   importContacts,
 } from "../../realm/queries/contactOperations";
 import {
+  getEventNoteMap,
+  getRawEvents,
+  importCalendarEventNoteMap,
+  importEvents,
+} from "../../realm/queries/calendarEventOperations";
+import { getNotesRaw, importNotes } from "../../realm/queries/noteOperations";
+import {
   getRawContactOrganisationMap,
   getRawNoteOrganisationMap,
   getRawOrg,
@@ -24,16 +31,15 @@ import { useDispatch, useSelector } from "react-redux";
 
 import BottomSheetModal from "../../components/common/BottomSheetModal";
 import Buttons from "../../components/Buttons/Buttons";
+import CloudJSONModal from "./CloudJSONModal";
+import Contact from "../../realm/models/Contact";
+import ContactNoteMap from "../../realm/models/ContactNoteMap";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Note from "../../realm/models/Note";
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import Toast from "react-native-toast-message";
-import { getNotesRaw, importNotes } from "../../realm/queries/noteOperations";
 import { useRealm } from "@realm/react";
-import CloudJSONModal from "./CloudJSONModal";
-import ContactNoteMap from "../../realm/models/ContactNoteMap";
-import Contact from "../../realm/models/Contact";
-import Note from "../../realm/models/Note";
 
 export default React.forwardRef((props, ref) => {
   const [title, setTitle] = useState();
@@ -228,11 +234,18 @@ export default React.forwardRef((props, ref) => {
     setPercentage(40);
     await importNotes(realm, jsonData?.notes || []);
     setPercentage(50);
+    await importEvents(realm, jsonData?.events || []);
+    setPercentage(50);
     await importContactNoteMap(realm, jsonData?.contactNoteMap || []);
     setPercentage(60);
     await importNoteOrganisationMap(realm, jsonData?.noteOrganisationMap || []);
     setPercentage(70);
     await importContactOrgMap(realm, jsonData?.contactOrganisationMap || []);
+    setPercentage(80);
+    await importCalendarEventNoteMap(
+      realm,
+      jsonData?.calendarEventNoteMap || []
+    );
     setPercentage(100);
     await new Promise((r) => setTimeout(r, 1000));
     hide();
@@ -274,25 +287,29 @@ export default React.forwardRef((props, ref) => {
     setPercentage(0);
     const rawConatcs = await getContactRaw(realm);
     setPercentage(10);
-    setPercentage(20);
     const rawNotes = await getNotesRaw(realm);
     setPercentage(20);
     const rawOrg = await getRawOrg(realm);
     setPercentage(30);
-    const rawContactNoteMap = await getContactNoteMap(realm);
+    const rawEvents = await getRawEvents(realm);
     setPercentage(40);
-    const rawNoteOrganisationMap = await getRawNoteOrganisationMap(realm);
+    const rawContactNoteMap = await getContactNoteMap(realm);
     setPercentage(50);
-    const rawContactOrganisationMap = await getRawContactOrganisationMap(realm);
+    const rawNoteOrganisationMap = await getRawNoteOrganisationMap(realm);
     setPercentage(60);
+    const rawContactOrganisationMap = await getRawContactOrganisationMap(realm);
     setPercentage(70);
+    const rawEventNoteMap = await getEventNoteMap(realm);
+    setPercentage(100);
     return {
       contacts: rawConatcs,
       organisations: rawOrg,
+      events: rawEvents,
+      notes: rawNotes,
       contactNoteMap: rawContactNoteMap,
       noteOrganisationMap: rawNoteOrganisationMap,
       contactOrganisationMap: rawContactOrganisationMap,
-      notes: rawNotes,
+      calendarEventNoteMap: rawEventNoteMap,
     };
   };
 

@@ -648,7 +648,7 @@ const CommonComponent = () => {
                               note={item.note}
                               onPress={() => {
                                 navigation.navigate("CalendarEventScreen", {
-                                  event_id: item._id.toHexString(),
+                                  eventId: item._id.toHexString(),
                                 });
                               }}
                             />
@@ -660,7 +660,7 @@ const CommonComponent = () => {
                             item={item}
                             onPress={() =>
                               navigation.navigate("CalendarEventScreen", {
-                                event_id: item._id.toHexString(),
+                                eventId: item._id.toHexString(),
                               })
                             }
                           ></CalendarItem>

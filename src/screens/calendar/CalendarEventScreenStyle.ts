@@ -4,7 +4,6 @@ const Styles = StyleSheet.create({
   container: {
     margin: 0,
     flex: 1,
-    paddingTop: 5,
   },
   title: {
     fontSize: 16,
@@ -50,10 +49,9 @@ const Styles = StyleSheet.create({
   },
   iconButton: {},
   box: {
-    backgroundColor: "#A5A6F64F",
+    backgroundColor: "#fff",
     padding: 20,
     marginVertical: 8,
-    marginHorizontal: 16,
     flexDirection: "row",
   },
 });

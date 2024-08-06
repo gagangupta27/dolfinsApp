@@ -16,7 +16,6 @@ export default class CalendarEvent extends Realm.Object {
   updatedAt!: Date;
   location: string;
   meetLinkUrl: string;
-  eventDate!: Date;
 
   static schema: ObjectSchema = {
     name: "CalendarEvent",
@@ -27,7 +26,6 @@ export default class CalendarEvent extends Realm.Object {
       title: "string",
       eventStartTime: "date",
       eventEndTime: "date",
-      eventDate: "date",
       description: "string",
       attendees: "Mentions[]",
       organizer: "Mentions",

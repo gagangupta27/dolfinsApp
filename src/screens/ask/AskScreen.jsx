@@ -80,11 +80,14 @@ const ChatComponent = ({ route }) => {
 
   const allContacts = useQuery(Contact);
   const allOrgs = useQuery(Organisation);
+  const allEvents = useQuery(CalendarEvent);
+
   const { searchText, setSearchText, searchFilter, filteredContacts } =
     useSearchFilter(
       [
         ...allContacts?.map((o) => ({ contact: o })),
         ...allOrgs?.map((o) => ({ organisation: o })),
+        ...allEvents?.map((o) => ({ event: o })),
       ],
       mentionData
     );
@@ -112,6 +115,9 @@ const ChatComponent = ({ route }) => {
       const mentionedOrgsIds = mentions
         ?.filter((o) => o?.organisation)
         ?.map((o) => o?.organisation?._id);
+      const mentionedEventIds = mentions
+        ?.filter((o) => o?.event)
+        ?.map((o) => o?.event?._id);
       const orgContactsIds = realm
         .objects(ContactOrganisationMap)
         .filtered(`organisationId IN $0`, mentionedOrgsIds)
@@ -123,14 +129,14 @@ const ChatComponent = ({ route }) => {
           ...orgContactsIds,
         ])
         .map((o) => o.noteId);
+      const allEventNoteIds = realm
+        .objects(CalendarEventNoteMap)
+        .filtered(`calendarEventId IN $0`, [...mentionedEventIds])
+        .map((o) => o.noteId);
       const allOrgNoteIds = realm
         .objects(NoteOrganisationMap)
         .filtered(`organisationId IN $0`, mentionedOrgsIds)
         .map((o) => o.note._id);
-      const allCalendarEventIds = realm
-        .objects(CalendarEventNoteMap)
-        .filtered(`noteId IN $0`, [...allContactNoteIds, ...allOrgNoteIds])
-        .map((o) => o.noteId);
       const allQuichNotesIds = realm
         .objects(ContactNoteMap)
         .filtered("contactId == $0", quickNoteRef._id)
@@ -156,10 +162,14 @@ const ChatComponent = ({ route }) => {
         ]),
         notes: realm
           .objects(Note)
-          .filtered(`_id IN $0`, [...allContactNoteIds, ...allOrgNoteIds]),
+          .filtered(`_id IN $0`, [
+            ...allContactNoteIds,
+            ...allOrgNoteIds,
+            ...allEventNoteIds,
+          ]),
         calendarEvents: realm
           .objects(CalendarEvent)
-          .filtered(`_id IN $0`, allCalendarEventIds),
+          .filtered(`_id IN $0`, mentionedEventIds),
         organisation: realm
           .objects(Organisation)
           .filtered(`_id IN $0`, mentionedOrgsIds),
@@ -290,7 +300,9 @@ const ChatComponent = ({ route }) => {
     let newConent = input;
     if (str !== null) {
       const boldSubstring = `*${
-        option?.organisation?.name || option?.contact?.name
+        option?.organisation?.name ||
+        option?.contact?.name ||
+        option?.event?.title
       }* `;
       newConent = newConent.replace(`@${str}`, boldSubstring);
     }
@@ -306,7 +318,9 @@ const ChatComponent = ({ route }) => {
   const handleMentionSelect = (user) => {
     setInput((prev) => {
       return prev?.replace(
-        `*${user?.contact?.name || user?.organisation?.name}*`,
+        `*${
+          user?.contact?.name || user?.organisation?.name || user?.event?.title
+        }*`,
         ""
       );
     });
@@ -314,8 +328,10 @@ const ChatComponent = ({ route }) => {
     setMentionData((prev) =>
       prev.filter((o) => {
         return (
-          String(o?.contact?._id || o?.organisation?._id) !=
-          String(user?.contact?._id || user?.organisation?._id)
+          String(o?.contact?._id || o?.organisation?._id || o?.event?._id) !=
+          String(
+            user?.contact?._id || user?.organisation?._id || user?.event?._id
+          )
         );
       })
     );

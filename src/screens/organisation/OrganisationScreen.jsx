@@ -13,7 +13,6 @@ import { useRef, useState } from "react";
 
 import AddOrgModal from "../../components/organisation/AddOrgModal";
 import { BSON } from "realm";
-import Contact from "../../realm/models/Contact";
 import Header from "../../components/common/Header";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import Note from "../../realm/models/Note";

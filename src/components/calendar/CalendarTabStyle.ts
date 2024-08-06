@@ -11,7 +11,7 @@ const Styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
     padding: 10,
-    backgroundColor: "#A5A6F64F",
+    backgroundColor: "#fff",
     flexDirection: "row",
   },
   title: {

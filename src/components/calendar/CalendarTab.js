@@ -1,129 +1,107 @@
 import {
-  Agenda,
-  AgendaEntry,
-  AgendaSchedule,
-  DateData,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  CalendarProvider,
+  CalendarUtils,
+  ExpandableCalendar,
+  TimelineList,
 } from "react-native-calendars";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { Component, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, useRealm } from "@realm/react";
 
 import CalendarEvent from "../../realm/models/CalendarEvent";
+import filter from "lodash/filter";
+import find from "lodash/find";
+import groupBy from "lodash/groupBy";
 import moment from "moment";
+import { useNavigation } from "@react-navigation/native";
+
+const EVENT_COLOR = "#e6add8";
+const today = new Date();
+export const getDate = (offset = 0) =>
+  CalendarUtils.getCalendarDateString(
+    new Date().setDate(today.getDate() + offset)
+  );
+
+const INITIAL_TIME = { hour: 9, minutes: 0 };
 
 const CalendarTab = () => {
-  const AllEvents = useQuery(CalendarEvent).sorted("eventDate");
-  const [items, setItems] = useState({});
+  const AllEvents = useQuery(CalendarEvent).sorted("eventStartTime");
+  const [currentDate, setCurrentDate] = useState(getDate());
+  const [eventsByDate, setEventsByDate] = useState([]);
+
+  const navigation = useNavigation();
 
   const realm = useRealm();
 
-  const loadItems = (day) => {
-    console.log("day", day);
-    const items = {};
-
-    const events = realm
-      .objects(CalendarEvent)
-      .filtered(
-        "eventDate >= $0 AND eventDate <= $1",
-        new Date(moment(day?.timestamp).subtract(15, "days").valueOf()),
-        new Date(moment(day?.timestamp).add(85, "days").valueOf())
+  useEffect(() => {
+    if (AllEvents) {
+      setEventsByDate(
+        groupBy(
+          AllEvents.map((o) => ({
+            start: moment(o.eventStartTime).format("YYYY-MM-DD hh:mm:ss"),
+            end: moment(o.eventEndTime).format("YYYY-MM-DD hh:mm:ss"),
+            title: o?.title,
+            summary: o?.description,
+            color: EVENT_COLOR,
+            eventId: o?._id,
+          })),
+          (e) => CalendarUtils.getCalendarDateString(e.start)
+        )
       );
-
-    if (events && events?.length > 0) {
-      console.log("events", events);
     }
-
-    setTimeout(() => {
-      for (let i = -15; i < 85; i++) {
-        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
-        const strTime = timeToString(time);
-
-        if (!items[strTime]) {
-          items[strTime] = [];
-
-          const numItems = Math.floor(Math.random() * 3 + 1);
-          for (let j = 0; j < numItems; j++) {
-            items[strTime].push({
-              name: "Item for " + strTime + " #" + j,
-              height: Math.max(50, Math.floor(Math.random() * 150)),
-              day: strTime,
-            });
-          }
-        }
-      }
-
-      const newItems = {};
-      Object.keys(items).forEach((key) => {
-        newItems[key] = items[key];
-      });
-      setItems(newItems);
-    }, 1000);
-  };
-
-  const renderDay = (day) => {
-    if (day) {
-      return <Text style={styles.customDay}>{day.getDay()}</Text>;
-    }
-    return <View style={styles.dayItem} />;
-  };
-
-  const renderItem = (reservation, isFirst) => {
-    const fontSize = isFirst ? 16 : 14;
-    const color = isFirst ? "black" : "#43515c";
-
-    return (
-      <TouchableOpacity
-        style={[styles.item, { height: reservation.height }]}
-        onPress={() => Alert.alert(reservation.name)}
-      >
-        <Text style={{ fontSize, color }}>{reservation.name}</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderEmptyDate = () => {
-    return (
-      <View style={styles.emptyDate}>
-        <Text>This is empty date!</Text>
-      </View>
-    );
-  };
-
-  const rowHasChanged = (r1, r2) => {
-    return r1.name !== r2.name;
-  };
-
-  const timeToString = (time) => {
-    const date = new Date(time);
-    return date.toISOString().split("T")[0];
-  };
+  }, [JSON.stringify(AllEvents)]);
 
   return (
-    <Agenda
-      items={items}
-      loadItemsForMonth={loadItems}
-      selected={"2017-02-1"}
-      renderItem={renderItem}
-      renderEmptyDate={renderEmptyDate}
-      rowHasChanged={rowHasChanged}
-      showClosingKnob={true}
-      // markingType={'period'}
-      // markedDates={{
-      //    '2017-05-08': {textColor: '#43515c'},
-      //    '2017-05-09': {textColor: '#43515c'},
-      //    '2017-05-14': {startingDay: true, endingDay: true, color: 'blue'},
-      //    '2017-05-21': {startingDay: true, color: 'blue'},
-      //    '2017-05-22': {endingDay: true, color: 'gray'},
-      //    '2017-05-24': {startingDay: true, color: 'gray'},
-      //    '2017-05-25': {color: 'gray'},
-      //    '2017-05-26': {endingDay: true, color: 'gray'}}}
-      // monthFormat={'yyyy'}
-      // theme={{calendarBackground: 'red', agendaKnobColor: 'green'}}
-      // renderDay={renderDay}
-      // hideExtraDays={false}
-      // showOnlySelectedDayItems
-      // reservationsKeyExtractor={reservationsKeyExtractor}
-    />
+    <CalendarProvider
+      date={currentDate}
+      onDateChanged={(date, source) => {
+        setCurrentDate(date);
+      }}
+      onMonthChange={() => {}}
+      // showTodayButton
+      disabledOpacity={0.6}
+      // numberOfDays={3}
+    >
+      <ExpandableCalendar
+        firstDay={1}
+        leftArrowImageSource={require("../../assets/previous.png")}
+        rightArrowImageSource={require("../../assets/next.png")}
+        markedDates={[]}
+      />
+      <TimelineList
+        events={eventsByDate}
+        timelineProps={{
+          format24h: false,
+          onEventPress: (data) => {
+            navigation.navigate("CalendarEventScreen", {
+              eventId: data?.eventId,
+            });
+          },
+          onBackgroundLongPress: () => {},
+          onBackgroundLongPressOut: () => {},
+          // scrollToFirst: true,
+          // start: 0,
+          // end: 24,
+          // unavailableHours: [
+          //   { start: 0, end: 6 },
+          //   { start: 22, end: 24 },
+          // ],
+          overlapEventsSpacing: 8,
+          rightEdgeSpacing: 24,
+        }}
+        showNowIndicator
+        scrollToNow
+        scrollToFirst
+        initialTime={INITIAL_TIME}
+      />
+    </CalendarProvider>
   );
 };
 

@@ -283,7 +283,7 @@ async function getContactRaw(realm: Realm) {
     realm.write(() => {
       const contacts = realm
         .objects("Contact")
-        .filtered("id != $0", "000000000000000000000000");
+        .filtered("_id != $0", "000000000000000000000000");
       if (contacts && contacts?.length > 0) {
         contactJSON = [...contacts];
       } else {

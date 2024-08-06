@@ -212,7 +212,6 @@ async function importNoteOrganisationMap(
       }
     }
   });
-
   return;
 }
 

@@ -71,7 +71,7 @@ const RealmWrapper = ({ children }) => {
   ];
 
   return (
-    <RealmProvider schema={schema} schemaVersion={22} onMigration={migration}>
+    <RealmProvider schema={schema} schemaVersion={23} onMigration={migration}>
       {children}
     </RealmProvider>
   );

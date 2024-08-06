@@ -12,6 +12,7 @@ const NotesList = forwardRef(
       onDelete,
       onPinPress = () => {},
       showPin = false,
+      ListHeaderComponent = () => {},
     },
     ref
   ) => {
@@ -34,6 +35,7 @@ const NotesList = forwardRef(
       <View style={styles.container}>
         <FlatList
           ref={ref}
+          ListHeaderComponent={ListHeaderComponent}
           data={notes || []}
           renderItem={renderItem}
           keyExtractor={(item) => "keyss__" + item?._id}

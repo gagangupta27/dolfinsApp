@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useObject, useQuery, useRealm } from "@realm/react";
 
 import Accordion from "../../components/common/Accordian";
+import { BSON } from "realm";
 import { Calendar } from "react-native-calendars";
 import CalendarEvent from "../../realm/models/CalendarEvent";
 import Contact from "../../realm/models/Contact";
@@ -20,7 +21,6 @@ import ExactTextBox from "../../components/notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { addCalendarEvent } from "../../realm/queries/calendarEventOperations";
-import { addOrganisation } from "../../realm/queries/organisationOperations";
 import moment from "moment";
 
 Date.prototype.addHours = function (h) {
@@ -44,8 +44,9 @@ const AddEventModal = ({
   const [location, setLocation] = useState();
   const [meetLinkUrl, setMeetLinkUrl] = useState("");
   const [openStartTime, setOpenStartModal] = useState(false);
-  const [date, setDate] = useState();
   const [openEndTime, setOpenEndModal] = useState(false);
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
 
   const realm = useRealm();
   const existingEvent = existingId
@@ -59,51 +60,71 @@ const AddEventModal = ({
   useEffect(() => {
     if (existingEvent) {
       setTitle(existingEvent?.title);
-      setDesc(existingEvent?.desc || "");
+      setDesc(existingEvent?.description || "");
+      setMeetLinkUrl(existingEvent.meetLinkUrl || "");
+      setStartTime(existingEvent.eventStartTime);
+      setEndTime(existingEvent.eventEndTime);
+      setAttendees(
+        existingEvent?.attendees?.length > 0
+          ? existingEvent?.attendees?.map((o) => o.contact)
+          : []
+      );
+      setOrganizer(
+        existingEvent?.organizer ? existingEvent.organizer?.contact : null
+      );
     }
   }, [existingEvent]);
 
-  //   useEffect(() => {
-  //     if (existingContacts && existingContacts?.length > 0) {
-  //       setContacts([...existingContacts]);
-  //     }
-  //   }, [JSON.stringify(existingContacts)]);
-
   const onCreate = async () => {
+    if (title?.trim()?.length == 0) {
+      Alert.alert("Error", "Please Enter Event Title!");
+      return;
+    }
+    if (desc?.trim()?.length == 0) {
+      Alert.alert("Error", "Please Enter Event Description!");
+      return;
+    }
+    if (attendees?.length == 0) {
+      Alert.alert("Error", "Please Enter Event Attendees!");
+      return;
+    }
+    if (!organizer) {
+      Alert.alert("Error", "Please Enter Event Organizer!");
+      return;
+    }
+    if (!startTime) {
+      Alert.alert("Error", "Please Enter Event Start Time!");
+      return;
+    }
+    if (!endTime) {
+      Alert.alert("Error", "Please Enter Event End time!");
+      return;
+    }
+    if (moment(startTime).valueOf() > moment(endTime).valueOf()) {
+      Alert.alert("Error", "Invalid Dates!");
+      return;
+    }
     if (existingId) {
       realm.write(() => {
         existingEvent.title = title;
-        existingEvent.desc = desc;
+        existingEvent.description = desc;
+        existingEvent.eventStartTime = startTime;
+        existingEvent.eventEndTime = endTime;
+        existingEvent.attendees =
+          attendees?.length > 0
+            ? attendees?.map((o) => ({
+                _id: new BSON.ObjectId(),
+                contact: realm.objectForPrimaryKey(Contact, o?._id),
+              }))
+            : [];
+        existingEvent.organizer = {
+          _id: new BSON.ObjectId(),
+          contact: realm.objectForPrimaryKey(Contact, organizer?._id),
+        };
+        existingEvent.location = "";
+        existingEvent.meetLinkUrl = meetLinkUrl;
       });
     } else {
-      if (title?.trim()?.length == 0) {
-        Alert.alert("Error", "Please Enter Event Title!");
-        return;
-      }
-      if (desc?.trim()?.length == 0) {
-        Alert.alert("Error", "Please Enter Event Description!");
-        return;
-      }
-      if (attendees?.length == 0) {
-        Alert.alert("Error", "Please Enter Event Attendees!");
-        return;
-      }
-      if (!organizer) {
-        Alert.alert("Error", "Please Enter Event Organizer!");
-        return;
-      }
-      if (!startTime) {
-        Alert.alert("Error", "Please Enter Event Start Time!");
-        return;
-      }
-      if (!endTime) {
-        Alert.alert("Error", "Please Enter Event End time!");
-        return;
-      }
-      if (!date) {
-        Alert.alert("Error", "Please Enter Event Date!");
-        return;
-      }
       const createdEvent = await addCalendarEvent(realm, {
         calendarId: 0,
         calendarProviderEventId: "",
@@ -115,7 +136,6 @@ const AddEventModal = ({
         organizer: { contact: organizer },
         location: "",
         meetLinkUrl: meetLinkUrl,
-        eventDate: new Date(date),
       });
 
       if (createdEvent) {
@@ -128,7 +148,6 @@ const AddEventModal = ({
     setAttendees([]);
     setOrganizer();
     setMeetLinkUrl("");
-    setDate();
     setStartTime();
     setEndTime();
   };
@@ -197,60 +216,274 @@ const AddEventModal = ({
                 placeholder="Meet Link*"
               />
             </View>
-            <Accordion viewKey="qwerty" isExpanded={true} enterFrom="top">
+            <View
+              style={{
+                paddingTop: 16,
+              }}
+            >
               <View
                 style={{
-                  width: "100%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <Calendar
-                  onDayPress={(day) => {
-                    setDate(day?.timestamp);
-                  }}
-                  current={moment().format("YYYY-MM-DD")}
+                <Text>Starts</Text>
+
+                <View
                   style={{
-                    backgroundColor: "#F7F7F7",
-                    borderRadius: 8,
-                    marginTop: 20,
+                    flexDirection: "row",
+                    alignItems: "center",
                   }}
-                  minDate={moment().format("YYYY-MM-DD")}
-                  maxDate={moment().add(5, "months").format("YYYY-MM-DD")}
-                  markingType={"custom"}
-                  markedDates={{
-                    [moment().format("YYYY-MM-DD")]: {
-                      customStyles: {
-                        container: {
-                          borderWidth: 1,
-                          borderRadius: 100,
-                          borderColor: "#00000029",
-                        },
-                      },
-                    },
-                    [moment(date).format("YYYY-MM-DD")]: {
-                      customStyles: {
-                        container: {
-                          backgroundColor: "#212427",
-                          borderRadius: 100,
-                          elevation: 2,
-                        },
-                        text: {
-                          color: "#FFFFFF",
-                        },
-                      },
-                    },
-                  }}
-                  theme={{
-                    backgroundColor: "#F7F7F7",
-                    calendarBackground: "#F7F7F7",
-                    textSectionTitleColor: "#212427",
-                    selectedDayBackgroundColor: "#212427",
-                    selectedDayTextColor: "#FFFFFF",
-                    todayTextColor: "#212427",
-                    dayTextColor: "#212427",
-                  }}
-                />
+                >
+                  <TouchableOpacity
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      paddingHorizontal: 16,
+                      minWidth: 120,
+                    }}
+                    activeOpacity={0.8}
+                    onPress={() => setShowStartCalendar(true)}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      {startTime ? moment(startTime).format("ll") : "--"}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      marginLeft: 8,
+                      paddingHorizontal: 16,
+                      minWidth: 120,
+                    }}
+                    activeOpacity={0.8}
+                    onPress={() => setOpenStartModal(true)}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      {startTime ? moment(startTime).format("hh:mm a") : "--"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </Accordion>
+              <Accordion
+                viewKey="qwerty"
+                isExpanded={showStartCalendar}
+                enterFrom="top"
+              >
+                <View
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  <Calendar
+                    onDayPress={(day) => {
+                      setStartTime((prev) => {
+                        if (prev) {
+                          return new Date(
+                            moment(prev)
+                              .set("year", day.year)
+                              .set("month", day.month - 1)
+                              .set("date", day.day)
+                          );
+                        } else {
+                          return new Date(moment(day?.timestamp));
+                        }
+                      });
+                      setShowStartCalendar(false);
+                    }}
+                    current={moment().format("YYYY-MM-DD")}
+                    style={{
+                      backgroundColor: "#F7F7F7",
+                      borderRadius: 8,
+                      marginTop: 20,
+                    }}
+                    markingType={"custom"}
+                    markedDates={{
+                      [moment().format("YYYY-MM-DD")]: {
+                        customStyles: {
+                          container: {
+                            borderWidth: 1,
+                            borderRadius: 100,
+                            borderColor: "#00000029",
+                          },
+                        },
+                      },
+                      [moment(startTime).format("YYYY-MM-DD")]: {
+                        customStyles: {
+                          container: {
+                            backgroundColor: "#212427",
+                            borderRadius: 100,
+                            elevation: 2,
+                          },
+                          text: {
+                            color: "#FFFFFF",
+                          },
+                        },
+                      },
+                    }}
+                    theme={{
+                      backgroundColor: "#F7F7F7",
+                      calendarBackground: "#F7F7F7",
+                      textSectionTitleColor: "#212427",
+                      selectedDayBackgroundColor: "#212427",
+                      selectedDayTextColor: "#FFFFFF",
+                      todayTextColor: "#212427",
+                      dayTextColor: "#212427",
+                    }}
+                  />
+                </View>
+              </Accordion>
+            </View>
+            <View
+              style={{
+                paddingTop: 16,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text>Ends</Text>
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      paddingHorizontal: 16,
+                      minWidth: 120,
+                    }}
+                    activeOpacity={0.8}
+                    onPress={() => setShowEndCalendar(true)}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      {endTime ? moment(endTime).format("ll") : "--"}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      marginLeft: 8,
+                      paddingHorizontal: 16,
+                      minWidth: 120,
+                    }}
+                    activeOpacity={0.8}
+                    onPress={() => setOpenEndModal(true)}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      {endTime ? moment(endTime).format("hh:mm a") : "--"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <Accordion
+                viewKey="qwerty"
+                isExpanded={showEndCalendar}
+                enterFrom="top"
+              >
+                <View
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  <Calendar
+                    onDayPress={(day) => {
+                      setEndTime((prev) => {
+                        if (prev) {
+                          return new Date(
+                            moment(prev)
+                              .set("year", day.year)
+                              .set("month", day.month - 1)
+                              .set("date", day.day)
+                          );
+                        } else {
+                          return new Date(
+                            moment(day?.timestamp).format(
+                              "YYYY-MM-DDTHH:mm:ss[Z]"
+                            )
+                          );
+                        }
+                      });
+                      setShowEndCalendar(false);
+                    }}
+                    current={moment().format("YYYY-MM-DD")}
+                    style={{
+                      backgroundColor: "#F7F7F7",
+                      borderRadius: 8,
+                      marginTop: 20,
+                    }}
+                    markingType={"custom"}
+                    markedDates={{
+                      [moment().format("YYYY-MM-DD")]: {
+                        customStyles: {
+                          container: {
+                            borderWidth: 1,
+                            borderRadius: 100,
+                            borderColor: "#00000029",
+                          },
+                        },
+                      },
+                      [moment(endTime).format("YYYY-MM-DD")]: {
+                        customStyles: {
+                          container: {
+                            backgroundColor: "#212427",
+                            borderRadius: 100,
+                            elevation: 2,
+                          },
+                          text: {
+                            color: "#FFFFFF",
+                          },
+                        },
+                      },
+                    }}
+                    theme={{
+                      backgroundColor: "#F7F7F7",
+                      calendarBackground: "#F7F7F7",
+                      textSectionTitleColor: "#212427",
+                      selectedDayBackgroundColor: "#212427",
+                      selectedDayTextColor: "#FFFFFF",
+                      todayTextColor: "#212427",
+                      dayTextColor: "#212427",
+                    }}
+                  />
+                </View>
+              </Accordion>
+            </View>
             <View style={{ minHeight: 50, marginVertical: 10, zIndex: 10 }}>
               <View
                 style={{
@@ -358,10 +591,20 @@ const AddEventModal = ({
               date={startTime ? startTime : new Date()}
               onDateChange={() => {}}
               onConfirm={(data) => {
-                setStartTime(data);
+                setStartTime((prev) => {
+                  if (prev) {
+                    return new Date(
+                      moment(data)
+                        .set("year", moment(prev).year())
+                        .set("month", moment(prev).month())
+                        .set("date", moment(prev).date())
+                    );
+                  } else {
+                    return new Date(moment(day?.timestamp));
+                  }
+                });
                 setEndTime();
                 setOpenStartModal(false);
-                setOpenEndModal(true);
               }}
               title="Set Start Time"
               onCancel={() => {
@@ -373,11 +616,21 @@ const AddEventModal = ({
               modal={true}
               open={openEndTime}
               date={endTime ? endTime : new Date()}
-              minimumDate={startTime ? startTime : new Date().addHours(1)}
               title="Set End Time"
               onDateChange={() => {}}
               onConfirm={(data) => {
-                setEndTime(data);
+                setEndTime((prev) => {
+                  if (prev) {
+                    return new Date(
+                      moment(data)
+                        .set("year", moment(prev).year())
+                        .set("month", moment(prev).month())
+                        .set("date", moment(prev).date())
+                    );
+                  } else {
+                    return new Date(moment(day?.timestamp));
+                  }
+                });
                 setOpenEndModal(false);
               }}
               onCancel={() => {
@@ -385,65 +638,6 @@ const AddEventModal = ({
               }}
               mode="time"
             />
-            <View style={{}}>
-              <TouchableOpacity
-                style={{
-                  borderWidth: 1,
-                  padding: 16,
-                  minHeight: 56,
-                  fontSize: 15,
-                  borderRadius: 8,
-                  marginTop: 20,
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-                activeOpacity={0.8}
-                onPress={() => {
-                  setOpenStartModal(true);
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    setOpenStartModal(true);
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 24,
-                    }}
-                  >
-                    {startTime
-                      ? moment(startTime).format("hh:mm a")
-                      : "Set Start "}
-                  </Text>
-                </TouchableOpacity>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    lineHeight: 24,
-                  }}
-                >
-                  {startTime || endTime ? " - " : "and "}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setOpenEndModal(true);
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 24,
-                    }}
-                  >
-                    {endTime ? moment(endTime).format("hh:mm a") : "End Time"}
-                  </Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            </View>
           </View>
         </TouchableOpacity>
       </KeyboardAwareScrollView>

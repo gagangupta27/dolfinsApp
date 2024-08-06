@@ -23,12 +23,18 @@ const UserMentionOptionsDropdown = ({
         style={[
           styles.item,
           {
-            backgroundColor: item?.organisation ? "#F8E6EF" : "#D0A0BF",
+            backgroundColor: item?.organisation
+              ? "#F8E6EF"
+              : item?.contact
+              ? "#D0A0BF"
+              : "white",
           },
         ]}
       >
         <Text style={styles.itemText}>
-          {item?.organisation?.name || item?.contact?.name}
+          {item?.organisation?.name ||
+            item?.contact?.name ||
+            item?.event?.title}
         </Text>
       </View>
     </TouchableOpacity>

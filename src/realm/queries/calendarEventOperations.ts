@@ -19,7 +19,6 @@ async function addCalendarEvent(
     organizer: Mentions;
     location: string;
     meetLinkUrl: string;
-    eventDate: Date;
   }
 ) {
   let createdEvent;
@@ -62,10 +61,9 @@ async function addCalendarEvent(
                   ),
                 }),
           }
-        : [],
+        : null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      eventDate: eventData?.eventDate,
       location: eventData?.location,
       meetLinkUrl: eventData?.meetLinkUrl || "",
     });
@@ -89,7 +87,6 @@ function updateCalendarEvent(
     updatedAt: Date;
     location: string;
     meetLinkUrl: string;
-    eventDate: Date;
   }>
 ) {
   realm.write(() => {
@@ -143,6 +140,173 @@ const useCalendarEvent = (event_id) => {
   return event;
 };
 
+async function getRawEvents(realm: Realm) {
+  let eventJSON = [];
+  try {
+    realm.write(() => {
+      const events = realm
+        .objects(CalendarEvent)
+        .filtered("id != $0", "000000000000000000000000");
+      if (events && events?.length > 0) {
+        eventJSON = [
+          ...events.map((o) => ({
+            ...o,
+            attendees: o?.attendees?.map((m) => ({
+              _id: m?._id,
+              contactId: m?.contact?._id,
+              organisationId: m?.organisation?._id,
+            })),
+            organizer: {
+              _id: o?.organizer?._id,
+              contactId: o?.organizer?.contact?._id,
+              organisationId: o?.organizer?.organisation?._id,
+            },
+          })),
+        ];
+      } else {
+        eventJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getRawEvents", err);
+    eventJSON = [];
+  }
+  return eventJSON;
+}
+
+async function getEventNoteMap(realm: Realm) {
+  let eventJSON = [];
+  try {
+    realm.write(() => {
+      const maps = realm.objects("CalendarEventNoteMap");
+      if (maps && maps?.length > 0) {
+        eventJSON = [...maps];
+      } else {
+        eventJSON = [];
+      }
+    });
+  } catch (err) {
+    console.log("err getEventNoteMap", err);
+    eventJSON = [];
+  }
+  return eventJSON;
+}
+
+async function importEvents(
+  realm: Realm,
+  events: {
+    _id: BSON.ObjectId;
+    calendarId: number;
+    calendarProviderEventId: string;
+    title: string;
+    eventStartTime: Date;
+    eventEndTime: Date;
+    description: string;
+    attendees: {
+      _id: BSON.ObjectId;
+      contactId: BSON.ObjectId;
+      organisationId: BSON.ObjectId;
+    }[];
+    organizer: {
+      _id: BSON.ObjectId;
+      contactId: BSON.ObjectId;
+      organisationId: BSON.ObjectId;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+    location: string;
+    meetLinkUrl: string;
+  }[]
+) {
+  realm.write(() => {
+    for (const event of events) {
+      try {
+        realm.create("CalendarEvent", {
+          _id: new BSON.ObjectID(event?._id),
+          attendees: event?.attendees
+            ? event.attendees?.map((o) => ({
+                _id: new BSON.ObjectId(o?._id),
+                ...(o?.contactId
+                  ? {
+                      contact: realm.objectForPrimaryKey(
+                        Contact,
+                        new BSON.ObjectID(o?.contactId)
+                      ),
+                    }
+                  : {
+                      organisation: realm.objectForPrimaryKey(
+                        Organisation,
+                        new BSON.ObjectID(o?.organisationId)
+                      ),
+                    }),
+              }))
+            : [],
+          organizer: event?.organizer
+            ? {
+                _id: new BSON.ObjectId(event?.organizer?._id),
+                ...(event?.organizer?.contactId
+                  ? {
+                      contact: realm.objectForPrimaryKey(
+                        Contact,
+                        new BSON.ObjectID(event?.organizer?.contactId)
+                      ),
+                    }
+                  : {
+                      organisation: realm.objectForPrimaryKey(
+                        Organisation,
+                        new BSON.ObjectID(event?.organizer?.organisationId)
+                      ),
+                    }),
+              }
+            : {},
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          calendarId: event.calendarId,
+          calendarProviderEventId: event.calendarProviderEventId,
+          title: event.title,
+          eventStartTime: event.eventStartTime,
+          eventEndTime: event.eventEndTime,
+          description: event.description,
+          location: event.location,
+          meetLinkUrl: event.meetLinkUrl,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+
+  return;
+}
+
+async function importCalendarEventNoteMap(
+  realm: Realm,
+  maps: {
+    _id: BSON.ObjectId;
+    calendarEventId: BSON.ObjectId;
+    noteId: BSON.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+  }[]
+) {
+  realm.write(() => {
+    for (const ENMap of maps) {
+      try {
+        realm.create("CalendarEventNoteMap", {
+          _id: new BSON.ObjectId(ENMap?._id),
+          calendarEventId: new BSON.ObjectId(ENMap.calendarEventId),
+          noteId: new BSON.ObjectId(ENMap.noteId),
+          createdAt: ENMap.createdAt,
+          updatedAt: ENMap.updatedAt,
+        });
+      } catch (err) {
+        console.log("err", err);
+      }
+    }
+  });
+  return;
+}
+
 export {
   addCalendarEvent,
   updateCalendarEvent,
@@ -151,4 +315,8 @@ export {
   useFutureCalendarEvents,
   usePastCalendarEvents,
   useRecentCalendarEvents,
+  getRawEvents,
+  getEventNoteMap,
+  importEvents,
+  importCalendarEventNoteMap,
 };
