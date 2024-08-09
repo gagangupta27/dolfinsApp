@@ -1,6 +1,7 @@
+import { Text, TouchableOpacity, View } from "react-native";
+
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
 import Styles from "./CalendarTabStyle";
 
 const CalendarItem = ({ item, onPress }) => {
@@ -61,9 +62,9 @@ const CalendarItem = ({ item, onPress }) => {
         <View>
           <Text style={Styles.title}>{item.title}</Text>
           <Text style={Styles.time}>{dateTimeString}</Text>
-          {item.organizer && (
+          {item?.organizer && (
             <Text style={Styles.time}>
-              Organizer: {item.organizer.slice(0, 40)}
+              Organizer: {item?.organizer?.contact?.name?.slice(0, 40) || ""}
             </Text>
           )}
         </View>

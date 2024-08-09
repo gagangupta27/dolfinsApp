@@ -58,6 +58,33 @@ const CalendarTab = () => {
     }
   }, [JSON.stringify(AllEvents)]);
 
+  const renderEvent = (data) => {
+    console.log("data", data);
+    return (
+      <View>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "bold",
+          }}
+        >
+          {data?.title}
+        </Text>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "400",
+          }}
+        >
+          {data?.title}
+        </Text>
+        <Text>{`${moment(data?.start).format("llll")} - ${moment(
+          data?.end
+        ).format("llll")}`}</Text>
+      </View>
+    );
+  };
+
   return (
     <CalendarProvider
       date={currentDate}
@@ -78,6 +105,7 @@ const CalendarTab = () => {
       <TimelineList
         events={eventsByDate}
         timelineProps={{
+          renderEvent: renderEvent,
           format24h: false,
           onEventPress: (data) => {
             navigation.navigate("CalendarEventScreen", {

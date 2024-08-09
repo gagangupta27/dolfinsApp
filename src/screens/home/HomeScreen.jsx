@@ -40,7 +40,6 @@ import ContactList from "../../components/contact/ContactList";
 import ContactSelectionModal from "../../components/contact/ContactSelectionModal";
 import Header from "../../components/common/Header";
 import Modal from "react-native-modal";
-import NavigationBarForHomeScreen from "../../components/home/NavigationBarForHomeScreen";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2";
 import NoteDone from "../../components/home/NoteDone";
 import { OrgContactLink } from "../../realm/queries/organisationOperations";
@@ -351,37 +350,39 @@ const CommonComponent = () => {
 
       const searchCalendarResults = calendarEvents.filter((calendarEvent) => {
         let exists = false;
-        if (calendarEvent.title) {
+        if (calendarEvent?.title) {
           exists =
             exists ||
-            calendarEvent.title.toLowerCase().includes(text.toLowerCase());
+            calendarEvent?.title.toLowerCase().includes(text.toLowerCase());
         }
-        if (calendarEvent.description) {
+        if (calendarEvent?.description) {
           exists =
             exists ||
-            calendarEvent.description
-              .toLowerCase()
+            calendarEvent?.description
+              ?.toLowerCase()
+              ?.includes(text?.toLowerCase());
+        }
+        if (calendarEvent?.attendees?.length > 0) {
+          exists =
+            exists ||
+            calendarEvent?.attendees?.filter((attendee) =>
+              attendee?.contact?.name?.toLowerCase().includes(text?.toLowerCase)
+            ).length > 0;
+        }
+        if (calendarEvent?.organizer) {
+          exists =
+            exists ||
+            calendarEvent?.organizer?.contact?.name
+              ?.toLowerCase()
               .includes(text.toLowerCase());
         }
-        // if (calendarEvent.attendees) {
-        //   exists =
-        //     exists ||
-        //     calendarEvent.attendees.filter((attendee) =>
-        //       attendee.toLowerCase().includes(text.toLowerCase)
-        //     ).length > 0;
-        // }
-        // if (calendarEvent.organizer) {
-        //   exists =
-        //     exists ||
-        //     calendarEvent.organizer.toLowerCase().includes(text.toLowerCase());
-        // }
         return exists;
       });
 
       let calendarNotesResults = allCalendarEventNotes
-        .filter((note) => {
-          if (note.content) {
-            return note.content.toLowerCase().includes(text.toLowerCase());
+        ?.filter((note) => {
+          if (note?.content) {
+            return note?.content?.toLowerCase()?.includes(text?.toLowerCase());
           }
           return false;
         })
@@ -648,7 +649,7 @@ const CommonComponent = () => {
                               note={item.note}
                               onPress={() => {
                                 navigation.navigate("CalendarEventScreen", {
-                                  eventId: item._id.toHexString(),
+                                  eventId: String(item?.note?.calendarEventId),
                                 });
                               }}
                             />
@@ -658,11 +659,12 @@ const CommonComponent = () => {
                         return (
                           <CalendarItem
                             item={item}
-                            onPress={() =>
+                            onPress={() => {
+                              console.log("item", item);
                               navigation.navigate("CalendarEventScreen", {
-                                eventId: item._id.toHexString(),
-                              })
-                            }
+                                eventId: item?._id?.toHexString(),
+                              });
+                            }}
                           ></CalendarItem>
                         );
                       }

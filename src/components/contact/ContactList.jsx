@@ -26,7 +26,7 @@ const ContactList = ({
       <FlatList
         data={contacts}
         renderItem={renderItem}
-        keyExtractor={(item) => item._id.toHexString()}
+        keyExtractor={(item) => item?._id?.toHexString()}
       />
     </View>
   );

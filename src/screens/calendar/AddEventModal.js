@@ -75,6 +75,17 @@ const AddEventModal = ({
     }
   }, [existingEvent]);
 
+  useEffect(() => {
+    if (!startTime) {
+      const currentTime = moment();
+      const roundedTime = moment(
+        Math.ceil(+currentTime / (30 * 60 * 1000)) * (30 * 60 * 1000)
+      );
+      setStartTime(new Date(moment(roundedTime).valueOf()));
+      setEndTime(new Date(moment(roundedTime).add(30, "minutes").valueOf()));
+    }
+  }, [startTime, endTime]);
+
   const onCreate = async () => {
     if (title?.trim()?.length == 0) {
       Alert.alert("Error", "Please Enter Event Title!");
@@ -84,14 +95,14 @@ const AddEventModal = ({
       Alert.alert("Error", "Please Enter Event Description!");
       return;
     }
-    if (attendees?.length == 0) {
-      Alert.alert("Error", "Please Enter Event Attendees!");
-      return;
-    }
-    if (!organizer) {
-      Alert.alert("Error", "Please Enter Event Organizer!");
-      return;
-    }
+    // if (attendees?.length == 0) {
+    //   Alert.alert("Error", "Please Enter Event Attendees!");
+    //   return;
+    // }
+    // if (!organizer) {
+    //   Alert.alert("Error", "Please Enter Event Organizer!");
+    //   return;
+    // }
     if (!startTime) {
       Alert.alert("Error", "Please Enter Event Start Time!");
       return;
@@ -117,10 +128,13 @@ const AddEventModal = ({
                 contact: realm.objectForPrimaryKey(Contact, o?._id),
               }))
             : [];
-        existingEvent.organizer = {
-          _id: new BSON.ObjectId(),
-          contact: realm.objectForPrimaryKey(Contact, organizer?._id),
-        };
+        existingEvent.organizer =
+          organizer && organizer?._id
+            ? {
+                _id: new BSON.ObjectId(),
+                contact: realm.objectForPrimaryKey(Contact, organizer?._id),
+              }
+            : null;
         existingEvent.location = "";
         existingEvent.meetLinkUrl = meetLinkUrl;
       });
@@ -133,7 +147,7 @@ const AddEventModal = ({
         eventEndTime: endTime,
         description: desc,
         attendees: attendees?.map((o) => ({ contact: o })),
-        organizer: { contact: organizer },
+        organizer: organizer?._id ? { contact: organizer } : null,
         location: "",
         meetLinkUrl: meetLinkUrl,
       });
@@ -432,11 +446,7 @@ const AddEventModal = ({
                               .set("date", day.day)
                           );
                         } else {
-                          return new Date(
-                            moment(day?.timestamp).format(
-                              "YYYY-MM-DDTHH:mm:ss[Z]"
-                            )
-                          );
+                          return new Date(moment(day?.timestamp).valueOf());
                         }
                       });
                       setShowEndCalendar(false);

@@ -163,11 +163,11 @@ const CalendarEventScreen = ({ route }) => {
                   />
                 </View>
                 <View>
-                  <Text style={Styles.title}>{event.title}</Text>
+                  <Text style={Styles.title}>{event?.title}</Text>
                   {event?.description && (
                     <View>
                       <Text style={{ paddingVertical: 5 }}>
-                        {event.description}
+                        {event?.description}
                       </Text>
                     </View>
                   )}
@@ -175,7 +175,7 @@ const CalendarEventScreen = ({ route }) => {
                     {event?.eventStartTime.toDateString()} -{" "}
                     {event?.eventEndTime.toDateString()}
                   </Text>
-                  {event?.attendees && event.attendees.length > 0 && (
+                  {event?.attendees && event?.attendees.length > 0 && (
                     <View style={{ paddingTop: 10 }}>
                       <Text
                         style={{
@@ -187,7 +187,7 @@ const CalendarEventScreen = ({ route }) => {
                       </Text>
                       <View style={{ maxHeight: 200, paddingVertical: 5 }}>
                         <ScrollView>
-                          {event.attendees.map((attendee, index) => (
+                          {event?.attendees?.map((attendee, index) => (
                             <Text key={index}>{attendee?.contact?.name}</Text>
                           ))}
                         </ScrollView>
@@ -205,7 +205,7 @@ const CalendarEventScreen = ({ route }) => {
                         Organizer
                       </Text>
                       <Text style={{ paddingVertical: 5 }}>
-                        {event.organizer?.contact?.name}
+                        {event?.organizer?.contact?.name || ""}
                       </Text>
                     </View>
                   )}

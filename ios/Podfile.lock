@@ -1269,11 +1269,11 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSentry (5.26.0):
+  - RNSentry (5.27.0):
     - hermes-engine
     - React-Core
     - React-hermes
-    - Sentry/HybridSDK (= 8.31.1)
+    - Sentry/HybridSDK (= 8.32.0)
   - RNShare (10.2.1):
     - React-Core
   - RNSVG (14.1.0):
@@ -1282,7 +1282,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - Sentry/HybridSDK (8.31.1)
+  - Sentry/HybridSDK (8.32.0)
   - SimpleKeychain (1.1.0)
   - SocketRocket (0.6.1)
   - SSZipArchive (2.2.3)
@@ -1731,11 +1731,11 @@ SPEC CHECKSUMS:
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNReanimated: f6b02d8f5eaa2830296411d4ec3b8ef5442dd13d
   RNScreens: 17e2f657f1b09a71ec3c821368a04acbb7ebcb46
-  RNSentry: 85fe1023bf60ead12d059d9c845de19de0ed6f0d
+  RNSentry: 23e21e49e5375ea9947461073ad0fd427e6e2875
   RNShare: 0fad69ae2d71de9d1f7b9a43acf876886a6cb99c
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 96e8c5c45609932bb2f8347e1c709bcca0e95654
-  Sentry: 9c1188876ea1291d1a9db4b38c3f17ebd8e6985e
+  Sentry: 96ae1dcdf01a644bc3a3b1dc279cecaf48a833fb
   SimpleKeychain: f8707c8e97b38c6a6e687b17732afc9bcef06439
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9

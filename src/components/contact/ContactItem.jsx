@@ -24,7 +24,7 @@ const ContactItem = ({
     });
 
     navigation.navigate("ContactScreen", {
-      contactId: item._id.toHexString(),
+      contactId: item?._id?.toHexString(),
       setContact: setContact,
     });
   };
