@@ -47,8 +47,7 @@ const CalendarEventScreen = ({ route }) => {
   const addNoteV2 = async (
     content,
     mentions,
-    imageUri,
-    imageText,
+    imageData,
     audioUri,
     audioText,
     volumeLevels,
@@ -57,15 +56,15 @@ const CalendarEventScreen = ({ route }) => {
     const newNote = {
       content: content,
       mentions: mentions || [],
-      type: imageUri
-        ? "image"
-        : audioUri
-        ? "audio"
-        : document
-        ? "document"
-        : "text",
-      imageUri: imageUri || null,
-      imageText: imageText || "",
+      type:
+        imageData?.length > 0
+          ? "image"
+          : audioUri
+          ? "audio"
+          : document
+          ? "document"
+          : "text",
+      imageData: imageData || [],
       audioUri: audioUri || null,
       audioText: audioText || "",
       volumeLevels: volumeLevels || [],
@@ -84,8 +83,7 @@ const CalendarEventScreen = ({ route }) => {
     noteId,
     content,
     mentions,
-    imageUri,
-    imageText,
+    imageData,
     audioUri,
     audioText,
     volumeLevels,
@@ -94,15 +92,15 @@ const CalendarEventScreen = ({ route }) => {
     const updatedNote = {
       content: content,
       mentions: mentions || [],
-      type: imageUri
-        ? "image"
-        : audioUri
-        ? "audio"
-        : document
-        ? "document"
-        : "text",
-      imageUri: imageUri || null,
-      imageText: imageText || "",
+      type:
+        imageData?.length > 0
+          ? "image"
+          : audioUri
+          ? "audio"
+          : document
+          ? "document"
+          : "text",
+      imageData: imageData || [],
       audioUri: audioUri || null,
       audioText: audioText || null,
       volumeLevels: volumeLevels || [],

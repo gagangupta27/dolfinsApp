@@ -7,6 +7,7 @@ import {
 import {
   Dimensions,
   Image,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -37,7 +38,7 @@ const NoteInputField = forwardRef(
       content,
       setContent,
       mentions,
-      imageUri,
+      imageData,
       audioUri,
       recording,
       onStopRecording,
@@ -57,12 +58,11 @@ const NoteInputField = forwardRef(
     const authData = useSelector((state) => state.app.authData);
 
     const buttonClicked = async () => {
-      if (content || imageUri || audioUri || document) {
+      if (content || imageData?.length > 0 || audioUri || document) {
         track(EVENTS.INPUT_DONE.NAME, {
           [EVENTS.INPUT_START.KEYS.INPUT_NAME]: INPUT_NAME.ADD_TEXT,
         });
         let audioText = "";
-        let imageText = "";
         if (audioUri) {
           setLoading(true);
           const formData = new FormData();
@@ -96,38 +96,43 @@ const NoteInputField = forwardRef(
             });
           setLoading(false);
         }
+        let tempImageData = [];
 
-        if (imageUri) {
+        if (imageData && imageData?.length > 0) {
           setLoading(true);
-          const formData = new FormData();
-          formData.append("image", {
-            uri: imageUri,
-            type: "png/jpeg",
-            name: "image.png",
-          });
-
-          imageText = await fetch(
-            "https://dolfins-server-development.up.railway.app/api/1.0/user/ocr/image",
-            {
-              method: "POST",
-              body: formData,
-              headers: {
-                "Content-Type": "multipart/form-data",
-                authorization: "Bearer " + authData?.idToken,
-              },
-            }
-          )
-            .then((response) => {
-              return response.json();
-            })
-            .then((data) => {
-              return data?.text || "";
-            })
-            .catch((error) => {
-              console.error("Error transcribing image:", error);
-              setLoading(false);
-              return "";
+          for await (const image of imageData) {
+            const formData = new FormData();
+            formData.append("image", {
+              uri: image?.uri,
+              type: "png/jpeg",
+              name: "image.png",
             });
+
+            let imageText = await fetch(
+              "https://dolfins-server-development.up.railway.app/api/1.0/user/ocr/image",
+              {
+                method: "POST",
+                body: formData,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  authorization: "Bearer " + authData?.idToken,
+                },
+              }
+            )
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                return data?.text || "";
+              })
+              .catch((error) => {
+                console.error("Error transcribing image:", error);
+                setLoading(false);
+                return "";
+              });
+            tempImageData.push({ ...image, imageText: imageText });
+          }
+
           setLoading(false);
         }
 
@@ -135,11 +140,14 @@ const NoteInputField = forwardRef(
           `${content}${
             audioText?.length > 0 ? `\n\nTranscribed Audio: ${audioText}` : ""
           }${
-            imageText?.length > 0 ? `\n\nImage Description :${imageText}` : ""
+            tempImageData?.length > 0
+              ? `\n\nImage Description :${tempImageData?.map(
+                  (o) => `${o?.imageText} \n\n`
+                )}`
+              : ""
           }`,
           mentions,
-          imageUri,
-          imageText,
+          tempImageData,
           audioUri,
           audioText,
           volumeLevels ? volumeLevels : [],
@@ -278,11 +286,15 @@ const NoteInputField = forwardRef(
                   autoCapitalize="none"
                 />
               )}
-              {imageUri && (
-                <Image
-                  source={{ uri: imageUri }}
-                  style={{ width: 70, height: 70 }}
-                />
+              {imageData && imageData?.length > 0 && (
+                <ScrollView horizontal>
+                  {imageData?.map((o) => (
+                    <Image
+                      source={{ uri: o?.uri }}
+                      style={{ width: 70, height: 70, marginRight: 10 }}
+                    />
+                  ))}
+                </ScrollView>
               )}
               {recording && (
                 <Recording
@@ -302,7 +314,7 @@ const NoteInputField = forwardRef(
                 height: "100%",
               }}
             >
-              {(imageUri || audioUri || document) && (
+              {(imageData?.length > 0 || audioUri || document) && (
                 <TouchableOpacity onPress={clear}>
                   <Feather name="x" size={24} color="black" />
                 </TouchableOpacity>

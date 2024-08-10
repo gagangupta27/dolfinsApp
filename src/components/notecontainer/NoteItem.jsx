@@ -7,7 +7,7 @@ import {
   EVENTS,
   useTrackWithPageInfo,
 } from "../../utils/analytics";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { useRef, useState } from "react";
@@ -113,19 +113,32 @@ const NoteItem = ({
   };
 
   const ImageSection = () => {
-    if (note.type == "image" && note.imageUri) {
+    if (
+      note.type == "image" &&
+      note?.imageData &&
+      note?.imageData?.length > 0
+    ) {
       return (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("ImagePreviewScreen", { uri: note.imageUri });
-          }}
-          onLongPress={handleLongPress}
-        >
-          <Image
-            source={{ uri: note.imageUri }}
-            style={{ width: 120, height: 120 }}
-          />
-        </TouchableOpacity>
+        <ScrollView showsHorizontalScrollIndicator={false} horizontal>
+          {note?.imageData?.map((o, idx) => (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("ImagePreviewScreen", {
+                  uri: o?.uri || "",
+                });
+              }}
+              style={{
+                marginRight: 10,
+              }}
+              key={idx}
+            >
+              <Image
+                source={{ uri: o?.uri || "" }}
+                style={{ width: 120, height: 120 }}
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       );
     } else {
       return <View></View>;

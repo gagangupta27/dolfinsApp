@@ -19,7 +19,7 @@ import UserMentionOptionsDropdown from "./UserMentionOptionsDropdown";
 import { getLastSubstringAfterAt } from "../../utils/common";
 import useAudioRecording from "../../hooks/AudioRecording";
 import useDocumentHandler from "../../hooks/DocumentHandler";
-import useImageHandler from "../../hooks/ImageHandler";
+import useMultiImageHandler from "../../hooks/useMultiImageHandler";
 import { useQuery } from "@realm/react";
 import useQuickNote from "../../hooks/useQuickNote";
 import useSearchFilter from "../../hooks/SearchFilter";
@@ -80,8 +80,10 @@ const NewNoteContainerV2 = forwardRef(
         ? { documentUri: note.documentUri, documentName: note.documentName }
         : null
     );
-    const { imageUri, onImagePress, setImageUri } = useImageHandler(
-      note && note.imageUri ? note.imageUri : null
+    const { imageData, onImagePress, setImageData } = useMultiImageHandler(
+      note && note?.imageData && note?.imageData?.length > 0
+        ? note.imageData
+        : []
     );
 
     const handleMentionSelect = (user) => {
@@ -138,8 +140,7 @@ const NewNoteContainerV2 = forwardRef(
     const addOrUpdateNote = (
       content,
       mentions,
-      imageUri,
-      imageText,
+      imageData,
       audioUri,
       audioText,
       volumeLevels,
@@ -150,8 +151,7 @@ const NewNoteContainerV2 = forwardRef(
           note._id,
           content,
           mentions,
-          imageUri,
-          imageText,
+          imageData,
           audioUri,
           audioText,
           volumeLevels,
@@ -161,8 +161,7 @@ const NewNoteContainerV2 = forwardRef(
         addNote(
           content,
           mentions,
-          imageUri,
-          imageText,
+          imageData,
           audioUri,
           audioText,
           volumeLevels,
@@ -172,7 +171,7 @@ const NewNoteContainerV2 = forwardRef(
     };
 
     const clear = () => {
-      setImageUri(null);
+      setImageData([]);
       setRecording(null);
       setAudioUri(null);
       setVolumeLevels([]);
@@ -196,7 +195,7 @@ const NewNoteContainerV2 = forwardRef(
       if (
         isFocused ||
         isMentionFocused ||
-        imageUri ||
+        imageData?.length > 0 ||
         audioUri ||
         document ||
         recording
@@ -205,7 +204,7 @@ const NewNoteContainerV2 = forwardRef(
       } else {
         setShouldIncreaseHeight(false);
       }
-    }, [imageUri, audioUri, document, isFocused, isMentionFocused, recording]);
+    }, [imageData, audioUri, document, isFocused, isMentionFocused, recording]);
 
     return (
       <View>
@@ -246,7 +245,7 @@ const NewNoteContainerV2 = forwardRef(
               ref={noteInputFieldRef}
               addNote={addOrUpdateNote}
               mentions={mentionData}
-              imageUri={imageUri}
+              imageData={imageData}
               audioUri={audioUri}
               recording={recording}
               onStopRecording={onStopRecording}
@@ -277,18 +276,21 @@ const NewNoteContainerV2 = forwardRef(
                   onStrikethroughPress={handleStrikethroughPress}
                 />
               )}
-              {!imageUri && !audioUri && !document && !recording && (
-                <View>
-                  <View style={styles.verticalline}></View>
-                  <MultiModalOptions
-                    recording={recording}
-                    onStartRecording={onStartRecording}
-                    onStopRecording={onStopRecording}
-                    onImagePress={onImagePress}
-                    onDocumentPress={onDocumentPress}
-                  />
-                </View>
-              )}
+              {imageData?.length == 0 &&
+                !audioUri &&
+                !document &&
+                !recording && (
+                  <View>
+                    <View style={styles.verticalline}></View>
+                    <MultiModalOptions
+                      recording={recording}
+                      onStartRecording={onStartRecording}
+                      onStopRecording={onStopRecording}
+                      onImagePress={onImagePress}
+                      onDocumentPress={onDocumentPress}
+                    />
+                  </View>
+                )}
             </View>
           </View>
         )}

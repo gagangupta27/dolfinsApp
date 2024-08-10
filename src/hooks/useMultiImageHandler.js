@@ -3,13 +3,14 @@ import * as ImagePicker from "expo-image-picker";
 
 import { BUTTON_NAME, EVENTS } from "../utils/analytics";
 
+import { BSON } from "realm";
 import { useState } from "react";
 import { useTrackWithPageInfo } from "../utils/analytics";
 
-const useMultiImageHandler = (existingImageUrl) => {
+const useMultiImageHandler = (existingImageUrl = []) => {
   const track = useTrackWithPageInfo();
 
-  const [imageUri, setImageUri] = useState(existingImageUrl);
+  const [imageData, setImageData] = useState(existingImageUrl);
 
   const onImagePress = async () => {
     track(EVENTS.BUTTON_TAPPED.NAME, {
@@ -28,28 +29,33 @@ const useMultiImageHandler = (existingImageUrl) => {
       allowsMultipleSelection: true,
     });
 
-    console.log("result", result);
-
     if (result && !result?.canceled) {
       if (result?.assets && Array.isArray(result?.assets)) {
         let tempResults = [];
-        for (const file in result?.assets) {
+        for (const file of result?.assets) {
+          console.log("result?.assets", file);
           let localUri = file?.uri || "";
           let filename = localUri?.split("/")?.pop();
-
+          console.log("filename", filename, localUri);
           let internalUri = FileSystem.documentDirectory + filename;
           await FileSystem.copyAsync({
             from: localUri,
             to: internalUri,
           });
-          tempResults.push(internalUri);
+          tempResults.push({
+            _id: new BSON.ObjectID(),
+            uri: internalUri,
+            localPath: "",
+            iCloudPath: "",
+            imageText: "",
+          });
         }
-        setImageUri(tempResults);
+        setImageData(tempResults);
       }
     }
   };
 
-  return { imageUri, onImagePress, setImageUri };
+  return { imageData, onImagePress, setImageData };
 };
 
 export default useMultiImageHandler;

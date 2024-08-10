@@ -3,6 +3,7 @@ import Realm, { BSON } from "realm";
 import CalendarEventNoteMap from "../models/CalendarEventNoteMap";
 import Contact from "../models/Contact";
 import ContactNoteMap from "../models/ContactNoteMap";
+import ImageData from "../models/ImageData";
 import Mentions from "../models/Mentions";
 import Note from "../models/Note";
 import Organisation from "../models/Organisation";
@@ -73,8 +74,7 @@ function addNoteToCalendar(
     content: string;
     mentions: Mentions[];
     type: string;
-    imageUri: string | null;
-    imageText: string | null;
+    imageData: ImageData[];
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -102,8 +102,7 @@ function addNoteToCalendar(
           }))
         : [],
       type: noteDetails.type,
-      imageUri: noteDetails?.imageUri,
-      imageText: noteDetails?.imageText,
+      imageData: noteDetails?.imageData || [],
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -132,8 +131,7 @@ async function createNoteAndAddToContact(
     content: string;
     mentions: Mentions[];
     type: string;
-    imageUri: string | null;
-    imageText: string | null;
+    imageData: ImageData[];
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -160,8 +158,7 @@ async function createNoteAndAddToContact(
           }))
         : [],
       type: noteDetails.type,
-      imageUri: noteDetails.imageUri,
-      imageText: noteDetails.imageText,
+      imageData: noteDetails.imageData || [],
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -194,8 +191,7 @@ async function importNotes(
       organisationId: BSON.ObjectId;
     }[];
     type: string;
-    imageUri: string | null;
-    imageText: string | null;
+    imageData: ImageData[];
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -231,8 +227,7 @@ async function importNotes(
               }))
             : [],
           type: note.type,
-          imageUri: note.imageUri,
-          imageText: note.imageText,
+          imageData: note?.imageData || [],
           audioUri: note.audioUri,
           audioText: note?.audioText || "",
           volumeLevels: note.volumeLevels,
@@ -258,8 +253,7 @@ async function createNoteAndAddToOrganisation(
     content: string;
     mentions: Mentions[];
     type: string;
-    imageUri: string | null;
-    imageText: string | null;
+    imageData: ImageData[];
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -286,8 +280,7 @@ async function createNoteAndAddToOrganisation(
           }))
         : [],
       type: noteDetails.type,
-      imageUri: noteDetails.imageUri,
-      imageText: noteDetails.imageText,
+      imageData: noteDetails.imageData || [],
       audioUri: noteDetails.audioUri,
       audioText: noteDetails?.audioText || "",
       volumeLevels: noteDetails.volumeLevels,
@@ -358,8 +351,7 @@ async function updateNote(
     content: string;
     mentions: Mentions[];
     type: string;
-    imageUri: string | null;
-    imageText: string | null;
+    imageData: ImageData[];
     audioUri: string | null;
     audioText: string | null;
     volumeLevels: number[];
@@ -387,8 +379,7 @@ async function updateNote(
           }))
         : [];
       note.type = noteDetails.type;
-      note.imageUri = noteDetails.imageUri;
-      note.imageText = noteDetails.imageText;
+      note.imageData = noteDetails.imageData || [];
       note.audioUri = noteDetails.audioUri;
       note.audioText = noteDetails?.audioText || "";
       note.volumeLevels = noteDetails.volumeLevels;

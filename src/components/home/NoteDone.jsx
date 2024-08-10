@@ -1,10 +1,19 @@
-import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { MarkdownView } from "../../utils/markdown";
+
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import { AntDesign } from "@expo/vector-icons";
 import AudioPlayer from "../audio/AudioPlayerV2";
 import Document from "../notecontainer/Document";
+import { MarkdownView } from "../../utils/markdown";
+import { useNavigation } from "@react-navigation/native";
 
 const openFile = async (localUri) => {
   if (Platform.OS === "android") {
@@ -52,18 +61,29 @@ const NoteDone = ({ note, contact = { id: 0, name: "Quick Notes" } }) => {
     }
   };
   const ImageSection = () => {
-    if (note.type == "image" && note.imageUri) {
+    if (
+      note.type == "image" &&
+      note?.imageData &&
+      note?.imageData?.length > 0
+    ) {
       return (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("ImagePreviewScreen", { uri: note.imageUri });
-          }}
-        >
-          <Image
-            source={{ uri: note.imageUri }}
-            style={{ width: 120, height: 120 }}
-          />
-        </TouchableOpacity>
+        <ScrollView horizontal>
+          {note?.imageData?.map((o, idx) => (
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("ImagePreviewScreen", {
+                  uri: o?.uri || "",
+                });
+              }}
+              key={idx}
+            >
+              <Image
+                source={{ uri: o?.uri || "" }}
+                style={{ width: 120, height: 120 }}
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       );
     } else {
       return <View></View>;
