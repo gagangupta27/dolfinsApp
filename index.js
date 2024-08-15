@@ -1,20 +1,21 @@
-if (__DEV__) {
-  import("./ReactotronConfig").then(() => {});
-}
-
 import App from "./App";
+import { Platform } from "react-native";
+import RealmWrapper from "./src/components/RealmWrapper";
 import codePush from "react-native-code-push";
 import { registerRootComponent } from "expo";
-import RealmWrapper from "./src/components/RealmWrapper";
 
-let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
+// let codePushOptions =
+//   Platform.OS == "ios"
+//     ? { checkFrequency: codePush.CheckFrequency.MANUAL }
+//     : {};
+
+// if (__DEV__ && Platform.OS != "web") {
+//   import("./ReactotronConfig").then(() => {});
+// }
 
 const Main = () => {
-  return (
-    <RealmWrapper>
-      <App />
-    </RealmWrapper>
-  );
+  return <></>;
 };
 
-registerRootComponent(codePush(codePushOptions)(Main));
+// registerRootComponent(codePush(codePushOptions)(Main));
+registerRootComponent(Main);

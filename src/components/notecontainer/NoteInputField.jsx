@@ -23,6 +23,7 @@ import {
 
 import AudioPlayer from "../audio/AudioPlayerV2";
 import Document from "./Document";
+import ExportImportModal from "../../screens/profile/ExportImportModal";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Loader from "../common/Loader";
@@ -51,6 +52,7 @@ const NoteInputField = forwardRef(
   ) => {
     const track = useTrackWithPageInfo();
     const textInputRef = useRef(null);
+    const _loadingRef = useRef();
 
     const [selection, setSelection] = useState({ start: 0, end: 0 });
     const [loading, setLoading] = useState(false);
@@ -97,10 +99,14 @@ const NoteInputField = forwardRef(
           setLoading(false);
         }
         let tempImageData = [];
-
+        let count = 0;
         if (imageData && imageData?.length > 0) {
-          setLoading(true);
           for await (const image of imageData) {
+            ++count;
+            _loadingRef?.current?.showLoading(
+              "Converting Images",
+              `Preparing Data\n${count}/${imageData?.length}`
+            );
             const formData = new FormData();
             formData.append("image", {
               uri: image?.uri,
@@ -132,7 +138,7 @@ const NoteInputField = forwardRef(
               });
             tempImageData.push({ ...image, imageText: imageText });
           }
-
+          _loadingRef?.current?.hide();
           setLoading(false);
         }
 
@@ -288,9 +294,10 @@ const NoteInputField = forwardRef(
               )}
               {imageData && imageData?.length > 0 && (
                 <ScrollView horizontal>
-                  {imageData?.map((o) => (
+                  {imageData?.map((o, idx) => (
                     <Image
                       source={{ uri: o?.uri }}
+                      key={idx}
                       style={{ width: 70, height: 70, marginRight: 10 }}
                     />
                   ))}
@@ -330,6 +337,14 @@ const NoteInputField = forwardRef(
           </View>
         </View>
         <Loader loading={loading} />
+        <ExportImportModal
+          hideCancel={true}
+          showPercentage={false}
+          ref={_loadingRef}
+          containserStyle={{
+            paddingBottom: 100,
+          }}
+        />
       </View>
     );
   }

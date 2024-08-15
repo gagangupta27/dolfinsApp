@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    "jsx": "react" ,
+    "jsx": "react",
+    "paths": {
+      "crypto": ["node_modules/crypto-js"]
+    }
   },
   "extends": "expo/tsconfig.base"
 }
