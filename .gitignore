@@ -83,3 +83,6 @@ yarn-error.*
 
 # @end expo-cli
 .env.local
+
+# Local Netlify folder
+.netlify
