@@ -12,18 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "accessesContactNotes": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.dolfins.ai",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts.",
-        "LSApplicationQueriesSchemes": [
-          "mailto"
-        ],
+        "LSApplicationQueriesSchemes": ["mailto"],
         "ITSAppUsesNonExemptEncryption": "NO"
       },
       "buildNumber": "1"
@@ -42,7 +38,7 @@
     },
     "web": {
       "favicon": "./src/assets/favicon.png",
-      "output": "server",
+      "output": "static",
       "bundler": "metro"
     },
     "plugins": [
