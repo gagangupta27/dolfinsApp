@@ -1,6 +1,6 @@
-import { useRealm } from "@realm/react";
 import { BSON } from "realm";
 import Contact from "../realm/models/Contact";
+import { useRealm } from "@realm/react";
 
 const useQuickNote = () => {
   const realm = useRealm();

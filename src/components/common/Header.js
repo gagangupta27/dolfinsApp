@@ -7,6 +7,7 @@ import Animated, {
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import {
   Image,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -43,6 +44,9 @@ const Header = ({
 }) => {
   const navigation = useNavigation();
 
+  const { top = 10, bottom = 0 } =
+    Platform.OS == "ios" ? useSafeAreaInsets() : {};
+
   return (
     <View style={[showShadow && Styles.container, container]}>
       {isSearch && (
@@ -52,7 +56,7 @@ const Header = ({
           style={[
             Styles.headerFlex,
             {
-              paddingTop: useSafeAreaInsets().top,
+              paddingTop: top,
               width: "100%",
               justifyContent: "flex-start",
             },
@@ -89,7 +93,7 @@ const Header = ({
           exiting={FadeOutRight}
           style={[
             Styles.headerFlex,
-            { paddingTop: useSafeAreaInsets().top },
+            { paddingTop: top || 0 },
             subConatinerStyle,
           ]}
         >

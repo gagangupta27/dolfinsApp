@@ -1,4 +1,5 @@
 import Realm, { BSON, ObjectSchema } from "realm";
+
 import Contact from "./Contact";
 import Organisation from "./Organisation";
 

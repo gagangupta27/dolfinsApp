@@ -1,5 +1,3 @@
-import * as AuthSession from "expo-auth-session";
-
 import {
   Alert,
   Dimensions,
@@ -18,13 +16,10 @@ import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
-import Api from "../../utils/Api";
 import Carousel from "react-native-reanimated-carousel";
 import { RootState } from "../../redux/store";
-import auth0 from "../../utils/auth";
 import { identify } from "../../utils/analytics";
 import { setAuthData } from "../../redux/reducer/app";
-import { useAuth0 } from "react-native-auth0";
 import { useTrackWithPageInfo } from "../../utils/analytics";
 
 const width = Dimensions.get("window").width;
@@ -50,12 +45,9 @@ const DATA = [
 const LoginScreen = () => {
   const track = useTrackWithPageInfo();
 
-  const { authorize } = useAuth0();
   const [currentIndex, setCurrentIndex] = useState(3);
   const authData = useSelector((state: RootState) => state.app.authData);
   const dispatch = useDispatch();
-
-  const redirectUri = AuthSession.makeRedirectUri({ path: "login" });
 
   async function onAppleButtonPress() {
     // performs login request
@@ -97,46 +89,7 @@ const LoginScreen = () => {
     }
   }
 
-  const onPress = async () => {
-    try {
-      if (authData && authData.refreshToken) {
-        // Token has expired, attempt re-authentication
-        const newCredentials = await auth0.auth.refreshToken({
-          refreshToken: authData.refreshToken,
-          scope: "openid profile email offline_access",
-        });
-        const user = await auth0.auth.userInfo({
-          token: newCredentials.accessToken,
-        });
-        const updatedAuthData = {
-          ...authData,
-          ...newCredentials,
-        };
-        identify(user.email, user);
-        track("Login Success Using Refresh Token");
-        dispatch(setAuthData(updatedAuthData));
-      } else {
-        const newCredentials = await authorize({
-          redirectUrl: redirectUri,
-          scope: "openid profile email offline_access",
-        });
-        const user = await auth0.auth.userInfo({
-          token: newCredentials.accessToken,
-        });
-        identify(user.email, user);
-        track("Login Success");
-        dispatch(setAuthData({ ...newCredentials, ...user }));
-      }
-    } catch (e) {
-      handleLoginFailure(e);
-    }
-  };
-
   const _carouselRef = useRef(null);
-
-  const handleLoginFailure = (e) => {
-    track("Login Failure", { Reason: e.toString() });
-  };
 
   const nextStep = () => {
     const currentIdx = _carouselRef.current?.getCurrentIndex() || currentIndex;
@@ -177,13 +130,7 @@ const LoginScreen = () => {
       </View>
 
       <TouchableOpacity
-        onPress={() => {
-          if (false) {
-            onPress();
-          } else {
-            onAppleButtonPress();
-          }
-        }}
+        onPress={onAppleButtonPress}
         style={{
           borderRadius: 12,
           justifyContent: "center",
