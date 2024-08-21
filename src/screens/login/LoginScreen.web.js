@@ -8,19 +8,14 @@ import {
   View,
 } from "react-native";
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import {
-  AppleButton,
-  appleAuth,
-} from "@invertase/react-native-apple-authentication";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
+import AppleLogin from '../../assets/html/AppleLogin.html'
 import Carousel from "react-native-reanimated-carousel";
 import { RootState } from "../../redux/store";
-import { identify } from "../../utils/analytics";
-import { setAuthData } from "../../redux/reducer/app";
-import { useTrackWithPageInfo } from "../../utils/analytics";
+import WebViewV2 from "../webview/WebViewV2";
 
 const width = Dimensions.get("window").width;
 
@@ -43,53 +38,16 @@ const DATA = [
 ];
 
 const LoginScreen = () => {
-  const track = useTrackWithPageInfo();
-
-  const [currentIndex, setCurrentIndex] = useState(3);
-  const authData = useSelector((state: RootState) => state.app.authData);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const authData = useSelector((state) => state.app.authData);
   const dispatch = useDispatch();
 
   async function onAppleButtonPress() {
-    // performs login request
-    const appleAuthRequestResponse = await appleAuth.performRequest({
-      requestedOperation: appleAuth.Operation.LOGIN,
-      // Note: it appears putting FULL_NAME first is important, see issue #293
-      requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
-    });
-
-    // get current authentication state for user
-    // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
-    const credentialState = await appleAuth.getCredentialStateForUser(
-      appleAuthRequestResponse.user
-    );
-
-    // use credentialState response to ensure the user is authenticated
-    if (credentialState === appleAuth.State.AUTHORIZED) {
-      // user is authenticated
-      try {
-        // Api.post("/api/1.0/user/auth/apple/", {
-        //   token: appleAuthRequestResponse.identityToken,
-        // })
-        //   .then((response) => {
-        //     Alert.alert("response", JSON.stringify(response));
-        //   })
-        //   .catch((error) => {
-        //     Alert.alert("error", JSON.stringify(error));
-        //     console.error("Error:", error);
-        //   });
-
-        identify(appleAuthRequestResponse.email, appleAuthRequestResponse);
-        track("Login Success");
-        dispatch(setAuthData({ ...appleAuthRequestResponse }));
-      } catch (err) {
-        Alert.alert("err", JSON.stringify(err));
-      }
-    } else {
-      Alert.alert("Error");
-    }
+    _webViewRef?.current?.showHtml(AppleLogin);
   }
 
   const _carouselRef = useRef(null);
+  const _webViewRef = useRef();
 
   const nextStep = () => {
     const currentIdx = _carouselRef.current?.getCurrentIndex() || currentIndex;
@@ -176,7 +134,7 @@ const LoginScreen = () => {
               autoPlay={false}
               data={DATA}
               scrollAnimationDuration={1000}
-              onSnapToItem={(index: number) => setCurrentIndex(index)}
+              onSnapToItem={(index) => setCurrentIndex(index)}
               renderItem={({ item, index }) => (
                 <View
                   style={{
@@ -255,6 +213,7 @@ const LoginScreen = () => {
             </View>
           </>
         )}
+        <WebViewV2 ref={_webViewRef} />
       </View>
     );
   };

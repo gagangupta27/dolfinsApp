@@ -10,7 +10,7 @@ import CalendarEventScreen from "../screens/calendar/CalendarEventScreen";
 import ContactScreen from "../screens/contact/ContactScreen";
 import HomeScreen from "../screens/home/HomeScreen";
 import ImagePreviewScreen from "../screens/imagepreview/ImagePreviewScreen";
-import LoginScreen from "../screens/login/LoginScreen";
+import LoginScreen from "../screens/login/LoginScreen.native";
 import Menu from "../screens/profile/Menu";
 import { NavigationContainer } from "@react-navigation/native";
 import OrganisationScreen from "../screens/organisation/OrganisationScreen.jsx";

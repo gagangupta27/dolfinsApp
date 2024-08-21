@@ -44,11 +44,22 @@ const Header = ({
 }) => {
   const navigation = useNavigation();
 
-  const { top = 10, bottom = 0 } =
+  const { top = 15, bottom = 0 } =
     Platform.OS == "ios" ? useSafeAreaInsets() : {};
 
   return (
-    <View style={[showShadow && Styles.container, container]}>
+    <View
+      style={[
+        showShadow && Styles.container,
+        container,
+        Platform.OS == "web"
+          ? {
+              maxHeight: 50,
+              width: "100%",
+            }
+          : {},
+      ]}
+    >
       {isSearch && (
         <Animated.View
           entering={SlideInRight}
@@ -201,12 +212,12 @@ export default Header;
 
 const Styles = StyleSheet.create({
   container: {
+    marginBottom: 5,
+    backgroundColor: "#fff",
     shadowColor: "rgba(0, 0, 0, 0.25)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,
     shadowRadius: 4,
-    marginBottom: 5,
-    backgroundColor: "#fff",
   },
   headerFlex: {
     padding: 16,

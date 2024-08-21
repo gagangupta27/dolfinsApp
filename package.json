@@ -46,6 +46,7 @@
     "expo-sharing": "~11.10.0",
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
+    "expo-web-browser": "~12.8.2",
     "lodash": "^4.17.21",
     "mixpanel-react-native": "^2.4.0",
     "moment": "^2.30.1",
