@@ -12,10 +12,7 @@ import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
-import AppleLogin from '../../assets/html/AppleLogin.html'
 import Carousel from "react-native-reanimated-carousel";
-import { RootState } from "../../redux/store";
-import WebViewV2 from "../webview/WebViewV2";
 
 const width = Dimensions.get("window").width;
 
@@ -43,11 +40,11 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
 
   async function onAppleButtonPress() {
-    _webViewRef?.current?.showHtml(AppleLogin);
+    const response = await window?.AppleID?.auth?.signIn();
+    console.log("response", response);
   }
 
   const _carouselRef = useRef(null);
-  const _webViewRef = useRef();
 
   const nextStep = () => {
     const currentIdx = _carouselRef.current?.getCurrentIndex() || currentIndex;
@@ -213,7 +210,6 @@ const LoginScreen = () => {
             </View>
           </>
         )}
-        <WebViewV2 ref={_webViewRef} />
       </View>
     );
   };

@@ -1,10 +1,7 @@
-import * as WebBrowser from "expo-web-browser";
-
 import { Modal, Platform, View } from "react-native";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-import Buttons from "../../components/Buttons/Buttons";
 import Header from "../../components/common/Header";
 import { WebView } from "react-native-webview";
 
@@ -30,11 +27,6 @@ const WebViewV2 = forwardRef(({}, ref) => {
     setVisible(true);
   };
 
-  const _handlePressButtonAsync = async () => {
-    let result = await WebBrowser.openBrowserAsync("https://expo.dev");
-    setResult(result);
-  };
-
   return (
     <Modal
       visible={visible}
@@ -54,17 +46,6 @@ const WebViewV2 = forwardRef(({}, ref) => {
               onBackPress={() => setVisible(false)}
               showShadow={false}
             />
-            <Buttons
-              text="Apple Login"
-              onPress={async () => {
-                try {
-                  const response = await window?.AppleID?.auth?.signIn();
-                  console.log("response", response);
-                } catch (err) {
-                  console.log("err", err);
-                }
-              }}
-            />
             {Platform.OS == "ios" && (
               <WebView
                 source={{
@@ -74,11 +55,7 @@ const WebViewV2 = forwardRef(({}, ref) => {
                 style={{ flex: 1 }}
               />
             )}
-            {Platform.OS == "web" && (
-              <>
-                <p>asdfghjk</p>
-              </>
-            )}
+            {Platform.OS == "web" && <></>}
           </View>
         </SafeAreaView>
       </SafeAreaProvider>

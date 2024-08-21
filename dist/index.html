@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title data-rh="true"></title>
+    <title data-rh="true">Dolfins.ai</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
@@ -962,6 +962,7 @@
     ></script>
     <script>
       const initApple = () => {
+        console.log("Apple Configured");
         window.AppleID.auth.init({
           clientId: "com.dolfins.ai.appleSignin", // This is the service ID we created.
           scope: "name email", // To tell apple we want the user name and emails fields in the response it sends us.
@@ -971,11 +972,6 @@
         });
       };
       initApple();
-      const singInApple = async () => {
-        const response = await window.AppleID.auth.signIn();
-        console.log("response", response);
-        return response;
-      };
     </script>
     <link rel="shortcut icon" href="/favicon.ico" />
   </head>
@@ -1001,7 +997,7 @@
       </div>
     </div>
     <script
-      src="/_expo/static/js/web/index-22b3f23b0c6797f7655b123a6eb4d9e9.js"
+      src="/_expo/static/js/web/index-9147b559bcb0b3b89cef58cc44d008d5.js"
       defer
     ></script>
   </body>
