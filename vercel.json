@@ -1,0 +1,13 @@
+{
+  "buildCommand": "expo export -p web",
+  "installCommand": "yarn",
+  "outputDirectory": "dist",
+  "devCommand": "expo",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
+  ]
+}

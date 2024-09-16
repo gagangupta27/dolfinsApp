@@ -5,6 +5,7 @@ import React, { memo, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 import { BSON } from "realm";
 import Contact from "../realm/models/Contact";
+import ExportImportModal from "../screens/profile/ExportImportModal";
 import { OrgContactLink } from "../realm/queries/organisationOperations";
 import { useRealm } from "@realm/react";
 
@@ -13,11 +14,13 @@ const InitialWrapper = ({ children }) => {
 
   let iRef = useRef(0);
   let lengthRef = useRef(0);
+  const _syncData = useRef();
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState == "active") {
         syncContacts();
+        _syncData?.current?.syncData();
       }
     });
 
@@ -103,7 +106,12 @@ const InitialWrapper = ({ children }) => {
     }
   };
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <ExportImportModal ref={_syncData} />
+    </>
+  );
 };
 
 export default memo(InitialWrapper);

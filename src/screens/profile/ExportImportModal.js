@@ -39,6 +39,7 @@ import Note from "../../realm/models/Note";
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import Toast from "react-native-toast-message";
+import { getSyncDataWithServer } from "../../redux/reducer/app";
 import { useRealm } from "@realm/react";
 
 export default React.forwardRef(
@@ -72,6 +73,7 @@ export default React.forwardRef(
         importICloud,
         hide,
         showLoading,
+        syncData,
       }),
       []
     );
@@ -86,6 +88,19 @@ export default React.forwardRef(
       setLoadingText(loadingtext);
       _bottomSheetRef?.current?.show();
       setPercentage(0);
+    };
+
+    const syncData = async (title = "", loadingText = "") => {
+      setTitle(title);
+      setLoadingText(loadingText);
+      dispatch(getSyncDataWithServer())
+        .then((res) => {
+          _bottomSheetRef?.current?.show();
+        })
+        .catch((err) => {
+          Toast.show("Sync Error");
+          console.log("err", err);
+        });
     };
 
     const exportData = async () => {

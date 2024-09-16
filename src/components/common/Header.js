@@ -4,8 +4,8 @@ import Animated, {
   SlideInRight,
   SlideOutRight,
 } from "react-native-reanimated";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
 import {
+  Dimensions,
   Image,
   Platform,
   StyleSheet,
@@ -13,7 +13,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -43,6 +45,7 @@ const Header = ({
   leftTitleFontSize = 17,
 }) => {
   const navigation = useNavigation();
+  const { height, width } = useWindowDimensions();
 
   const { top = 15, bottom = 0 } =
     Platform.OS == "ios" ? useSafeAreaInsets() : {};
@@ -55,7 +58,7 @@ const Header = ({
         Platform.OS == "web"
           ? {
               maxHeight: 50,
-              width: "100%",
+              width: width,
             }
           : {},
       ]}
@@ -212,7 +215,6 @@ export default Header;
 
 const Styles = StyleSheet.create({
   container: {
-    marginBottom: 5,
     backgroundColor: "#fff",
     shadowColor: "rgba(0, 0, 0, 0.25)",
     shadowOffset: { width: 0, height: 2 },

@@ -1,20 +1,10 @@
-import {
-  Alert,
-  Dimensions,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { AntDesign, Entypo } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
-import Carousel from "react-native-reanimated-carousel";
-
-const width = Dimensions.get("window").width;
+import { AntDesign } from "@expo/vector-icons";
+import { setAuthData } from "../../redux/reducer/app";
 
 const DATA = [
   {
@@ -34,22 +24,31 @@ const DATA = [
   },
 ];
 
+const Apple = require("../../assets/js/Apple.js");
+
 const LoginScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const authData = useSelector((state) => state.app.authData);
   const dispatch = useDispatch();
 
   async function onAppleButtonPress() {
-    const response = await window?.AppleID?.auth?.signIn();
-    console.log("response", response);
+    const response = await Apple?.auth?.signIn();
+    console.log("response", JSON.stringify(response));
+    dispatch(setAuthData(response));
   }
 
-  const _carouselRef = useRef(null);
+  useEffect(() => {
+    Apple?.auth?.init({
+      clientId: "com.dolfins.ai.appleSignin", // This is the service ID we created.
+      scope: "name email", // To tell apple we want the user name and emails fields in the response it sends us.
+      redirectURI: "https://dolfins.netlify.app", // As registered along with our service ID
+      state: "origin:web", // Any string of your choice that you may use for some logic. It's optional and you may omit it.
+      usePopup: true, // Important if we want to capture the data apple sends on the client side.
+    });
+  }, []);
 
   const nextStep = () => {
-    const currentIdx = _carouselRef.current?.getCurrentIndex() || currentIndex;
-    setCurrentIndex(currentIdx + 1);
-    _carouselRef.current.next({ count: 1, animated: true });
+    setCurrentIndex((prev) => prev + 1);
   };
 
   const LoginPage = () => (
@@ -123,36 +122,27 @@ const LoginScreen = () => {
         {currentIndex == 3 && <LoginPage />}
         {currentIndex != 3 && (
           <>
-            <Carousel
-              width={width}
-              enabled={false}
-              ref={_carouselRef}
-              height={500}
-              autoPlay={false}
-              data={DATA}
-              scrollAnimationDuration={1000}
-              onSnapToItem={(index) => setCurrentIndex(index)}
-              renderItem={({ item, index }) => (
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  <Image source={item?.src} style={item.style} />
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: 36,
-                      color: "#040404",
-                      marginTop: 52,
-                    }}
-                  >
-                    {item?.title}
-                  </Text>
-                </View>
-              )}
-            />
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+              }}
+            >
+              <Image
+                source={DATA?.[currentIndex]?.src}
+                style={DATA?.[currentIndex].style}
+              />
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  fontSize: 36,
+                  color: "#040404",
+                  marginTop: 52,
+                }}
+              >
+                {DATA?.[currentIndex]?.title}
+              </Text>
+            </View>
             <View
               style={{
                 position: "absolute",

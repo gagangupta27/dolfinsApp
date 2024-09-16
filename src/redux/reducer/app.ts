@@ -20,6 +20,22 @@ export const fetchCalendars = createAsyncThunk(
   }
 );
 
+export const getSyncDataWithServer = createAsyncThunk(
+  "getSyncDataWithServer",
+  async () => {
+    const res = await Api.get("/api/1.0/user/calendar/list");
+    return res.data;
+  }
+);
+
+export const postSyncDataWithServer = createAsyncThunk(
+  "postSyncDataWithServer",
+  async () => {
+    const res = await Api.get("/api/1.0/user/calendar/list");
+    return res.data;
+  }
+);
+
 type InitialStateType = {
   authData: null | Credentials;
   calendarEvents: any[];
@@ -31,7 +47,7 @@ type InitialStateType = {
 };
 
 const initialState: InitialStateType = {
-  authData: null,
+  authData: {},
   calendarEvents: [],
   calendars: null,
   calendarLastSynced: null,
