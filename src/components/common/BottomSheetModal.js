@@ -13,6 +13,7 @@ import {
   Dimensions,
   Keyboard,
   Modal,
+  Platform,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,6 +21,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import React, { useState } from "react";
 
 import { debounce } from "../../utils/common";
+import { useSelector } from "react-redux";
 
 export default React.forwardRef(
   (
@@ -43,7 +45,10 @@ export default React.forwardRef(
     const [showModal, setShowModal] = React.useState(false);
     const offsetY = useSharedValue(ScreenHeight);
     const layoutHeight = useSharedValue(0);
-    const keyboard = useAnimatedKeyboard();
+    const keyboard =
+      Platform.OS == "web" ? { height: { value: 0 } } : useAnimatedKeyboard();
+
+    const isDark = useSelector((state) => state.app.isDark);
 
     React.useImperativeHandle(
       ref,
@@ -202,7 +207,7 @@ export default React.forwardRef(
                   width: "100%",
                   borderTopLeftRadius: 20,
                   borderTopRightRadius: 20,
-                  backgroundColor: "white",
+                  backgroundColor: isDark ? "#181b1a" : "white",
                   position: "absolute",
                   overflow: "hidden",
                   paddingBottom: 20,
@@ -256,7 +261,7 @@ export default React.forwardRef(
                 position: "absolute",
                 bottom: 0,
                 width: "100%",
-                backgroundColor: "#fff",
+                backgroundColor: isDark ? "#181b1a" : "white",
                 zIndex: 100,
               },
               BottomStuckCompStyle,

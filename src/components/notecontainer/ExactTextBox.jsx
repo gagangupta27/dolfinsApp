@@ -1,6 +1,6 @@
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 
-import { LinearGradient } from "expo-linear-gradient";
+import { useSelector } from "react-redux";
 
 const ExactTextBox = ({
   content,
@@ -13,20 +13,32 @@ const ExactTextBox = ({
   multiline = true,
   editable = true,
 }) => {
+  const isDark = useSelector((state) => state.app.isDark);
+
   return (
-    <View style={[styles.container, containerStyle]}>
+    <TouchableOpacity
+      activeOpacity={1}
+      style={[styles.container, containerStyle]}
+    >
       <TextInput
-        style={[styles.textinput1, { textAlignVertical: textAlignVertical }]}
+        style={[
+          styles.textinput1,
+          {
+            textAlignVertical: textAlignVertical,
+            outline: "none",
+            color: isDark ? "#fff" : "#000",
+          },
+        ]}
         multiline={multiline}
         value={content}
-        editable={editable}
+        readOnly={!editable}
         onChangeText={setContent}
         placeholder={placeholder}
         onFocus={() => setIsFocused(true)}
         placeholderTextColor="#858585"
       />
       {rightIcons()}
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -44,6 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     paddingHorizontal: 10,
+    outline: "none",
   },
 });
 

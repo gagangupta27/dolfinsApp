@@ -17,17 +17,21 @@ import React, { useEffect, useRef, useState } from "react";
 import Svg, { Path } from "react-native-svg";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Feather } from "@expo/vector-icons";
+import FeedBackModal from "../../components/Profile/FeedBackModal";
 import { FontAwesome5 } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Foundation from "@expo/vector-icons/Foundation";
 import LoginModal from "../login/LoginModal";
 import { MarkdownView } from "../../utils/markdown";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Octicons from "@expo/vector-icons/Octicons";
+import ProfileModal from "../../components/ProfileModal.web";
 import Toast from "react-native-toast-message";
 import { chatGptStreamWeb } from "../../utils/gpt";
 import { setAuthData } from "../../redux/reducer/app";
 import useCheckMobileScreen from "../../utils/useCheckMobileScreen";
 import useDocumentHandler from "../../hooks/DocumentHandler";
+import { useNavigation } from "@react-navigation/native";
 import { uuidv4 } from "../../utils/common";
 
 const AskScreen = ({}) => {
@@ -37,11 +41,31 @@ const AskScreen = ({}) => {
   const [error, setError] = useState(null);
   const [input, setInput] = useState("");
 
+  const navigation = useNavigation();
+
   const MENU_ITEMS = [
     {
       title: "My Profile",
       icon: () => <AntDesign name="user" size={24} color="#b0b0b0" />,
-      onPress: () => {},
+      onPress: () => {
+        _profileRef?.current?.show();
+      },
+    },
+    {
+      title: "My Organisations",
+      icon: () => <Octicons name="organization" size={24} color="#b0b0b0" />,
+      onPress: () => {
+        navigation.navigate("Organisations");
+      },
+    },
+    {
+      title: "Quick Notes",
+      icon: () => (
+        <Foundation name="clipboard-notes" size={24} color="#b0b0b0" />
+      ),
+      onPress: () => {
+        navigation.navigate("QuickNotes");
+      },
     },
     {
       title: "T&C",
@@ -67,7 +91,9 @@ const AskScreen = ({}) => {
     {
       title: "FeedBack",
       icon: () => <MaterialIcons name="feedback" size={24} color="#b0b0b0" />,
-      onPress: () => {},
+      onPress: () => {
+        _feedBackRef?.current?.show();
+      },
     },
     {
       title: "Logout",
@@ -116,6 +142,8 @@ const AskScreen = ({}) => {
   const textInputRef = useRef(null);
   const flatListRef = useRef();
   const _loginRef = useRef();
+  const _profileRef = useRef();
+  const _feedBackRef = useRef();
 
   const dispatch = useDispatch();
 
@@ -311,7 +339,7 @@ const AskScreen = ({}) => {
                 paddingTop: 20,
               }}
             >
-              Prepp.ai
+              Preppd.ai
             </Text>
             <View
               style={{
@@ -525,6 +553,8 @@ const AskScreen = ({}) => {
         </View>
       </View>
       <LoginModal ref={_loginRef} />
+      <ProfileModal ref={_profileRef} />
+      <FeedBackModal ref={_feedBackRef} />
     </KeyboardAvoidingView>
   );
 };

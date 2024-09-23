@@ -20,6 +20,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
 const Header = ({
   title = "",
@@ -50,6 +51,8 @@ const Header = ({
   const { top = 15, bottom = 0 } =
     Platform.OS == "ios" ? useSafeAreaInsets() : {};
 
+  const isDark = useSelector((state) => state.app.isDark);
+
   return (
     <View
       style={[
@@ -61,6 +64,9 @@ const Header = ({
               width: width,
             }
           : {},
+        {
+          backgroundColor: isDark ? "#1f2221" : "#fff",
+        },
       ]}
     >
       {isSearch && (
@@ -109,6 +115,9 @@ const Header = ({
             Styles.headerFlex,
             { paddingTop: top || 0 },
             subConatinerStyle,
+            {
+              backgroundColor: isDark ? "#1f2221" : "#fff",
+            },
           ]}
         >
           {leftIcons()}
@@ -135,7 +144,7 @@ const Header = ({
                 <MaterialIcons
                   name="arrow-back-ios-new"
                   size={24}
-                  color="black"
+                  color={isDark ? "#b0b0b0" : "black"}
                 />
               </TouchableOpacity>
             )}
@@ -145,7 +154,7 @@ const Header = ({
                   {
                     fontSize: leftTitleFontSize,
                     fontWeight: "900",
-                    color: "#212427",
+                    color: isDark ? "#b0b0b0" : "#212427",
                   },
                   titleStyle,
                 ]}
@@ -215,7 +224,6 @@ export default Header;
 
 const Styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
     shadowColor: "rgba(0, 0, 0, 0.25)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,

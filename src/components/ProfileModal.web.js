@@ -17,7 +17,7 @@ import BottomSheetModal from "./common/BottomSheetModal";
 import ExactTextBox from "./notecontainer/ExactTextBox";
 import Feather from "@expo/vector-icons/Feather";
 import { setAuthData } from "../redux/reducer/app";
-import useImageHandler from "../hooks/ImageHandler";
+import useImageHandler from "../hooks/ImageHandler.web";
 
 export default React.forwardRef((props, ref) => {
   const [name, setName] = useState("");
@@ -26,10 +26,7 @@ export default React.forwardRef((props, ref) => {
   const authData = useSelector((state) => state.app.authData);
   const isDark = useSelector((state) => state.app.isDark);
 
-  const { imageUri, onImagePress, setImageUri } =
-    Platform.OS == "web" ? useImageHandler() : useImageHandler();
-
-  console.log("imageUri", imageUri);
+  const { imageUri, onImagePress, setImageUri } = useImageHandler();
 
   const dispatch = useDispatch();
   const _bottomSheetRef = useRef();
@@ -67,7 +64,9 @@ export default React.forwardRef((props, ref) => {
         email: email,
         fullName: { givenName: name },
         name: name,
-        picture: imageUri,
+        picture: Array.isArray(imageUri?.assets)
+          ? imageUri?.assets?.[0]?.uri
+          : "",
       })
     );
     _bottomSheetRef?.current?.hide();
@@ -121,7 +120,11 @@ export default React.forwardRef((props, ref) => {
                 borderRadius: 100,
                 backgroundColor: "black",
               }}
-              source={{ uri: imageUri }}
+              source={{
+                uri: Array.isArray(imageUri?.assets)
+                  ? imageUri?.assets?.[0]?.uri
+                  : "",
+              }}
             />
             <TouchableOpacity
               style={{

@@ -44,6 +44,7 @@ type InitialStateType = {
   postsData: any;
   status: any;
   error: any;
+  isDark: boolean;
 };
 
 const initialState: InitialStateType = {
@@ -54,6 +55,7 @@ const initialState: InitialStateType = {
   postsData: {},
   status: null,
   error: null,
+  isDark: true,
 };
 
 const appSlice = createSlice({
@@ -69,6 +71,9 @@ const appSlice = createSlice({
       }
       if (state.authData && state.authData.idToken)
         setToken(state.authData.idToken);
+    },
+    setIsDark: (state, action) => {
+      state.isDark = action.payload;
     },
   },
   extraReducers(builder) {
@@ -99,6 +104,6 @@ const appSlice = createSlice({
   },
 });
 
-export const { setAuthData } = appSlice.actions;
+export const { setAuthData, setIsDark } = appSlice.actions;
 
 export default appSlice.reducer;

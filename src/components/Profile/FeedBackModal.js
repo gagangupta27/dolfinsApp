@@ -23,6 +23,7 @@ export default React.forwardRef((props, ref) => {
   const [loading, setLoading] = useState(false);
 
   const authData = useSelector((state) => state.app.authData);
+  const isDark = useSelector((state) => state.app.isDark);
 
   const dispatch = useDispatch();
   const _bottomSheetRef = useRef();
@@ -81,7 +82,7 @@ export default React.forwardRef((props, ref) => {
       <KeyboardAwareScrollView
         keyboardShouldPersistTaps="handled"
         scrollEnabled={true}
-        style={{ flex: 1, backgroundColor: "white" }}
+        style={{ flex: 1, backgroundColor: isDark ? "#181b1a" : "white" }}
       >
         <View style={{ paddingTop: 8, paddingBottom: 20, padding: 16 }}>
           <ScrollView
@@ -100,7 +101,7 @@ export default React.forwardRef((props, ref) => {
                   style={{
                     paddingRight: 20,
                   }}
-                  color={"black"}
+                  color={isDark ? "white" : "black"}
                   size="small"
                 />
               )}
@@ -111,6 +112,7 @@ export default React.forwardRef((props, ref) => {
                       fontSize: 20,
                       fontWeight: "700",
                       lineHeight: 28,
+                      color: isDark ? "white" : "black",
                     }}
                   >
                     Submit
@@ -129,6 +131,7 @@ export default React.forwardRef((props, ref) => {
                   lineHeight: 20,
                   fontWeight: "500",
                   paddingBottom: 8,
+                  color: isDark ? "white" : "black",
                 }}
               >
                 Email
@@ -155,6 +158,7 @@ export default React.forwardRef((props, ref) => {
                   lineHeight: 20,
                   fontWeight: "500",
                   paddingBottom: 8,
+                  color: isDark ? "white" : "black",
                 }}
               >
                 FeedBack
