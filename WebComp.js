@@ -5,6 +5,7 @@ import AskScreen from "./src/screens/ask/AskScreen.web";
 import Header from "./src/components/common/Header";
 import LoginScreen from "./src/screens/login/LoginScreen.web";
 import { NavigationContainer } from "@react-navigation/native";
+import OrganisationScreen from "./src/screens/organisation/OrganisationScreen.web";
 import Organisations from "./src/screens/organisation/Organisations.web";
 import PrepHome from "./web/PrepHome";
 import QuickNotes from "./src/screens/quickNotes/QuickNotes.web";
@@ -49,12 +50,14 @@ const WebComp = () => {
                 <Stack.Screen name="AskScreen" component={AskScreen} />
                 <Stack.Screen name="Organisations" component={Organisations} />
                 <Stack.Screen name="QuickNotes" component={QuickNotes} />
+                <Stack.Screen name="OrgScreen" component={OrganisationScreen} />
               </Stack.Navigator>
             </View>
           )}
         </NavigationContainer>
       </View>
     );
+    x;
   } else {
     return (
       <NavigationContainer>

@@ -17,6 +17,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Svg, { Path } from "react-native-svg";
 import { useDispatch, useSelector } from "react-redux";
 
+import { Feather } from "@expo/vector-icons";
 import FeedBackModal from "../../components/Profile/FeedBackModal";
 import { FontAwesome5 } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -30,7 +31,7 @@ import Toast from "react-native-toast-message";
 import { chatGptStreamWeb } from "../../utils/gpt";
 import { setAuthData } from "../../redux/reducer/app";
 import useCheckMobileScreen from "../../utils/useCheckMobileScreen";
-import useDocumentHandler from "../../hooks/DocumentHandler";
+import useDocumentHandler from "../../hooks/DocumentHandler.web";
 import { useNavigation } from "@react-navigation/native";
 import { uuidv4 } from "../../utils/common";
 
@@ -138,6 +139,8 @@ const AskScreen = ({}) => {
 
   const { height, width } = useWindowDimensions();
   const isMobile = useCheckMobileScreen();
+
+  console.log("document", document);
 
   const textInputRef = useRef(null);
   const flatListRef = useRef();
@@ -371,7 +374,7 @@ const AskScreen = ({}) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <View
+            {/* <View
               style={{
                 padding: 10,
               }}
@@ -404,7 +407,7 @@ const AskScreen = ({}) => {
                   Sign In with Apple
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
 
             <View
               style={{
@@ -523,7 +526,7 @@ const AskScreen = ({}) => {
               selectionColor="white"
               autoCapitalize="none"
             ></TextInput>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={onDocumentPress}
               style={{
                 padding: 5,
@@ -531,7 +534,7 @@ const AskScreen = ({}) => {
               }}
             >
               <Feather name="file" size={24} color="white" />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
             <TouchableOpacity style={{ margin: 5 }} onPress={() => submit()}>
               <Svg
                 xmlns="http://www.w3.org/2000/svg"

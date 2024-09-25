@@ -15,8 +15,6 @@ import React, {
 } from "react";
 
 import Accordion from "./Accordian";
-import { LinearGradient } from "expo-linear-gradient";
-import { useQuery } from "@realm/react";
 
 const Dropdown = forwardRef(
   (

@@ -1,5 +1,6 @@
+import { Icon, Text, TextInput, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
-import { View, TextInput, Icon, TouchableOpacity, Text } from "react-native";
+
 import ExactTextBox from "../notecontainer/ExactTextBox";
 
 const MultiInput = ({
@@ -38,7 +39,13 @@ const MultiInput = ({
                 activeOpacity={0.8}
                 onPress={() => setInputs(inputs.filter((_, i) => i !== index))}
               >
-                <Text>x</Text>
+                <Text
+                  style={{
+                    color: "#b0b0b0",
+                  }}
+                >
+                  x
+                </Text>
               </TouchableOpacity>
             )}
           />
@@ -51,10 +58,11 @@ const MultiInput = ({
           padding: 16,
           borderRadius: 10,
           marginTop: 20,
+          backgroundColor: "rgba(255, 255, 255, 0.17)",
         }}
         onPress={addInput}
       >
-        <Text style={{ textAlign: "center" }}>{addText}</Text>
+        <Text style={{ textAlign: "center", color: "#b0b0b0" }}>{addText}</Text>
       </TouchableOpacity>
     </View>
   );

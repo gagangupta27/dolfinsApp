@@ -197,7 +197,11 @@ export default React.forwardRef(
       >
         <TouchableOpacity
           activeOpacity={1}
-          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            outline: "none",
+          }}
           onPress={restrictClose ? () => {} : hide}
         >
           <GestureDetector gesture={pan}>
@@ -224,6 +228,7 @@ export default React.forwardRef(
                     overflow: "hidden",
                     borderTopLeftRadius: 20,
                     borderTopRightRadius: 20,
+                    outline: "none",
                   },
                   touchContainerStyle,
                 ]}

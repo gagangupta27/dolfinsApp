@@ -51,6 +51,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.17)",
     borderWidth: 0.5,
     borderRadius: 6,
+    flexDirection: "row",
+    alignItems: "center",
   },
   textinput1: {
     flex: 1,
