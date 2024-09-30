@@ -30,6 +30,7 @@ import ProfileModal from "../../components/ProfileModal.web";
 import Toast from "react-native-toast-message";
 import { chatGptStreamWeb } from "../../utils/gpt";
 import { setAuthData } from "../../redux/reducer/app";
+import { setWebDataApi } from "../../redux/reducer/webSlice";
 import useCheckMobileScreen from "../../utils/useCheckMobileScreen";
 import useDocumentHandler from "../../hooks/DocumentHandler.web";
 import { useNavigation } from "@react-navigation/native";
@@ -107,24 +108,25 @@ const AskScreen = ({}) => {
       title: "Clear Data",
       icon: () => <AntDesign name="delete" size={24} color="#b0b0b0" />,
       onPress: () => {
-        Alert.alert(
-          "Delete Account",
-          "Are you sure you want to delete ypur account?",
-          [
-            {
-              text: "Cancel",
-              onPress: () => {},
-              style: "cancel",
-            },
-            {
-              text: "Delete",
-              onPress: () => {
-                dispatch(setAuthData());
-              },
-              style: "destructive",
-            },
-          ]
-        );
+        dispatch(setWebDataApi({}));
+        // Alert.alert(
+        //   "Delete Account",
+        //   "Are you sure you want to delete ypur account?",
+        //   [
+        //     {
+        //       text: "Cancel",
+        //       onPress: () => {},
+        //       style: "cancel",
+        //     },
+        //     {
+        //       text: "Delete",
+        //       onPress: () => {
+
+        //       },
+        //       style: "destructive",
+        //     },
+        //   ]
+        // );
       },
     },
   ];

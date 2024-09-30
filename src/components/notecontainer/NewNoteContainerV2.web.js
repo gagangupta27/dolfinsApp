@@ -19,7 +19,7 @@ import useMultiImageHandler from "../../hooks/useMultiImageHandler.web";
 import useSearchFilter from "../../hooks/SearchFilter";
 
 const NewNoteContainerV2 = forwardRef(
-  ({ addNote, note, updateNote, mentionHasInput = false }, ref) => {
+  ({ addNote, note, updateNote, loadingAPI = false }, ref) => {
     const noteInputFieldRef = useRef();
     const [shouldIncreaseHeight, setShouldIncreaseHeight] = useState(
       note ? true : false
@@ -253,6 +253,7 @@ const NewNoteContainerV2 = forwardRef(
               onStopRecording={onStopRecording}
               volumeLevels={volumeLevels}
               document={document}
+              loadingAPI={loadingAPI}
               content={content}
               setContent={async (txt) => {
                 setContent(txt);

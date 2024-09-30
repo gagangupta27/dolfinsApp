@@ -4,40 +4,131 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { useRef, useState } from "react";
 
 import AddOrgModalWeb from "../../components/organisation/AddOrgModal.web";
 import Feather from "@expo/vector-icons/Feather";
 import Header from "../../components/common/Header";
 import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2.web";
+import NotesList from "../../components/notecontainer/NotesList.web";
 import React from "react";
 import { View } from "react-native";
-import { useSelector } from "react-redux";
+import { generateUUID } from "../../utils/common";
+import { setWebDataApi } from "../../redux/reducer/webSlice";
 
 const OrganisationScreen = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
-  const isDark = useSelector((state) => state.app.isDark);
+  const [loading, setLoading] = useState(false);
 
+  const isDark = useSelector((state) => state.app.isDark);
+  const webData = useSelector((state) => state.web.webData);
+
+  const dispatch = useDispatch();
   const noteRef = useRef(null);
   const _editOrgModal = useRef(null);
 
-  const organisation = route?.params?.organisation || {};
+  const organisation = Array.isArray(webData?.organisations)
+    ? webData?.organisations?.find(
+        (o) => o?._id == route?.params?.organisation?._id
+      )
+    : null;
 
-  console.log("organisation", organisation);
-
-  const summaryNote = organisation.summary
-    ? [
-        {
-          _id: "summary",
-          contactId: organisation._id,
-          content: "*Summary* \n\n" + organisation.summary,
-          mentions: [],
-          type: "text",
-          nonEditable: true,
-          readOnly: true,
-        },
-      ]
+  const noteIds = Array.isArray(webData?.noteOrganisationMap)
+    ? webData?.noteOrganisationMap
+        ?.filter((o) => o?.organisationId == organisation?._id)
+        ?.map((j) => j?.noteId)
     : [];
+
+  const notes = Array.isArray(webData?.notes)
+    ? webData?.notes?.filter((o) => [...noteIds].includes(o?._id))
+    : [];
+
+  console.log("notes", notes);
+
+  const addNote = async (
+    content,
+    mentions,
+    imageData,
+    audioUri,
+    audioText,
+    volumeLevels,
+    document
+  ) => {
+    if (
+      mentions &&
+      !mentions.some(
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          String(organisation._id)
+      )
+    ) {
+      mentions.push({
+        _id: generateUUID(),
+        organisation: organisation,
+      });
+    }
+    let newLineIndex = content.indexOf("\n");
+    let newConent = "";
+    if (newLineIndex != -1) {
+      newConent += `*${content.substring(
+        0,
+        newLineIndex
+      )}*\n${content.substring(newLineIndex + 1)}`;
+    } else {
+      newConent = content;
+    }
+    setLoading(true);
+    const newNoteID = generateUUID();
+    dispatch(
+      setWebDataApi({
+        ...webData,
+        notes: [
+          ...(webData?.notes || []),
+          {
+            _id: newNoteID,
+            content: newConent,
+            mentions: mentions || [],
+            type:
+              imageData?.length > 0
+                ? "image"
+                : audioUri
+                ? "audio"
+                : document
+                ? "document"
+                : "text",
+            imageData: imageData || [],
+            audioUri: audioUri || null,
+            audioText: audioText || null,
+            volumeLevels: volumeLevels || [],
+            documentUri: document ? document.documentUri : null,
+            documentName: document ? document.documentName : null,
+            isPinned: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        noteOrganisationMap: [
+          ...(webData?.noteOrganisationMap || []),
+          {
+            _id: generateUUID(),
+            organisationId: organisation?._id,
+            noteId: newNoteID,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      })
+    )
+      .then((res) => {
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        alert("Error");
+        console.log("err", err);
+      });
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -134,11 +225,21 @@ const OrganisationScreen = ({ route }) => {
                 </View>
               )}
           </View>
+          <NotesList
+            // ref={notesListRef}
+            notes={notes}
+            setEditMode={setEditMode}
+            contact={{}}
+            onDelete={() => {}}
+            showPin={true}
+            onPinPress={() => {}}
+          />
         </View>
         <AddOrgModalWeb ref={_editOrgModal} />
         <NewNoteContainerV2
           ref={noteRef}
-          addNote={() => {}}
+          addNote={addNote}
+          loadingAPI={loading}
           note={editMode.editMode && editMode.note}
           updateNote={() => {}}
           mentionHasInput={false}

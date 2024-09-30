@@ -1,4 +1,4 @@
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { View, useWindowDimensions } from "react-native";
 
 import AskScreen from "./src/screens/ask/AskScreen.web";
@@ -11,7 +11,9 @@ import PrepHome from "./web/PrepHome";
 import QuickNotes from "./src/screens/quickNotes/QuickNotes.web";
 import WebAddNote from "./web/WebAddNote";
 import { createStackNavigator } from "@react-navigation/stack";
+import { getWebDataApi } from "./src/redux/reducer/webSlice";
 import { store } from "./src/redux/store";
+import { useEffect } from "react";
 
 const WebComp = () => {
   const authData = useSelector((state) => state.app.authData);
@@ -19,9 +21,14 @@ const WebComp = () => {
   const Stack = createStackNavigator();
 
   const { height, width } = useWindowDimensions();
+  const dispatch = useDispatch();
 
   const isDolfins = false;
   const isPrepptd = true;
+
+  useEffect(() => {
+    dispatch(getWebDataApi());
+  }, []);
 
   if (authData) {
     return (
@@ -57,7 +64,6 @@ const WebComp = () => {
         </NavigationContainer>
       </View>
     );
-    x;
   } else {
     return (
       <NavigationContainer>

@@ -6,146 +6,158 @@ import {
 } from "react-native";
 import { Path, Svg } from "react-native-svg";
 import { TouchableWithoutFeedback, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { useRef, useState } from "react";
 
 import Header from "../../components/common/Header";
+import NewNoteContainerV2 from "../../components/notecontainer/NewNoteContainerV2.web";
+import NotesList from "../../components/notecontainer/NotesList.web";
 import React from "react";
-import { useSelector } from "react-redux";
+import { generateUUID } from "../../utils/common";
+import { setWebDataApi } from "../../redux/reducer/webSlice";
 
 const QuickNotes = ({ route }) => {
   const [editMode, setEditMode] = useState({ editMode: false, id: null });
-  const [addOrgModalVisible, setAddOrgModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isDark = useSelector((state) => state.app.isDark);
+  const webData = useSelector((state) => state.web.webData);
 
-  const _addQuicknotes = useRef();
+  const dispatch = useDispatch();
+  const noteRef = useRef();
 
-  const _renderItem = ({ item, index }) => {
-    return (
-      <TouchableOpacity
-        style={{
-          padding: 16,
-          backgroundColor: "#1f2221",
-          marginTop: 20,
-        }}
-        onPress={() => {}}
-      >
-        <Text
-          style={{
-            fontSize: 20,
-            color: "#b0b0b0",
-          }}
-        >
-          {item?.name}
-        </Text>
-        <TouchableOpacity
-          style={{
-            fontSize: 16,
-            color: "blue",
-            paddingTop: 8,
-          }}
-          onPress={() => Linking.openURL(item?.linkedinUrl)}
-          activeOpacity={0.8}
-        >
-          {item?.linkedinUrl}
-        </TouchableOpacity>
-        {Array.isArray(item?.links) && item?.links?.length > 0 && (
-          <View
-            style={{
-              marginTop: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: "#b0b0b0",
-              }}
-            >
-              {"Additional Links"}
-            </Text>
-            {item?.links?.map((o, idx) => (
-              <TouchableOpacity
-                style={{
-                  fontSize: 16,
-                  color: "blue",
-                  paddingTop: 8,
-                }}
-                key={idx}
-                onPress={() => Linking.openURL(o)}
-                activeOpacity={0.8}
-              >
-                {o}
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            right: 20,
-            top: 20,
-          }}
-          activeOpacity={0.8}
-          onPress={() =>
-            _addModalRef?.current?.show("Edit Organisation", item?.id)
-          }
-        >
-          <Feather name="edit-2" size={24} color="#b0b0b0" />
-        </TouchableOpacity>
-      </TouchableOpacity>
-    );
+  const noteIds = Array.isArray(webData?.contactNoteMap)
+    ? webData?.contactNoteMap
+        ?.filter((o) => o?.contactId == "000000000000000000000000")
+        ?.map((j) => j?.noteId)
+    : [];
+
+  const notes = Array.isArray(webData?.notes)
+    ? webData?.notes?.filter((o) => [...noteIds].includes(o?._id))
+    : [];
+
+  const addNote = async (
+    content,
+    mentions,
+    imageData,
+    audioUri,
+    audioText,
+    volumeLevels,
+    document
+  ) => {
+    if (
+      !mentions.some(
+        (mention) =>
+          String(mention?.contact?._id || mention?.organisation?._id) ===
+          "000000000000000000000000"
+      )
+    ) {
+      mentions.push({
+        _id: generateUUID(),
+        contact: {
+          _id: "000000000000000000000000",
+        },
+      });
+    }
+    let newLineIndex = content.indexOf("\n");
+    let newConent = "";
+    if (newLineIndex != -1) {
+      newConent += `*${content.substring(
+        0,
+        newLineIndex
+      )}*\n${content.substring(newLineIndex + 1)}`;
+    } else {
+      newConent = content;
+    }
+    setLoading(true);
+    const newNoteID = generateUUID();
+    dispatch(
+      setWebDataApi({
+        ...webData,
+        notes: [
+          ...(webData?.notes || []),
+          {
+            _id: newNoteID,
+            content: newConent,
+            mentions: mentions || [],
+            type:
+              imageData?.length > 0
+                ? "image"
+                : audioUri
+                ? "audio"
+                : document
+                ? "document"
+                : "text",
+            imageData: imageData || [],
+            audioUri: audioUri || null,
+            audioText: audioText || null,
+            volumeLevels: volumeLevels || [],
+            documentUri: document ? document.documentUri : null,
+            documentName: document ? document.documentName : null,
+            isPinned: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        contactNoteMap: [
+          ...(webData?.contactNoteMap || []),
+          {
+            _id: generateUUID(),
+            contactId: "000000000000000000000000",
+            noteId: newNoteID,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      })
+    )
+      .then((res) => {
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        alert("Error");
+        console.log("err", err);
+      });
   };
 
   return (
-    <KeyboardAvoidingView
-      keyboardVerticalOffset={64}
-      behavior={"padding"}
-      style={{ flex: 1, backgroundColor: isDark ? "#181b1a" : "#fff" }}
+    <TouchableWithoutFeedback
+      onPress={() => {
+        if (noteRef.current) {
+          noteRef.current.unfocus();
+        }
+      }}
     >
-      <View style={{ flex: 1 }}>
-        <View style={{ flex: 1 }}>
-          <Header title={"All Quick Notes"} />
-          <FlatList
-            contentContainerStyle={{
-              padding: 50,
-            }}
-            data={[]}
-            renderItem={_renderItem}
+      <View style={{ flex: 1, backgroundColor: isDark ? "#181b1a" : "#fff" }}>
+        <Header title={"All Quick Notes"} />
+        <View
+          style={{
+            padding: 24,
+          }}
+        >
+          <NotesList
+            // ref={notesListRef}
+            notes={notes}
+            setEditMode={setEditMode}
+            contact={{}}
+            onDelete={() => {}}
+            showPin={true}
+            onPinPress={() => {}}
           />
         </View>
-        <TouchableOpacity
-          style={{
-            height: 50,
-            width: 50,
-            borderRadius: 100,
-            backgroundColor: "black",
-            position: "absolute",
-            bottom: 40,
-            right: 40,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          activeOpacity={0.8}
-          onPress={() => _addModalRef?.current?.show()}
-        >
-          <Svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <Path
-              d="M12 5V12V19M5 12H19"
-              stroke="white"
-              stroke-width="5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </Svg>
-        </TouchableOpacity>
+
+        <NewNoteContainerV2
+          ref={noteRef}
+          addNote={addNote}
+          loadingAPI={loading}
+          note={editMode.editMode && editMode.note}
+          updateNote={() => {}}
+          mentionHasInput={false}
+          type={"contact"}
+        />
       </View>
-    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 

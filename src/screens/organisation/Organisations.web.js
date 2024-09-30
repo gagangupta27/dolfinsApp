@@ -16,27 +16,13 @@ import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 
-const TEMP = [
-  {
-    id: 1,
-    name: "Google",
-    linkedinUrl: "https:google",
-    links: ["https:googlrhwywgu"],
-  },
-  {
-    id: 2,
-    name: "NVDA",
-    linkedinUrl: "https:google",
-    links: ["https:googlrhwywgu"],
-  },
-];
-
 const Organisations = ({ route }) => {
   const [text, setText] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [searchListData, setSearchListData] = useState([]);
 
   const isDark = useSelector((state) => state.app.isDark);
+  const webData = useSelector((state) => state.web.webData);
 
   const _addModalRef = useRef();
 
@@ -156,7 +142,11 @@ const Organisations = ({ route }) => {
             contentContainerStyle={{
               padding: 50,
             }}
-            data={TEMP}
+            data={
+              Array.isArray(webData?.organisations)
+                ? webData?.organisations
+                : []
+            }
             renderItem={_renderItem}
           />
         </View>

@@ -8,27 +8,15 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import Api from "../../utils/Api";
 import BottomSheetModal from "../common/BottomSheetModal";
 import ExactTextBox from "../notecontainer/ExactTextBox";
 import { Ionicons } from "@expo/vector-icons";
 import MultiInput from "../common/MultiInput";
-
-const TEMP = [
-  {
-    id: 1,
-    name: "Google",
-    linkedinUrl: "https:google",
-    links: ["https:googlrhwywgu"],
-  },
-  {
-    id: 2,
-    name: "NVDA",
-    linkedinUrl: "https:google",
-    links: ["https:googlrhwywgu"],
-  },
-];
+import { generateUUID } from "../../utils/common";
+import { setWebDataApi } from "../../redux/reducer/webSlice";
 
 export default React.forwardRef(({}, ref) => {
   const [name, setName] = useState("");
@@ -39,9 +27,13 @@ export default React.forwardRef(({}, ref) => {
   const [loading, setLoading] = useState(false);
   const [existingOrg, setExistingOrg] = useState(null);
 
+  const webData = useSelector((state) => state.web.webData);
+
   const existingContacts = existingOrg ? [] : [];
 
   const _bottomSheetRef = useRef();
+
+  const dispatch = useDispatch();
 
   React.useImperativeHandle(
     ref,
@@ -82,6 +74,36 @@ export default React.forwardRef(({}, ref) => {
 
   const onCreate = async () => {
     if (existingOrg) {
+      setLoading(true);
+      dispatch(
+        setWebDataApi({
+          ...webData,
+          organisations: [
+            ...(webData?.organisations?.filter(
+              (o) => o?._id != existingOrg?._id
+            ) || []),
+            {
+              ...existingOrg,
+              name: name,
+              links: links,
+              linkedinUrl: linkedin,
+              updatedAt: new Date(),
+            },
+          ],
+        })
+      )
+        .then((res) => {
+          setLoading(false);
+          hide();
+          setName();
+          setLinks([]);
+          setLinkedin();
+        })
+        .catch((err) => {
+          setLoading(false);
+          alert("Error");
+          console.log("err", err);
+        });
       // realm.write(() => {
       //   existingOrg.name = name;
       //   existingOrg.linkedinUrl = linkedin;
@@ -92,27 +114,43 @@ export default React.forwardRef(({}, ref) => {
       // });
     } else {
       if (name?.trim()?.length == 0) {
-        Alert.alert("Error", "Please Enter Organisation Name!");
+        alert("Please Enter Organisation Name!");
         return;
       }
       setLoading(true);
-      Api.post("/api/1.0/user/organization/", {
-        user_id: 1,
-        name: name,
-        linkedInUrl: linkedin,
-        links: links,
-      })
+      dispatch(
+        setWebDataApi({
+          ...webData,
+          organisations: [
+            ...(webData?.organisations || []),
+            {
+              _id: generateUUID(),
+              name: name,
+              links: links,
+              linkedinUrl: linkedin,
+              linkedinProfile: "",
+              linkedinProfileData: "",
+              summary: "",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              isPinned: false,
+            },
+          ],
+        })
+      )
         .then((res) => {
           setLoading(false);
-          console.log("res", res?.data);
-          // return res?.data?.response || "";
-          // setName("");
-          // hide();
+          hide();
+          setName();
+          setLinks([]);
+          setLinkedin();
         })
-        .catch((error) => {
+        .catch((err) => {
           setLoading(false);
-          console.error("Error:", error);
+          alert("Error");
+          console.log("err", err);
         });
+
       // const linkedinProfileData = await fetchLinkedinData();
       // const createdOrg = await addOrganisation(realm, {
       //   name: name,
