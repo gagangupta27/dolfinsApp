@@ -5,22 +5,21 @@ import { StyleSheet, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
-import AskScreen from "../screens/ask/AskScreen";
-import CalendarEventScreen from "../screens/calendar/CalendarEventScreen";
-import ContactScreen from "../screens/contact/ContactScreen";
-import HomeScreen from "../screens/home/HomeScreen";
-import ImagePreviewScreen from "../screens/imagepreview/ImagePreviewScreen";
-import LoginScreen from "../screens/login/LoginScreen";
-import Menu from "../screens/profile/Menu";
+import AskScreen from "../screens/ask/AskScreen.jsx";
+import CalendarEventScreen from "../screens/calendar/CalendarEventScreen.jsx";
+import ContactScreen from "../screens/contact/ContactScreen.jsx";
+import HomeScreen from "../screens/home/HomeScreen.jsx";
+import ImagePreviewScreen from "../screens/imagepreview/ImagePreviewScreen.jsx";
+import LoginScreen from "../screens/login/LoginScreen.js";
+import Menu from "../screens/profile/Menu.js";
 import { NavigationContainer } from "@react-navigation/native";
 import OrganisationScreen from "../screens/organisation/OrganisationScreen.jsx";
-import PDFPreviewScreen from "../screens/pdfpreview/PDFPreviewScreen";
+import PDFPreviewScreen from "../screens/pdfpreview/PDFPreviewScreen.jsx";
 import React from "react";
-import { RootState } from "../redux/store";
-import { Storage } from "../utils/storage";
-import WebViewScreen from "../screens/webview/WebViewScreen";
+import { Storage } from "../utils/storage.js";
+import WebViewScreen from "../screens/webview/WebViewScreen.jsx";
 import { createStackNavigator } from "@react-navigation/stack";
-import { setAuthData } from "../redux/reducer/app";
+import { setAuthData } from "../redux/reducer/app.js";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -51,7 +50,7 @@ function LoggedInStack() {
 }
 
 export default function Navigation() {
-    const authData = useSelector((state: RootState) => state.app.authData);
+    const authData = useSelector((state) => state.app.authData);
     const dispatch = useDispatch();
     const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -80,14 +79,12 @@ export default function Navigation() {
                 await SplashScreen.preventAutoHideAsync();
                 const authData = await Storage.getItem("authData");
                 if (authData) {
-                    dispatch(setAuthData(JSON.parse(authData as string)));
+                    dispatch(setAuthData(JSON.parse(authData)));
                 }
                 setFontsLoaded(true);
             }
         })();
     }, [loaded, error]);
-
-    useEffect(() => {}, []);
 
     const linking = {
         prefixes: ["dolfins://"],

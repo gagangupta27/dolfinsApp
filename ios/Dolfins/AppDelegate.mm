@@ -2,12 +2,14 @@
 #import <CodePush/CodePush.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <GoogleSignIn/GoogleSignIn.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
+  // GIDSignIn.sharedInstance().clientID = "489610353043-opmp8tiat2lah3nbash5v45v5v4f7teh.apps.googleusercontent.com"
 
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.

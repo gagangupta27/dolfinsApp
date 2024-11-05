@@ -2,29 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>API_KEY</key>
-	<string>AIzaSyD9R84n9JGIMFTaVFdvxgSUW87L0-FZMic</string>
-	<key>GCM_SENDER_ID</key>
-	<string>489610353043</string>
+	<key>CLIENT_ID</key>
+	<string>489610353043-opmp8tiat2lah3nbash5v45v5v4f7teh.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.489610353043-opmp8tiat2lah3nbash5v45v5v4f7teh</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.dolfins.ai</string>
-	<key>PROJECT_ID</key>
-	<string>dolfins-ai</string>
-	<key>STORAGE_BUCKET</key>
-	<string>dolfins-ai.appspot.com</string>
-	<key>IS_ADS_ENABLED</key>
-	<false></false>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
-	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
-	<key>IS_GCM_ENABLED</key>
-	<true></true>
-	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:489610353043:ios:2c9de4ded2c60cc487f066</string>
 </dict>
 </plist>

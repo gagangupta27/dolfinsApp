@@ -1,15 +1,15 @@
 import * as AuthSession from "expo-auth-session";
 
-import { Alert, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AppleButton, appleAuth } from "@invertase/react-native-apple-authentication";
-import React, { useRef, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GoogleSignin, GoogleSigninButton, statusCodes } from "@react-native-google-signin/google-signin";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Api from "../../utils/Api";
 import Carousel from "react-native-reanimated-carousel";
-import { RootState } from "../../redux/store";
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+import { appleLogin } from "../../redux/reducer/webslice";
 import auth0 from "../../utils/auth";
 import { identify } from "../../utils/analytics";
 import { setAuthData } from "../../redux/reducer/app";
@@ -41,88 +41,91 @@ const LoginScreen = () => {
 
     const { authorize } = useAuth0();
     const [currentIndex, setCurrentIndex] = useState(3);
-    const authData = useSelector((state: RootState) => state.app.authData);
+    const [appleLoading, setAppleLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+
+    const authData = useSelector((state) => state.app.authData);
     const dispatch = useDispatch();
+    const _carouselRef = useRef(null);
 
-    const redirectUri = AuthSession.makeRedirectUri({ path: "login" });
+    useEffect(() => {
+        GoogleSignin.configure({
+            iosClientId: "489610353043-opmp8tiat2lah3nbash5v45v5v4f7teh.apps.googleusercontent.com",
+            scopes: ["https://www.googleapis.com/auth/drive.readonly"], // what API you want to access on behalf of the user, default is email and profile
+            hostedDomain: "", // specifies a hosted domain restriction
+            googleServicePlistPath: "", // [iOS] if you renamed your GoogleService-Info file, new name here, e.g. "GoogleService-Info-Staging"
+            profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
+        });
+    }, []);
 
-    async function onAppleButtonPress() {
-        // performs login request
+    const onAppleButtonPress = async () => {
         const appleAuthRequestResponse = await appleAuth.performRequest({
             requestedOperation: appleAuth.Operation.LOGIN,
-            // Note: it appears putting FULL_NAME first is important, see issue #293
             requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
         });
 
-        // get current authentication state for user
-        // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
         const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
 
-        // use credentialState response to ensure the user is authenticated
-        if (credentialState === appleAuth.State.AUTHORIZED) {
-            // user is authenticated
-            try {
-                // Api.post("/api/1.0/user/auth/apple/", {
-                //   token: appleAuthRequestResponse.identityToken,
-                // })
-                //   .then((response) => {
-                //     Alert.alert("response", JSON.stringify(response));
-                //   })
-                //   .catch((error) => {
-                //     Alert.alert("error", JSON.stringify(error));
-                //     console.error("Error:", error);
-                //   });
+        console.log("appleAuthRequestResponse", appleAuthRequestResponse);
 
-                identify(appleAuthRequestResponse.email, appleAuthRequestResponse);
-                track("Login Success");
-                dispatch(setAuthData({ ...appleAuthRequestResponse }));
+        if (credentialState === appleAuth.State.AUTHORIZED) {
+            setAppleLoading(true);
+            try {
+                dispatch(appleLogin(appleAuthRequestResponse?.identityToken))
+                    .then((res) => {
+                        console.log("res", res);
+                        setAppleLoading(false);
+                        if ([200].includes(res?.payload?.status) && res?.payload?.data?.id) {
+                            dispatch(
+                                setAuthData({
+                                    ...res?.payload?.data,
+                                    userId: res?.payload?.data?.id,
+                                })
+                            );
+                        } else {
+                            alert("Error");
+                        }
+                    })
+                    .catch((err) => {
+                        setAppleLoading(false);
+                        alert("Error");
+                        console.log("err", err);
+                    });
             } catch (err) {
+                setAppleLoading(false);
                 Alert.alert("err", JSON.stringify(err));
             }
         } else {
             Alert.alert("Error");
         }
-    }
-
-    const onPress = async () => {
-        try {
-            if (authData && authData.refreshToken) {
-                // Token has expired, attempt re-authentication
-                const newCredentials = await auth0.auth.refreshToken({
-                    refreshToken: authData.refreshToken,
-                    scope: "openid profile email offline_access",
-                });
-                const user = await auth0.auth.userInfo({
-                    token: newCredentials.accessToken,
-                });
-                const updatedAuthData = {
-                    ...authData,
-                    ...newCredentials,
-                };
-                identify(user.email, user);
-                track("Login Success Using Refresh Token");
-                dispatch(setAuthData(updatedAuthData));
-            } else {
-                const newCredentials = await authorize({
-                    redirectUrl: redirectUri,
-                    scope: "openid profile email offline_access",
-                });
-                const user = await auth0.auth.userInfo({
-                    token: newCredentials.accessToken,
-                });
-                identify(user.email, user);
-                track("Login Success");
-                dispatch(setAuthData({ ...newCredentials, ...user }));
-            }
-        } catch (e) {
-            handleLoginFailure(e);
-        }
     };
 
-    const _carouselRef = useRef(null);
-
-    const handleLoginFailure = (e) => {
-        track("Login Failure", { Reason: e.toString() });
+    const signIn = async () => {
+        try {
+            await GoogleSignin.hasPlayServices();
+            const response = await GoogleSignin.signIn();
+            if (isSuccessResponse(response)) {
+                setState({ userInfo: response.data });
+            } else {
+                // sign in was cancelled by user
+            }
+        } catch (error) {
+            console.log("err", error);
+            // if (isErrorWithCode(error)) {
+            //     switch (error.code) {
+            //         case statusCodes.IN_PROGRESS:
+            //             // operation (eg. sign in) already in progress
+            //             break;
+            //         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            //             // Android only, play services not available or outdated
+            //             break;
+            //         default:
+            //         // some other error happened
+            //     }
+            // } else {
+            //     // an error that's not related to google sign in occurred
+            // }
+        }
     };
 
     const nextStep = () => {
@@ -163,11 +166,7 @@ const LoginScreen = () => {
 
             <TouchableOpacity
                 onPress={() => {
-                    if (false) {
-                        onPress();
-                    } else {
-                        onAppleButtonPress();
-                    }
+                    onAppleButtonPress();
                 }}
                 style={{
                     borderRadius: 12,
@@ -177,19 +176,57 @@ const LoginScreen = () => {
                     padding: 16,
                     flexDirection: "row",
                     marginTop: 50,
+                    width: 250,
                 }}
             >
-                <AntDesign name="apple1" size={24} color="black" />
-                <Text
-                    style={{
-                        fontFamily: "Urbanist-Bold",
-                        color: "white",
-                        fontSize: 16,
-                        paddingLeft: 16,
-                    }}
-                >
-                    Sign In with Apple
-                </Text>
+                {appleLoading && <ActivityIndicator />}
+                {!appleLoading && (
+                    <>
+                        <AntDesign name="apple1" size={24} color="white" />
+                        <Text
+                            style={{
+                                fontFamily: "Urbanist-Bold",
+                                color: "white",
+                                fontSize: 16,
+                                paddingLeft: 16,
+                            }}
+                        >
+                            Sign In with Apple
+                        </Text>
+                    </>
+                )}
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => {
+                    signIn();
+                }}
+                style={{
+                    borderRadius: 12,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "#000",
+                    padding: 16,
+                    flexDirection: "row",
+                    marginTop: 20,
+                    width: 250,
+                }}
+            >
+                {googleLoading && <ActivityIndicator />}
+                {!googleLoading && (
+                    <>
+                        <AntDesign name="google" size={24} color="white" />
+                        <Text
+                            style={{
+                                fontFamily: "Urbanist-Bold",
+                                color: "white",
+                                fontSize: 16,
+                                paddingLeft: 16,
+                            }}
+                        >
+                            Sign In with Google
+                        </Text>
+                    </>
+                )}
             </TouchableOpacity>
         </View>
     );
@@ -214,7 +251,7 @@ const LoginScreen = () => {
                             autoPlay={false}
                             data={DATA}
                             scrollAnimationDuration={1000}
-                            onSnapToItem={(index: number) => setCurrentIndex(index)}
+                            onSnapToItem={(index) => setCurrentIndex(index)}
                             renderItem={({ item, index }) => (
                                 <View
                                     style={{
