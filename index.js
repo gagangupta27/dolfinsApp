@@ -1,6 +1,7 @@
 import { Platform, View } from "react-native";
 
 import App from "./App";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Realm from "realm";
 import RealmWrapper from "./src/components/RealmWrapper";
 import codePush from "react-native-code-push";
@@ -22,9 +23,11 @@ const Main = () => {
                 flex: 1,
             }}
         >
-            <RealmWrapper>
-                <App />
-            </RealmWrapper>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <RealmWrapper>
+                    <App />
+                </RealmWrapper>
+            </GestureHandlerRootView>
         </View>
     );
 };

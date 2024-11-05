@@ -15,47 +15,47 @@ import React from "react";
 import { RealmProvider } from "@realm/react";
 
 const RealmWrapper = ({ children }) => {
-  const migration = (oldRealm, newRealm) => {
-    if (oldRealm.schemaVersion < newRealm.schemaVersion) {
-      const oldNote = oldRealm.objects("Note");
-      const newNotes = newRealm.objects("Note");
+    const migration = (oldRealm, newRealm) => {
+        if (oldRealm.schemaVersion < newRealm.schemaVersion) {
+            const oldNote = oldRealm.objects("Note");
+            const newNotes = newRealm.objects("Note");
 
-      for (let i = 0; i < oldNote.length; i++) {
-        if (oldNote[i]?.imageUri) {
-          newNotes[i].imageData = [
-            {
-              _id: new BSON.ObjectID(),
-              uri: oldNote[i]?.imageUri,
-              localPath: "",
-              iCloudPath: "",
-              imageText: oldNote[i]?.imageText || "",
-            },
-          ];
+            for (let i = 0; i < oldNote.length; i++) {
+                if (oldNote[i]?.imageUri) {
+                    newNotes[i].imageData = [
+                        {
+                            _id: new BSON.ObjectId(),
+                            uri: oldNote[i]?.imageUri,
+                            localPath: "",
+                            iCloudPath: "",
+                            imageText: oldNote[i]?.imageText || "",
+                        },
+                    ];
+                }
+            }
         }
-      }
-    }
-  };
+    };
 
-  const schema = [
-    CalendarEvent,
-    Note,
-    CalendarEventNoteMap,
-    ContactNoteMap,
-    Contact,
-    Chat,
-    Address,
-    Organisation,
-    NoteOrganisationMap,
-    ContactOrganisationMap,
-    Mentions,
-    ImageData,
-  ];
+    const schema = [
+        CalendarEvent,
+        Note,
+        CalendarEventNoteMap,
+        ContactNoteMap,
+        Contact,
+        Chat,
+        Address,
+        Organisation,
+        NoteOrganisationMap,
+        ContactOrganisationMap,
+        Mentions,
+        ImageData,
+    ];
 
-  return (
-    <RealmProvider schema={schema} schemaVersion={25} onMigration={migration}>
-      {children}
-    </RealmProvider>
-  );
+    return (
+        <RealmProvider schema={schema} schemaVersion={25} onMigration={migration}>
+            {children}
+        </RealmProvider>
+    );
 };
 
 export default RealmWrapper;
