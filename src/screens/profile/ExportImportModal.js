@@ -119,10 +119,40 @@ export default React.forwardRef(
         };
 
         const syncDataExport = async () => {
-            let json = await prepareJSON();
-            dispatch(setWebDataApi(json))
-                .then(() => {})
+            dispatch(getWebDataApi())
+                .then(async (res) => {
+                    if ([200].includes(res?.payload?.status) && res.payload?.data?.data) {
+                        setPercentage(0);
+                        const jsonData = res.payload?.data?.data;
+                        setPercentage(10);
+                        await importContacts(realm, jsonData?.contacts || []);
+                        setPercentage(20);
+                        await importOrgs(realm, jsonData?.organisations || []);
+                        setPercentage(40);
+                        await importNotes(realm, jsonData?.notes || []);
+                        setPercentage(50);
+                        await importEvents(realm, jsonData?.events || []);
+                        setPercentage(50);
+                        await importContactNoteMap(realm, jsonData?.contactNoteMap || []);
+                        setPercentage(60);
+                        await importNoteOrganisationMap(realm, jsonData?.noteOrganisationMap || []);
+                        setPercentage(70);
+                        await importContactOrgMap(realm, jsonData?.contactOrganisationMap || []);
+                        setPercentage(80);
+                        await importCalendarEventNoteMap(realm, jsonData?.calendarEventNoteMap || []);
+                        setPercentage(100);
+                        _bottomSheetRef?.current?.hide();
+                        let json = await prepareJSON();
+                        dispatch(setWebDataApi(json))
+                            .then(() => {})
+                            .catch((err) => {
+                                console.log("err", err);
+                            });
+                    }
+                })
                 .catch((err) => {
+                    _bottomSheetRef?.current?.hide();
+                    Toast.show("Sync Error");
                     console.log("err", err);
                 });
         };

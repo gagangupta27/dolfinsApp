@@ -76,7 +76,7 @@ export default function Navigation() {
     useEffect(() => {
         (async () => {
             if (loaded || error) {
-                await SplashScreen.preventAutoHideAsync();
+                await SplashScreen.hideAsync();
                 const authData = await Storage.getItem("authData");
                 if (authData) {
                     dispatch(setAuthData(JSON.parse(authData)));
