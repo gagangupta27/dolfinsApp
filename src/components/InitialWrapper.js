@@ -24,7 +24,11 @@ const InitialWrapper = ({ children }) => {
             if (nextAppState == "active") {
                 syncContacts();
                 if (authData?.userId) {
-                    _syncData?.current?.syncData("Syncing Data", "This may take a while...");
+                    _syncData?.current?.syncDataImport("Syncing Data", "This may take a while...");
+                }
+            } else {
+                if (authData?.userId) {
+                    _syncData?.current?.syncDataExport("Syncing Data", "This may take a while...");
                 }
             }
         });

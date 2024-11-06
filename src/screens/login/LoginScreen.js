@@ -1,20 +1,14 @@
-import * as AuthSession from "expo-auth-session";
-
 import { ActivityIndicator, Alert, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { GoogleSignin, GoogleSigninButton, statusCodes } from "@react-native-google-signin/google-signin";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Animated from "react-native-reanimated";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Carousel from "react-native-reanimated-carousel";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { appleAuth } from "@invertase/react-native-apple-authentication";
 import { appleLogin } from "../../redux/reducer/webslice";
-import auth0 from "../../utils/auth";
-import { identify } from "../../utils/analytics";
 import { setAuthData } from "../../redux/reducer/app";
-import { useAuth0 } from "react-native-auth0";
-import { useTrackWithPageInfo } from "../../utils/analytics";
 
 const width = Dimensions.get("window").width;
 
@@ -37,9 +31,6 @@ const DATA = [
 ];
 
 const LoginScreen = () => {
-    const track = useTrackWithPageInfo();
-
-    const { authorize } = useAuth0();
     const [currentIndex, setCurrentIndex] = useState(3);
     const [appleLoading, setAppleLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
@@ -65,8 +56,6 @@ const LoginScreen = () => {
         });
 
         const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
-
-        console.log("appleAuthRequestResponse", appleAuthRequestResponse);
 
         if (credentialState === appleAuth.State.AUTHORIZED) {
             setAppleLoading(true);
@@ -104,27 +93,30 @@ const LoginScreen = () => {
         try {
             await GoogleSignin.hasPlayServices();
             const response = await GoogleSignin.signIn();
-            if (isSuccessResponse(response)) {
-                setState({ userInfo: response.data });
-            } else {
-                // sign in was cancelled by user
-            }
+            setGoogleLoading(true);
+            dispatch(appleLogin(response?.data?.idToken))
+                .then((res) => {
+                    setGoogleLoading(false);
+                    if ([200].includes(res?.payload?.status) && res?.payload?.data?.id) {
+                        dispatch(
+                            setAuthData({
+                                ...res?.payload?.data,
+                                userId: res?.payload?.data?.id,
+                            })
+                        );
+                    } else {
+                        alert("Error");
+                    }
+                })
+                .catch((err) => {
+                    setGoogleLoading(false);
+                    alert("Error");
+                    console.log("err", err);
+                });
         } catch (error) {
+            setGoogleLoading(false);
             console.log("err", error);
-            // if (isErrorWithCode(error)) {
-            //     switch (error.code) {
-            //         case statusCodes.IN_PROGRESS:
-            //             // operation (eg. sign in) already in progress
-            //             break;
-            //         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            //             // Android only, play services not available or outdated
-            //             break;
-            //         default:
-            //         // some other error happened
-            //     }
-            // } else {
-            //     // an error that's not related to google sign in occurred
-            // }
+            Alert.alert("Error");
         }
     };
 

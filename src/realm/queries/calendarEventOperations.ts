@@ -132,7 +132,9 @@ async function getRawEvents(realm: Realm) {
     let eventJSON = [];
     try {
         realm.write(() => {
-            const events = realm.objects(CalendarEvent).filtered("id != $0", "000000000000000000000000");
+            const events = realm
+                .objects(CalendarEvent)
+                .filtered("_id != $0", new BSON.ObjectId("000000000000000000000000"));
             if (events && events?.length > 0) {
                 eventJSON = [
                     ...events.map((o) => ({

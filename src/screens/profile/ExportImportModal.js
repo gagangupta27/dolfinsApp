@@ -24,6 +24,7 @@ import {
     importNoteOrganisationMap,
     importOrgs,
 } from "../../realm/queries/organisationOperations";
+import { getWebDataApi, setWebDataApi } from "../../redux/reducer/webslice";
 import { useDispatch, useSelector } from "react-redux";
 
 import { BSON } from "realm";
@@ -37,7 +38,6 @@ import Note from "../../realm/models/Note";
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import Toast from "react-native-toast-message";
-import { getWebDataApi } from "../../redux/reducer/webslice";
 import { useRealm } from "@realm/react";
 
 export default React.forwardRef(
@@ -63,7 +63,8 @@ export default React.forwardRef(
                 importICloud,
                 hide,
                 showLoading,
-                syncData,
+                syncDataImport,
+                syncDataExport,
             }),
             []
         );
@@ -80,15 +81,14 @@ export default React.forwardRef(
             setPercentage(0);
         };
 
-        const syncData = async (title = "", loadingText = "") => {
-            console.log("qwertyujk");
+        const syncDataImport = async (title = "", loadingText = "") => {
             setTitle(title);
             setLoadingText(loadingText);
             dispatch(getWebDataApi())
                 .then(async (res) => {
                     if ([200].includes(res?.payload?.status) && res.payload?.data?.data) {
                         setPercentage(0);
-                        _bottomSheetRef?.current?.show();
+                        // _bottomSheetRef?.current?.show();
                         const jsonData = res.payload?.data?.data;
                         setPercentage(10);
                         await importContacts(realm, jsonData?.contacts || []);
@@ -108,10 +108,21 @@ export default React.forwardRef(
                         await importCalendarEventNoteMap(realm, jsonData?.calendarEventNoteMap || []);
                         setPercentage(100);
                         await new Promise((r) => setTimeout(r, 1000));
+                        _bottomSheetRef?.current?.hide();
                     }
                 })
                 .catch((err) => {
+                    _bottomSheetRef?.current?.hide();
                     Toast.show("Sync Error");
+                    console.log("err", err);
+                });
+        };
+
+        const syncDataExport = async () => {
+            let json = await prepareJSON();
+            dispatch(setWebDataApi(json))
+                .then(() => {})
+                .catch((err) => {
                     console.log("err", err);
                 });
         };
