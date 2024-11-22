@@ -144,7 +144,9 @@ export default React.forwardRef(
                         _bottomSheetRef?.current?.hide();
                         let json = await prepareJSON();
                         dispatch(setWebDataApi(json))
-                            .then(() => {})
+                            .then(() => {
+                                Toast.show({ text1: "Data Synced!" });
+                            })
                             .catch((err) => {
                                 console.log("err", err);
                             });

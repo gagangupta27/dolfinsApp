@@ -121,6 +121,13 @@ const Menu = ({ route }) => {
             },
         },
         {
+            icon: () => <Fontisto name="import" size={24} color="black" />,
+            manuName: "Sync Data",
+            onPress: () => {
+                _exportImportRef?.current?.syncDataExport("Syncing Data", "This may take a while...");
+            },
+        },
+        {
             icon: () => <FontAwesome6 name="discord" size={24} color="black" />,
             manuName: "Contact Us",
             onPress: () => {

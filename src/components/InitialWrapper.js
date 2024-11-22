@@ -20,22 +20,9 @@ const InitialWrapper = ({ children }) => {
     const _syncData = useRef();
 
     useEffect(() => {
-        const subscription = AppState.addEventListener("change", (nextAppState) => {
-            if (nextAppState == "active") {
-                syncContacts();
-                if (authData?.userId) {
-                    _syncData?.current?.syncDataImport("Syncing Data", "This may take a while...");
-                }
-            } else {
-                if (authData?.userId) {
-                    _syncData?.current?.syncDataExport("Syncing Data", "This may take a while...");
-                }
-            }
-        });
-
-        return () => {
-            subscription.remove();
-        };
+        if (authData?.userId) {
+            _syncData?.current?.syncDataExport("Syncing Data", "This may take a while...");
+        }
     }, [authData?.userId]);
 
     useEffect(() => {
